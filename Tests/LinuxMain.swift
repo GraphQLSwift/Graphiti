@@ -2,5 +2,7 @@ import XCTest
 @testable import GraphitiTests
 
 XCTMain([
-     testCase(GraphitiTests.allTests),
+    testCase(HelloWorldTests.allTests),
+    testCase(StarWarsQueryTests.allTests),
+    testCase(StarWarsIntrospectionTests.allTests),
 ])
