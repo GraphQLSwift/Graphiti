@@ -114,5 +114,5 @@ This project is released under the MIT license. See [LICENSE](LICENSE) for detai
 [travis-url]: https://travis-ci.org/GraphQLSwift/Graphiti
 [codecov-badge]: https://codecov.io/gh/GraphQLSwift/Graphiti/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/GraphQLSwift/Graphiti
-[codebeat-badge]: https://codebeat.co/badges/13293962-d1d8-4906-8e62-30a2cbb66b38
+[codebeat-badge]: https://codebeat.co/badges/df113480-6e62-43e0-8c9d-4571c4307e19
 [codebeat-url]: https://codebeat.co/projects/github-com-graphqlswift-graphiti
