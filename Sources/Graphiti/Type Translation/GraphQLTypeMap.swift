@@ -136,39 +136,6 @@ func getOutputType(from type: Any.Type, field: String) throws -> GraphQLOutputTy
     return outputType
 }
 
-func getNamedType(from type: Any.Type) throws -> GraphQLNamedType {
-    // TODO: Remove this when Reflection error is fixed
-    guard let graphQLType = getGraphQLType(from: type) else {
-        throw GraphQLError(
-            message:
-            // TODO: Add more information of where the error happened.
-            "Cannot use type \"\(type)\" as a named type. " +
-            "Type does not map to a GraphQL type."
-        )
-    }
-
-    guard let nonNull = graphQLType as? GraphQLNonNull else {
-        throw GraphQLError(
-            message:
-            // TODO: Add more information of where the error happened.
-            "Cannot use type \"\(type)\" as a named type. " +
-            "Mapped GraphQL type is nullable."
-        )
-    }
-
-    guard let namedType = nonNull.ofType as? GraphQLNamedType else {
-        throw GraphQLError(
-            message:
-            // TODO: Add more information of where the error happened.
-            "Cannot use type \"\(type)\" as interface. " +
-            "Mapped GraphQL type is not a named type."
-        )
-    }
-
-    return namedType
-}
-
-
 func getInputType(from type: Any.Type, field: String) throws -> GraphQLInputType {
     guard let graphQLType = getGraphQLType(from: type) else {
         throw GraphQLError(
