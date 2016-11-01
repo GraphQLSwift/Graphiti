@@ -14,6 +14,17 @@ public struct ObjectType<Type> {
 
     @discardableResult
     public init(name: String, interfaces: Any.Type..., build: (ObjectTypeBuilder<Type>) throws -> Void) throws {
+        try self.init(name: name, interfaceTypes: interfaces, build: build)
+    }
+
+    @discardableResult
+    public init(interfaces: Any.Type..., build: (ObjectTypeBuilder<Type>) throws -> Void) throws {
+        let name = fixName(String(describing: Type.self))
+        try self.init(name: name, interfaceTypes: interfaces, build: build)
+    }
+
+    @discardableResult
+    private init(name: String, interfaceTypes: [Any.Type], build: (ObjectTypeBuilder<Type>) throws -> Void) throws {
         let builder = ObjectTypeBuilder<Type>()
         try build(builder)
         
@@ -21,7 +32,7 @@ public struct ObjectType<Type> {
             name: name,
             description: builder.description,
             fields: builder.fields,
-            interfaces: try interfaces.map({ try getInterface(from: $0) }),
+            interfaces: try interfaceTypes.map({ try getInterfaceType(from: $0) }),
             isTypeOf: builder.isTypeOf
         )
 

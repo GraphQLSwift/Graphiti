@@ -129,7 +129,7 @@ func getOutputType(from type: Any.Type, field: String) throws -> GraphQLOutputTy
             message:
             // TODO: Add field type and use "type.field" format.
             "Cannot use type \"\(type)\" for field \"\(field)\". " +
-            "Mapped GraphQL type does is not an output type."
+            "Mapped GraphQL type is not an output type."
         )
     }
 
@@ -151,21 +151,41 @@ func getInputType(from type: Any.Type, field: String) throws -> GraphQLInputType
             message:
             // TODO: Add field type and use "type.field" format.
             "Cannot use type \"\(type)\" for field \"\(field)\". " +
-            "Mapped GraphQL type does is not an input type."
+            "Mapped GraphQL type is not an input type."
         )
     }
 
     return inputType
 }
 
-func getInterface(from type: Any.Type) throws -> GraphQLInterfaceType {
+func getNamedType(from type: Any.Type) throws -> GraphQLNamedType {
+    guard let graphQLType = getGraphQLType(from: type) else {
+        throw GraphQLError(
+            message:
+            "Cannot use type \"\(type)\" as named type. " +
+            "Type does not map to a GraphQL type."
+        )
+    }
+
+    guard let namedType = getNamedType(type: graphQLType) else {
+        throw GraphQLError(
+            message:
+            "Cannot use type \"\(type)\" as named type. " +
+            "Mapped GraphQL type is not a named type."
+        )
+    }
+
+    return namedType
+}
+
+func getInterfaceType(from type: Any.Type) throws -> GraphQLInterfaceType {
     // TODO: Remove this when Reflection error is fixed
     guard isProtocol(type: type) else {
         throw GraphQLError(
             message:
             // TODO: Add more information of where the error happened.
             "Cannot use type \"\(type)\" as interface. " +
-            "Type does is not a protocol."
+            "Type is not a protocol."
         )
     }
 
@@ -192,9 +212,40 @@ func getInterface(from type: Any.Type) throws -> GraphQLInterfaceType {
             message:
             // TODO: Add more information of where the error happened.
             "Cannot use type \"\(type)\" as interface. " +
-            "Mapped GraphQL type does is not an interface type."
+            "Mapped GraphQL type is not an interface type."
         )
     }
     
     return interfaceType
+}
+
+func getObjectType(from type: Any.Type) throws -> GraphQLObjectType {
+    guard let graphQLType = getGraphQLType(from: type) else {
+        throw GraphQLError(
+            message:
+            // TODO: Add more information of where the error happened.
+            "Cannot use type \"\(type)\" as object. " +
+            "Type does not map to a GraphQL type."
+        )
+    }
+
+    guard let nonNull = graphQLType as? GraphQLNonNull else {
+        throw GraphQLError(
+            message:
+            // TODO: Add more information of where the error happened.
+            "Cannot use type \"\(type)\" as object. " +
+            "Mapped GraphQL type is nullable."
+        )
+    }
+
+    guard let objectType = nonNull.ofType as? GraphQLObjectType else {
+        throw GraphQLError(
+            message:
+            // TODO: Add more information of where the error happened.
+            "Cannot use type \"\(type)\" as object. " +
+            "Mapped GraphQL type is not an object type."
+        )
+    }
+
+    return objectType
 }

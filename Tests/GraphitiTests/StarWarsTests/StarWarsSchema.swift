@@ -77,7 +77,7 @@ let starWarsSchema = try! Schema<Void> { schema in
      *
      *     enum Episode { NEWHOPE, EMPIRE, JEDI }
      */
-    try EnumType<Episode>(name: "Episode") { episode in
+    try EnumType<Episode> { episode in
         episode.description = "One of the films in the Star Wars Trilogy"
 
         try episode.value(
@@ -112,7 +112,7 @@ let starWarsSchema = try! Schema<Void> { schema in
      *         secretBackstory: String
      *     }
      */
-    try InterfaceType<Character>(name: "Character") { character in
+    try InterfaceType<Character> { character in
         character.description = "A character in the Star Wars Trilogy"
 
         try character.field(
@@ -148,9 +148,9 @@ let starWarsSchema = try! Schema<Void> { schema in
         character.resolveType { character, _, _ in
             switch character {
             case is Human:
-                return "Human"
+                return Human.self
             default:
-                return "Droid"
+                return Droid.self
             }
         }
     }
@@ -169,7 +169,7 @@ let starWarsSchema = try! Schema<Void> { schema in
      *         homePlanet: String
      *     }
      */
-    try ObjectType<Human>(name: "Human",  interfaces: Character.self) { human in
+    try ObjectType<Human>(interfaces: Character.self) { human in
         human.description = "A humanoid creature in the Star Wars universe."
 
         try human.field(
@@ -190,7 +190,7 @@ let starWarsSchema = try! Schema<Void> { schema in
             description: "The friends of the human, or an empty list if they have none.",
             resolve: { human, _, _, _ in
                 getFriends(character: human)
-        }
+            }
         )
 
         try human.field(
@@ -211,7 +211,7 @@ let starWarsSchema = try! Schema<Void> { schema in
             description: "Where are they from and how they came to be who they are.",
             resolve: { _ in
                 try getSecretBackStory()
-        }
+            }
         )
     }
 
@@ -229,7 +229,7 @@ let starWarsSchema = try! Schema<Void> { schema in
      *         primaryFunction: String
      *     }
      */
-    try ObjectType<Droid>(name: "Droid", interfaces: Character.self) { droid in
+    try ObjectType<Droid>(interfaces: Character.self) { droid in
         droid.description = "A mechanical creature in the Star Wars universe."
 
         try droid.field(
@@ -250,7 +250,7 @@ let starWarsSchema = try! Schema<Void> { schema in
             description: "The friends of the droid, or an empty list if they have none.",
             resolve: { droid, _, _, _ in
                 getFriends(character: droid)
-        }
+            }
         )
 
         try droid.field(
@@ -265,7 +265,7 @@ let starWarsSchema = try! Schema<Void> { schema in
             description: "Where are they from and how they came to be who they are.",
             resolve: { _ in
                 try getSecretBackStory()
-        }
+            }
         )
 
         try droid.field(
@@ -295,7 +295,7 @@ let starWarsSchema = try! Schema<Void> { schema in
             static let defaultValue: DefaultValue? = nil
             static let description: String? =
                 "If omitted, returns the hero of the whole saga. If " +
-            "provided, returns the hero of that particular episode."
+                "provided, returns the hero of that particular episode."
         }
 
         struct HeroArguments : Arguments {
@@ -334,4 +334,6 @@ let starWarsSchema = try! Schema<Void> { schema in
             getDroid(id: arguments.id.value)
         }
     }
+
+    schema.types = [Human.self, Droid.self]
 }

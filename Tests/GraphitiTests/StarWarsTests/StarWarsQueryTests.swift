@@ -492,7 +492,6 @@ class StarWarsQueryTests : XCTestCase {
     }
 }
 
-
 extension StarWarsQueryTests {
     static var allTests: [(String, (StarWarsQueryTests) -> () throws -> Void)] {
         return [

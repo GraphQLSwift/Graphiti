@@ -1,11 +1,10 @@
 import GraphQL
 
-public typealias ResolveType<Value> = (
-    _ value: Value,
+public typealias ResolveType<Type> = (
+    _ value: Type,
     _ context: Any,
     _ info: GraphQLResolveInfo
-) throws -> TypeResolveResultRepresentable
-
+) throws -> Any.Type
 
 public final class InterfaceTypeBuilder<Type> : FieldBuilder<Type> {
     public var description: String? = nil
@@ -17,13 +16,21 @@ public final class InterfaceTypeBuilder<Type> : FieldBuilder<Type> {
                 throw GraphQLError(message: "Expected type \(Type.self) but got \(type(of: value))")
             }
 
-            return try resolve(v, context, info)
+            let type = try resolve(v, context, info)
+            return try getObjectType(from: type)
         }
     }
 }
 
+
 public struct InterfaceType<Type> {
     let interfaceType: GraphQLInterfaceType
+
+    @discardableResult
+    public init(build: (InterfaceTypeBuilder<Type>) throws -> Void) throws {
+        let name = fixName(String(describing: Type.self))
+        try self.init(name: name, build: build)
+    }
 
     @discardableResult
     public init(name: String, build: (InterfaceTypeBuilder<Type>) throws -> Void) throws {

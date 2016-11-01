@@ -1,6 +1,6 @@
 import GraphQL
 
-public protocol InputType : MapInitializable {}
+public protocol InputType  : MapInitializable {}
 public protocol OutputType : MapFallibleRepresentable {}
 
 public typealias DefaultValue = MapRepresentable
@@ -11,7 +11,7 @@ public protocol ArgumentInfo {
 }
 
 public protocol Arguments : MapInitializable {}
-public protocol Argument : MapInitializable, ArgumentInfo {}
+public protocol Argument  : MapInitializable, ArgumentInfo {}
 
 public struct NoArguments : Arguments {
     init() {}
@@ -23,7 +23,7 @@ public typealias ResolveField<S, A : Arguments, R> = (
     _ args: A,
     _ context: Any,
     _ info: GraphQLResolveInfo
-    ) throws -> R
+) throws -> R
 
 func getArgument(argumentType: MapInitializable.Type, field: String) throws -> GraphQLArgument {
     return GraphQLArgument(
@@ -35,7 +35,7 @@ func getArgument(
     propertyType: Any.Type,
     argumentInfo: ArgumentInfo.Type,
     field: String
-    ) throws -> GraphQLArgument {
+) throws -> GraphQLArgument {
     var inputType: GraphQLInputType? = nil
 
     // TODO: Change to Reflection.get
@@ -65,7 +65,7 @@ func getArgument(
 func getArgument(
     propertyType: Any.Type,
     field: String
-    ) throws -> (GraphQLArgument, Bool) {
+) throws -> (GraphQLArgument, Bool) {
     switch propertyType {
     case let argumentInfo as ArgumentInfo.Type:
         let argument = try getArgument(
@@ -94,7 +94,7 @@ func getArgument(
 func arguments(
     type: Any.Type,
     field: String
-    ) throws -> ([String: GraphQLArgument], [String: Void])  {
+) throws -> ([String: GraphQLArgument], [String: Void])  {
     var arguments: [String: GraphQLArgument] = [:]
     var argumentInfoMap: [String: Void]  = [:]
 
@@ -123,7 +123,7 @@ public class FieldBuilder<Type> {
         description: String? = nil,
         deprecationReason: String? = nil,
         resolve: ResolveField<Type, NoArguments, O?>? = nil
-        ) throws {
+    ) throws {
         var r: GraphQLFieldResolve? = nil
 
         if let resolve = resolve {
@@ -157,7 +157,7 @@ public class FieldBuilder<Type> {
         description: String? = nil,
         deprecationReason: String? = nil,
         resolve: ResolveField<Type, NoArguments, O>? = nil
-        ) throws {
+    ) throws {
         var r: GraphQLFieldResolve? = nil
 
         if let resolve = resolve {
@@ -187,7 +187,7 @@ public class FieldBuilder<Type> {
         description: String? = nil,
         deprecationReason: String? = nil,
         resolve: ResolveField<Type, NoArguments, [O]>? = nil
-        ) throws {
+    ) throws {
         var r: GraphQLFieldResolve? = nil
 
         if let resolve = resolve {
@@ -217,7 +217,7 @@ public class FieldBuilder<Type> {
         description: String? = nil,
         deprecationReason: String? = nil,
         resolve: ResolveField<Type, NoArguments, O>? = nil
-        ) throws {
+    ) throws {
         var r: GraphQLFieldResolve? = nil
 
         if let resolve = resolve {
@@ -247,7 +247,7 @@ public class FieldBuilder<Type> {
         description: String? = nil,
         deprecationReason: String? = nil,
         resolve: ResolveField<Type, A, O?>? = nil
-        ) throws {
+    ) throws {
         let (args, argumentInfoMap) = try arguments(
             type: A.self,
             field: name
@@ -294,7 +294,7 @@ public class FieldBuilder<Type> {
         description: String? = nil,
         deprecationReason: String? = nil,
         resolve: ResolveField<Type, A, O>? = nil
-        ) throws {
+    ) throws {
         let (args, argumentInfoMap) = try arguments(
             type: A.self,
             field: name

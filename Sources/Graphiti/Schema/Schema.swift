@@ -4,7 +4,8 @@ public final class SchemaBuilder<Root> {
     public var query: ObjectType<Root>?
     public var mutation: ObjectType<Root>? = nil
     public var subscription: ObjectType<Root>? = nil
-    var types: [GraphQLNamedType] = []
+    public var types: [Any.Type] = []
+    // TODO: Add support for directives
     var directives: [GraphQLDirective] = []
 }
 
@@ -25,7 +26,7 @@ public struct Schema<Root> {
             query: query.objectType,
             mutation: builder.mutation?.objectType,
             subscription: builder.subscription?.objectType,
-            types: builder.types,
+            types: builder.types.map({ try getNamedType(from: $0) }),
             directives: builder.directives
         )
     }
