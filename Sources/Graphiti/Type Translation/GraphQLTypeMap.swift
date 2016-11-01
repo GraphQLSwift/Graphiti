@@ -151,7 +151,7 @@ func getInputType(from type: Any.Type, field: String) throws -> GraphQLInputType
             message:
             // TODO: Add field type and use "type.field" format.
             "Cannot use type \"\(type)\" for field \"\(field)\". " +
-            "Mapped GraphQL type does is not an output type."
+            "Mapped GraphQL type does is not an input type."
         )
     }
 

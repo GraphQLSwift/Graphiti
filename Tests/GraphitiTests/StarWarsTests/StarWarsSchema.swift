@@ -188,7 +188,7 @@ let starWarsSchema = try! Schema<Void> { schema in
             name: "friends",
             type: [Character?].self,
             description: "The friends of the human, or an empty list if they have none.",
-            resolve: { (human, _, _, _) in
+            resolve: { human, _, _, _ in
                 getFriends(character: human)
         }
         )
@@ -248,7 +248,7 @@ let starWarsSchema = try! Schema<Void> { schema in
             name: "friends",
             type: [Character?].self,
             description: "The friends of the droid, or an empty list if they have none.",
-            resolve: { (droid, _, _, _) in
+            resolve: { droid, _, _, _ in
                 getFriends(character: droid)
         }
         )
@@ -299,11 +299,11 @@ let starWarsSchema = try! Schema<Void> { schema in
         }
 
         struct HeroArguments : Arguments {
-            let episode: EpisodeArgument?
+            let episode: EpisodeArgument
         }
 
         try query.field(name: "hero") { (_, arguments: HeroArguments, _, _) in
-            getHero(episode: arguments.episode?.value)
+            getHero(episode: arguments.episode.value)
         }
 
         struct HumanIDArgument : Argument {
