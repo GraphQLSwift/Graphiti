@@ -69,7 +69,10 @@ extension Droid : OutputType {}
  *         droid(id: String!): Droid
  *     }
  */
-let starWarsSchema = try! Schema<Void> { schema in
+
+import GraphQL
+
+let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
     /**
      * The original trilogy consists of three movies.
      *

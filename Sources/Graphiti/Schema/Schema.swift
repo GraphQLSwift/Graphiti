@@ -1,6 +1,6 @@
 import GraphQL
 
-public final class SchemaBuilder<Root> {
+public final class SchemaBuilder<Root, Context> {
     var graphQLTypeMap: [AnyType: GraphQLType] = [
         AnyType(Int.self): GraphQLInt,
         AnyType(Double.self): GraphQLFloat,
@@ -17,8 +17,8 @@ public final class SchemaBuilder<Root> {
 
     init() {}
 
-    public func query(name: String = "Query", build: (ObjectTypeBuilder<Root, Root>) throws -> Void) throws {
-        let builder = ObjectTypeBuilder<Root, Root>(schema: self)
+    public func query(name: String = "Query", build: (ObjectTypeBuilder<Root, Context, Root>) throws -> Void) throws {
+        let builder = ObjectTypeBuilder<Root, Context, Root>(schema: self)
         try build(builder)
 
         query = try GraphQLObjectType(
@@ -29,8 +29,8 @@ public final class SchemaBuilder<Root> {
         )
     }
 
-    public func mutation(name: String = "Mutation", build: (ObjectTypeBuilder<Root, Root>) throws -> Void) throws {
-        let builder = ObjectTypeBuilder<Root, Root>(schema: self)
+    public func mutation(name: String = "Mutation", build: (ObjectTypeBuilder<Root, Context, Root>) throws -> Void) throws {
+        let builder = ObjectTypeBuilder<Root, Context, Root>(schema: self)
         try build(builder)
 
         mutation = try GraphQLObjectType(
@@ -41,8 +41,8 @@ public final class SchemaBuilder<Root> {
         )
     }
 
-    public func subscription(name: String = "Subscription", build: (ObjectTypeBuilder<Root, Root>) throws -> Void) throws {
-        let builder = ObjectTypeBuilder<Root, Root>(schema: self)
+    public func subscription(name: String = "Subscription", build: (ObjectTypeBuilder<Root, Context, Root>) throws -> Void) throws {
+        let builder = ObjectTypeBuilder<Root, Context, Root>(schema: self)
         try build(builder)
 
         subscription = try GraphQLObjectType(
@@ -56,7 +56,7 @@ public final class SchemaBuilder<Root> {
     public func object<Type>(
         type: Type.Type,
         interfaces: Any.Type...,
-        build: (ObjectTypeBuilder<Root, Type>) throws -> Void
+        build: (ObjectTypeBuilder<Root, Context, Type>) throws -> Void
     ) throws {
         let name = fixName(String(describing: Type.self))
         try `object`(name: name, type: type, interfaces: interfaces, build: build)
@@ -66,7 +66,7 @@ public final class SchemaBuilder<Root> {
         type: Type.Type,
         name: String,
         interfaces: Any.Type...,
-        build: (ObjectTypeBuilder<Root, Type>) throws -> Void
+        build: (ObjectTypeBuilder<Root, Context, Type>) throws -> Void
     ) throws {
         try `object`(name: name, type: type, interfaces: interfaces, build: build)
     }
@@ -75,9 +75,9 @@ public final class SchemaBuilder<Root> {
         name: String,
         type: Type.Type,
         interfaces: [Any.Type],
-        build: (ObjectTypeBuilder<Root, Type>) throws -> Void
+        build: (ObjectTypeBuilder<Root, Context, Type>) throws -> Void
     ) throws {
-        let builder = ObjectTypeBuilder<Root, Type>(schema: self)
+        let builder = ObjectTypeBuilder<Root, Context, Type>(schema: self)
         try builder.addAllFields()
         try build(builder)
 
@@ -94,7 +94,7 @@ public final class SchemaBuilder<Root> {
 
     public func interface<Type>(
         type: Type.Type,
-        build: (InterfaceTypeBuilder<Root, Type>) throws -> Void
+        build: (InterfaceTypeBuilder<Root, Context, Type>) throws -> Void
     ) throws {
         let name = fixName(String(describing: Type.self))
         try interface(name: name, type: type, build: build)
@@ -103,9 +103,9 @@ public final class SchemaBuilder<Root> {
     public func interface<Type>(
         name: String,
         type: Type.Type,
-        build: (InterfaceTypeBuilder<Root, Type>) throws -> Void
+        build: (InterfaceTypeBuilder<Root, Context, Type>) throws -> Void
     ) throws {
-        let builder = InterfaceTypeBuilder<Root, Type>(schema: self)
+        let builder = InterfaceTypeBuilder<Root, Context, Type>(schema: self)
         try build(builder)
 
         let interfaceType = try GraphQLInterfaceType(
@@ -118,7 +118,7 @@ public final class SchemaBuilder<Root> {
         map(Type.self, to: interfaceType)
     }
 
-    public func `enum`<Type>(
+    public func `enum`<Type : OutputType>(
         type: Type.Type,
         build: (EnumTypeBuilder<Type>) throws -> Void
     ) throws {
@@ -126,7 +126,7 @@ public final class SchemaBuilder<Root> {
         try `enum`(name: name, type: type, build: build)
     }
 
-    public func `enum`<Type>(
+    public func `enum`<Type : OutputType>(
         name: String,
         type: Type.Type,
         build: (EnumTypeBuilder<Type>) throws -> Void
@@ -141,6 +141,55 @@ public final class SchemaBuilder<Root> {
         )
 
         map(Type.self, to: enumType)
+    }
+
+    public func scalar<Type : OutputType>(
+        type: Type.Type,
+        build: (ScalarTypeBuilder<Type>) throws -> Void
+    ) throws {
+        let name = fixName(String(describing: Type.self))
+        try scalar(name: name, type: type, build: build)
+    }
+
+    public func scalar<Type : OutputType>(
+        name: String,
+        type: Type.Type,
+        build: (ScalarTypeBuilder<Type>) throws -> Void
+    ) throws {
+        let builder = ScalarTypeBuilder<Type>()
+        try build(builder)
+
+        if builder.parseValue != nil && builder.parseLiteral == nil {
+            throw GraphQLError(
+                message: "parseLiteral function is required."
+            )
+        }
+
+        if builder.parseValue == nil && builder.parseLiteral != nil {
+            throw GraphQLError(
+                message: "parseValue function is required."
+            )
+        }
+
+        let scalarType: GraphQLScalarType
+
+        if let parseValue = builder.parseValue, let parseLiteral = builder.parseLiteral {
+            scalarType = try GraphQLScalarType(
+                name: name,
+                description: builder.description,
+                serialize: builder.serialize,
+                parseValue: parseValue,
+                parseLiteral: parseLiteral
+            )
+        } else {
+            scalarType = try GraphQLScalarType(
+                name: name,
+                description: builder.description,
+                serialize: builder.serialize
+            )
+        }
+
+        map(Type.self, to: scalarType)
     }
 }
 
@@ -355,7 +404,7 @@ extension SchemaBuilder {
                 let argument =  GraphQLArgument(
                     type: try getInputType(from: propertyType, field: field),
                     description: argumentsType.descriptions[property.key],
-                    defaultValue: argumentsType.defaultValues[property.key]?.map
+                    defaultValue: try argumentsType.defaultValues[property.key]?.asMap()
                 )
 
                 arguments[property.key] = argument
@@ -366,11 +415,14 @@ extension SchemaBuilder {
     }
 }
 
-public struct Schema<Root> {
+public typealias NoRoot = Void
+public typealias NoContext = Void
+
+public struct Schema<Root, Context> {
     let schema: GraphQLSchema
 
-    public init(_ build: (SchemaBuilder<Root>) throws -> Void) throws {
-        let builder = SchemaBuilder<Root>()
+    public init(_ build: (SchemaBuilder<Root, Context>) throws -> Void) throws {
+        let builder = SchemaBuilder<Root, Context>()
         try build(builder)
 
         guard let query = builder.query else {
@@ -387,18 +439,27 @@ public struct Schema<Root> {
             directives: builder.directives
         )
     }
-
     public func execute(
         request: String,
-        contextValue: Any = Void(),
-        variableValues: [String: Map] = [:],
+        variables: [String: Map] = [:],
         operationName: String? = nil
-        ) throws -> Map {
+    ) throws -> Map {
+        guard Root.self is Void.Type else {
+            throw GraphQLError(
+                message: "Root value is required."
+            )
+        }
+
+        guard Context.self is Void.Type else {
+            throw GraphQLError(
+                message: "Context value is required."
+            )
+        }
+
         return try graphql(
             schema: schema,
             request: request,
-            contextValue: contextValue,
-            variableValues: variableValues,
+            variableValues: variables,
             operationName: operationName
         )
     }
@@ -406,16 +467,58 @@ public struct Schema<Root> {
     public func execute(
         request: String,
         rootValue: Root,
-        contextValue: Any = Void(),
-        variableValues: [String: Map] = [:],
+        variables: [String: Map] = [:],
         operationName: String? = nil
-        ) throws -> Map {
+    ) throws -> Map {
+        guard Context.self is Void.Type else {
+            throw GraphQLError(
+                message: "Context value is required."
+            )
+        }
+
         return try graphql(
             schema: schema,
             request: request,
             rootValue: rootValue,
-            contextValue: contextValue,
-            variableValues: variableValues,
+            variableValues: variables,
+            operationName: operationName
+        )
+    }
+
+    public func execute(
+        request: String,
+        context: Context,
+        variables: [String: Map] = [:],
+        operationName: String? = nil
+    ) throws -> Map {
+        guard Root.self is Void.Type else {
+            throw GraphQLError(
+                message: "Root value is required."
+            )
+        }
+        
+        return try graphql(
+            schema: schema,
+            request: request,
+            contextValue: context,
+            variableValues: variables,
+            operationName: operationName
+        )
+    }
+
+    public func execute(
+        request: String,
+        rootValue: Root,
+        context: Context,
+        variables: [String: Map] = [:],
+        operationName: String? = nil
+    ) throws -> Map {
+        return try graphql(
+            schema: schema,
+            request: request,
+            rootValue: rootValue,
+            contextValue: context,
+            variableValues: variables,
             operationName: operationName
         )
     }

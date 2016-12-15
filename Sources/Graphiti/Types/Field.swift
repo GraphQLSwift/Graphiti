@@ -3,9 +3,9 @@ import GraphQL
 public protocol InputType  : MapInitializable {}
 public protocol OutputType : MapFallibleRepresentable {}
 
-public protocol Arguments : MapInitializable {
+public protocol Arguments : InputType {
     static var descriptions: [String: String] { get }
-    static var defaultValues: [String: MapRepresentable] { get }
+    static var defaultValues: [String: OutputType] { get }
 }
 
 extension Arguments {
@@ -13,7 +13,7 @@ extension Arguments {
         return [:]
     }
 
-    public static var defaultValues: [String: MapRepresentable] {
+    public static var defaultValues: [String: OutputType] {
         return [:]
     }
 }
@@ -23,17 +23,17 @@ public struct NoArguments : Arguments {
     public init(map: Map) throws {}
 }
 
-public typealias ResolveField<S, A : Arguments, R> = (
+public typealias ResolveField<S, A : Arguments, C, R> = (
     _ source: S,
     _ args: A,
-    _ context: Any,
+    _ context: C,
     _ info: GraphQLResolveInfo
 ) throws -> R
 
-public class FieldBuilder<Root, Type> {
-    var schema: SchemaBuilder<Root>
+public class FieldBuilder<Root, Context, Type> {
+    var schema: SchemaBuilder<Root, Context>
 
-    init(schema: SchemaBuilder<Root>) {
+    init(schema: SchemaBuilder<Root, Context>) {
         self.schema = schema
     }
 
@@ -49,22 +49,26 @@ public class FieldBuilder<Root, Type> {
         }
     }
 
-    public func field<O>(
+    public func field<Output>(
         name: String,
-        type: (TypeReference<O>?).Type = (TypeReference<O>?).self,
+        type: (TypeReference<Output>?).Type = (TypeReference<Output>?).self,
         description: String? = nil,
         deprecationReason: String? = nil,
-        resolve: ResolveField<Type, NoArguments, O?>? = nil
+        resolve: ResolveField<Type, NoArguments, Context, Output?>? = nil
     ) throws {
         var r: GraphQLFieldResolve? = nil
 
         if let resolve = resolve {
             r = { source, _, context, info in
                 guard let s = source as? Type else {
-                    throw GraphQLError(message: "Expected type \(Type.self) but got \(type(of: source))")
+                    throw GraphQLError(message: "Expected source type \(Type.self) but got \(type(of: source))")
                 }
 
-                guard let output = try resolve(s, NoArguments(), context, info) else {
+                guard let c = context as? Context else {
+                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                }
+
+                guard let output = try resolve(s, NoArguments(), c, info) else {
                     return nil
                 }
 
@@ -73,7 +77,7 @@ public class FieldBuilder<Root, Type> {
         }
 
         let field = GraphQLField(
-            type: try schema.getOutputType(from: (TypeReference<O>?).self, field: name),
+            type: try schema.getOutputType(from: (TypeReference<Output>?).self, field: name),
             description: description,
             deprecationReason: deprecationReason,
             args: [:],
@@ -88,17 +92,21 @@ public class FieldBuilder<Root, Type> {
         type: TypeReference<O>.Type = TypeReference<O>.self,
         description: String? = nil,
         deprecationReason: String? = nil,
-        resolve: ResolveField<Type, NoArguments, O>? = nil
+        resolve: ResolveField<Type, NoArguments, Context, O>? = nil
     ) throws {
         var r: GraphQLFieldResolve? = nil
 
         if let resolve = resolve {
             r = { source, _, context, info in
                 guard let s = source as? Type else {
-                    throw GraphQLError(message: "Expected type \(Type.self) but got \(type(of: source))")
+                    throw GraphQLError(message: "Expected source type \(Type.self) but got \(type(of: source))")
                 }
 
-                return try resolve(s, NoArguments(), context, info)
+                guard let c = context as? Context else {
+                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                }
+
+                return try resolve(s, NoArguments(), c, info)
             }
         }
 
@@ -118,17 +126,21 @@ public class FieldBuilder<Root, Type> {
         type: [TypeReference<O>].Type = [TypeReference<O>].self,
         description: String? = nil,
         deprecationReason: String? = nil,
-        resolve: ResolveField<Type, NoArguments, [O]>? = nil
+        resolve: ResolveField<Type, NoArguments, Context, [O]>? = nil
     ) throws {
         var r: GraphQLFieldResolve? = nil
 
         if let resolve = resolve {
             r = { source, _, context, info in
                 guard let s = source as? Type else {
-                    throw GraphQLError(message: "Expected type \(Type.self) but got \(type(of: source))")
+                    throw GraphQLError(message: "Expected source type \(Type.self) but got \(type(of: source))")
                 }
 
-                return try resolve(s, NoArguments(), context, info)
+                guard let c = context as? Context else {
+                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                }
+
+                return try resolve(s, NoArguments(), c, info)
             }
         }
 
@@ -163,17 +175,21 @@ public class FieldBuilder<Root, Type> {
         type: O.Type = O.self,
         description: String? = nil,
         deprecationReason: String? = nil,
-        resolve: ResolveField<Type, NoArguments, O>? = nil
+        resolve: ResolveField<Type, NoArguments, Context, O>? = nil
     ) throws {
         var r: GraphQLFieldResolve? = nil
 
         if let resolve = resolve {
             r = { source, _, context, info in
                 guard let s = source as? Type else {
-                    throw GraphQLError(message: "Expected type \(Type.self) but got \(type(of: source))")
+                    throw GraphQLError(message: "Expected source type \(Type.self) but got \(type(of: source))")
                 }
 
-                return try resolve(s, NoArguments(), context, info)
+                guard let c = context as? Context else {
+                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                }
+
+                return try resolve(s, NoArguments(), c, info)
             }
         }
 
@@ -193,7 +209,7 @@ public class FieldBuilder<Root, Type> {
         type: (O?).Type = (O?).self,
         description: String? = nil,
         deprecationReason: String? = nil,
-        resolve: ResolveField<Type, A, O?>? = nil
+        resolve: ResolveField<Type, A, Context, O?>? = nil
     ) throws {
         let arguments = try schema.arguments(type: A.self, field: name)
 
@@ -205,12 +221,16 @@ public class FieldBuilder<Root, Type> {
             resolve: resolve.map { resolve in
                 return { source, args, context, info in
                     guard let s = source as? Type else {
-                        throw GraphQLError(message: "Expected type \(Type.self) but got \(type(of: source))")
+                        throw GraphQLError(message: "Expected source type \(Type.self) but got \(type(of: source))")
                     }
 
                     let a = try A(map: args)
 
-                    guard let output = try resolve(s, a, context, info) else {
+                    guard let c = context as? Context else {
+                        throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                    }
+
+                    guard let output = try resolve(s, a, c, info) else {
                         return nil
                     }
 
@@ -227,7 +247,7 @@ public class FieldBuilder<Root, Type> {
         type: O.Type = O.self,
         description: String? = nil,
         deprecationReason: String? = nil,
-        resolve: ResolveField<Type, A, O>? = nil
+        resolve: ResolveField<Type, A, Context, O>? = nil
     ) throws {
         let arguments = try schema.arguments(type: A.self, field: name)
 
@@ -243,7 +263,12 @@ public class FieldBuilder<Root, Type> {
                     }
 
                     let a = try A(map: args)
-                    return try resolve(s, a, context, info)
+
+                    guard let c = context as? Context else {
+                        throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                    }
+
+                    return try resolve(s, a, c, info)
                 }
             }
         )
