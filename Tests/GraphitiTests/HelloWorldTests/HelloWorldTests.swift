@@ -3,7 +3,7 @@ import XCTest
 
 class HelloWorldTests : XCTestCase {
     let schema = try! Schema<Void> { schema in
-        schema.query = try ObjectType(name: "RootQueryType") { query in
+        try schema.query { query in
             try query.field(name: "hello", type: String.self) { _ in
                 "world"
             }
@@ -27,7 +27,7 @@ class HelloWorldTests : XCTestCase {
         let expectedErrors: Map = [
             "errors": [
                 [
-                    "message": "Cannot query field \"boyhowdy\" on type \"RootQueryType\".",
+                    "message": "Cannot query field \"boyhowdy\" on type \"Query\".",
                     "locations": [["line": 1, "column": 3]]
                 ]
             ]

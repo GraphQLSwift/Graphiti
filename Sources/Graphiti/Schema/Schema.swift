@@ -1,12 +1,436 @@
 import GraphQL
 
 public final class SchemaBuilder<Root> {
-    public var query: ObjectType<Root>?
-    public var mutation: ObjectType<Root>? = nil
-    public var subscription: ObjectType<Root>? = nil
+    var graphQLTypeMap: [AnyType: GraphQLType] = [
+        AnyType(Int.self): GraphQLInt,
+        AnyType(Double.self): GraphQLFloat,
+        AnyType(String.self): GraphQLString,
+        AnyType(Bool.self): GraphQLBoolean,
+    ]
+
+    var query: GraphQLObjectType? = nil
+    var mutation: GraphQLObjectType? = nil
+    var subscription: GraphQLObjectType? = nil
     public var types: [Any.Type] = []
     // TODO: Add support for directives
     var directives: [GraphQLDirective] = []
+
+    init() {}
+
+    public func query(name: String = "Query", build: (ObjectTypeBuilder<Root, Root>) throws -> Void) throws {
+        let builder = ObjectTypeBuilder<Root, Root>(schema: self)
+        try build(builder)
+
+        query = try GraphQLObjectType(
+            name: name,
+            description: builder.description,
+            fields: builder.fields,
+            isTypeOf: builder.isTypeOf
+        )
+    }
+
+    public func mutation(name: String = "Mutation", build: (ObjectTypeBuilder<Root, Root>) throws -> Void) throws {
+        let builder = ObjectTypeBuilder<Root, Root>(schema: self)
+        try build(builder)
+
+        mutation = try GraphQLObjectType(
+            name: name,
+            description: builder.description,
+            fields: builder.fields,
+            isTypeOf: builder.isTypeOf
+        )
+    }
+
+    public func subscription(name: String = "Subscription", build: (ObjectTypeBuilder<Root, Root>) throws -> Void) throws {
+        let builder = ObjectTypeBuilder<Root, Root>(schema: self)
+        try build(builder)
+
+        subscription = try GraphQLObjectType(
+            name: name,
+            description: builder.description,
+            fields: builder.fields,
+            isTypeOf: builder.isTypeOf
+        )
+    }
+
+    public func object<Type>(
+        type: Type.Type,
+        interfaces: Any.Type...,
+        build: (ObjectTypeBuilder<Root, Type>) throws -> Void
+    ) throws {
+        let name = fixName(String(describing: Type.self))
+        try `object`(name: name, type: type, interfaces: interfaces, build: build)
+    }
+
+    public func object<Type>(
+        type: Type.Type,
+        name: String,
+        interfaces: Any.Type...,
+        build: (ObjectTypeBuilder<Root, Type>) throws -> Void
+    ) throws {
+        try `object`(name: name, type: type, interfaces: interfaces, build: build)
+    }
+
+    private func `object`<Type>(
+        name: String,
+        type: Type.Type,
+        interfaces: [Any.Type],
+        build: (ObjectTypeBuilder<Root, Type>) throws -> Void
+    ) throws {
+        let builder = ObjectTypeBuilder<Root, Type>(schema: self)
+        try builder.addAllFields()
+        try build(builder)
+
+        let objectType = try GraphQLObjectType(
+            name: name,
+            description: builder.description,
+            fields: builder.fields,
+            interfaces: try interfaces.map({ try getInterfaceType(from: $0) }),
+            isTypeOf: builder.isTypeOf
+        )
+
+        map(Type.self, to: objectType)
+    }
+
+    public func interface<Type>(
+        type: Type.Type,
+        build: (InterfaceTypeBuilder<Root, Type>) throws -> Void
+    ) throws {
+        let name = fixName(String(describing: Type.self))
+        try interface(name: name, type: type, build: build)
+    }
+
+    public func interface<Type>(
+        name: String,
+        type: Type.Type,
+        build: (InterfaceTypeBuilder<Root, Type>) throws -> Void
+    ) throws {
+        let builder = InterfaceTypeBuilder<Root, Type>(schema: self)
+        try build(builder)
+
+        let interfaceType = try GraphQLInterfaceType(
+            name: name,
+            description: builder.description,
+            fields: builder.fields,
+            resolveType: builder.resolveType
+        )
+
+        map(Type.self, to: interfaceType)
+    }
+
+    public func `enum`<Type>(
+        type: Type.Type,
+        build: (EnumTypeBuilder<Type>) throws -> Void
+    ) throws {
+        let name = fixName(String(describing: Type.self))
+        try `enum`(name: name, type: type, build: build)
+    }
+
+    public func `enum`<Type>(
+        name: String,
+        type: Type.Type,
+        build: (EnumTypeBuilder<Type>) throws -> Void
+    ) throws {
+        let builder = EnumTypeBuilder<Type>()
+        try build(builder)
+
+        let enumType = try GraphQLEnumType(
+            name: name,
+            description: builder.description,
+            values: builder.values
+        )
+
+        map(Type.self, to: enumType)
+    }
+}
+
+extension SchemaBuilder {
+    func map(_ type: Any.Type, to graphQLType: GraphQLType) {
+        guard !(type is Void.Type) else {
+            return
+        }
+
+        graphQLTypeMap[AnyType(type)] = graphQLType
+    }
+
+    func getTypes() throws -> [GraphQLNamedType] {
+        return try types.map({ try getNamedType(from: $0) })
+    }
+
+    func getGraphQLType(from type: Any.Type) -> GraphQLType? {
+        if let type = type as? Wrapper.Type {
+            switch type.modifier {
+            case .optional:
+                if let wrapper = type.wrappedType as? Wrapper.Type {
+                    if case .reference = wrapper.modifier {
+                        let name = fixName(String(describing: wrapper.wrappedType))
+                        return GraphQLTypeReference(name)
+                    } else {
+                        return getGraphQLType(from: type.wrappedType)
+                    }
+                } else {
+                    return graphQLTypeMap[AnyType(type.wrappedType)]
+                }
+            case .list:
+                if type.wrappedType is Wrapper.Type {
+                    let unwrapped = getGraphQLType(from: type.wrappedType)
+                    return unwrapped.map { GraphQLList($0) }
+                } else {
+                    let unwrapped = graphQLTypeMap[AnyType(type.wrappedType)]
+                    // TODO: check if it's nullable and throw error
+                    return unwrapped.map { GraphQLList(GraphQLNonNull($0 as! GraphQLNullableType)) }
+                }
+            case .reference:
+                let name = fixName(String(describing: type.wrappedType))
+                return GraphQLNonNull(GraphQLTypeReference(name))
+            }
+        }
+
+        return graphQLTypeMap[AnyType(type)].flatMap {
+            guard let nullable = $0 as? GraphQLNullableType else {
+                return nil
+            }
+            
+            return GraphQLNonNull(nullable)
+        }
+    }
+
+    func getOutputType(from type: Any.Type, field: String) throws -> GraphQLOutputType {
+        // TODO: Remove this when Reflection error is fixed
+        guard isMapFallibleRepresentable(type: type) else {
+            throw GraphQLError(
+                message:
+                // TODO: Add field type and use "type.field" format.
+                "Cannot use type \"\(type)\" for field \"\(field)\". " +
+                "Type does not conform to \"MapFallibleRepresentable\"."
+            )
+        }
+
+        guard let graphQLType = getGraphQLType(from: type) else {
+            throw GraphQLError(
+                message:
+                // TODO: Add field type and use "type.field" format.
+                "Cannot use type \"\(type)\" for field \"\(field)\". " +
+                "Type does not map to a GraphQL type."
+            )
+        }
+
+        guard let outputType = graphQLType as? GraphQLOutputType else {
+            throw GraphQLError(
+                message:
+                // TODO: Add field type and use "type.field" format.
+                "Cannot use type \"\(type)\" for field \"\(field)\". " +
+                "Mapped GraphQL type is not an output type."
+            )
+        }
+
+        return outputType
+    }
+
+    func getInputType(from type: Any.Type, field: String) throws -> GraphQLInputType {
+        guard let graphQLType = getGraphQLType(from: type) else {
+            throw GraphQLError(
+                message:
+                // TODO: Add field type and use "type.field" format.
+                "Cannot use type \"\(type)\" for field \"\(field)\". " +
+                "Type does not map to a GraphQL type."
+            )
+        }
+
+        guard let inputType = graphQLType as? GraphQLInputType else {
+            throw GraphQLError(
+                message:
+                // TODO: Add field type and use "type.field" format.
+                "Cannot use type \"\(type)\" for field \"\(field)\". " +
+                "Mapped GraphQL type is not an input type."
+            )
+        }
+
+        return inputType
+    }
+
+    func getNamedType(from type: Any.Type) throws -> GraphQLNamedType {
+        guard let graphQLType = getGraphQLType(from: type) else {
+            throw GraphQLError(
+                message:
+                "Cannot use type \"\(type)\" as named type. " +
+                "Type does not map to a GraphQL type."
+            )
+        }
+
+        guard let namedType = GraphQL.getNamedType(type: graphQLType) else {
+            throw GraphQLError(
+                message:
+                "Cannot use type \"\(type)\" as named type. " +
+                "Mapped GraphQL type is not a named type."
+            )
+        }
+
+        return namedType
+    }
+
+    func getInterfaceType(from type: Any.Type) throws -> GraphQLInterfaceType {
+        // TODO: Remove this when Reflection error is fixed
+        guard isProtocol(type: type) else {
+            throw GraphQLError(
+                message:
+                // TODO: Add more information of where the error happened.
+                "Cannot use type \"\(type)\" as interface. " +
+                "Type is not a protocol."
+            )
+        }
+
+        guard let graphQLType = getGraphQLType(from: type) else {
+            throw GraphQLError(
+                message:
+                // TODO: Add more information of where the error happened.
+                "Cannot use type \"\(type)\" as interface. " +
+                "Type does not map to a GraphQL type."
+            )
+        }
+
+        guard let nonNull = graphQLType as? GraphQLNonNull else {
+            throw GraphQLError(
+                message:
+                // TODO: Add more information of where the error happened.
+                "Cannot use type \"\(type)\" as interface. " +
+                "Mapped GraphQL type is nullable."
+            )
+        }
+
+        guard let interfaceType = nonNull.ofType as? GraphQLInterfaceType else {
+            throw GraphQLError(
+                message:
+                // TODO: Add more information of where the error happened.
+                "Cannot use type \"\(type)\" as interface. " +
+                "Mapped GraphQL type is not an interface type."
+            )
+        }
+
+        return interfaceType
+    }
+
+    func getObjectType(from type: Any.Type) throws -> GraphQLObjectType {
+        guard let graphQLType = getGraphQLType(from: type) else {
+            throw GraphQLError(
+                message:
+                // TODO: Add more information of where the error happened.
+                "Cannot use type \"\(type)\" as object. " +
+                "Type does not map to a GraphQL type."
+            )
+        }
+
+        guard let nonNull = graphQLType as? GraphQLNonNull else {
+            throw GraphQLError(
+                message:
+                // TODO: Add more information of where the error happened.
+                "Cannot use type \"\(type)\" as object. " +
+                "Mapped GraphQL type is nullable."
+            )
+        }
+        
+        guard let objectType = nonNull.ofType as? GraphQLObjectType else {
+            throw GraphQLError(
+                message:
+                // TODO: Add more information of where the error happened.
+                "Cannot use type \"\(type)\" as object. " +
+                "Mapped GraphQL type is not an object type."
+            )
+        }
+        
+        return objectType
+    }
+}
+
+extension SchemaBuilder {
+    func getArgument(argumentType: MapInitializable.Type, field: String) throws -> GraphQLArgument {
+        return GraphQLArgument(
+            type: try getInputType(from: argumentType, field: field)
+        )
+    }
+
+    func getArgument(
+        propertyType: Any.Type,
+        argumentInfo: ArgumentInfo.Type,
+        field: String
+        ) throws -> GraphQLArgument {
+        var inputType: GraphQLInputType? = nil
+
+        // TODO: Change to Reflection.get
+        for property in try properties(argumentInfo) {
+            if property.key == "value" {
+                inputType = try getInputType(from: property.type, field: field)
+                break
+            }
+        }
+
+        guard let type = inputType else {
+            throw GraphQLError(
+                message:
+                "Cannot use type \"\(propertyType)\" as an argument. " +
+                    "\"\(propertyType)\" needs a property named \"value\" " +
+                "with a type that adopts the \"ArgumentType\" protocol."
+            )
+        }
+
+        return GraphQLArgument(
+            type: type,
+            description: argumentInfo.description,
+            defaultValue: argumentInfo.defaultValue?.map
+        )
+    }
+
+    func getArgument(
+        propertyType: Any.Type,
+        field: String
+        ) throws -> (GraphQLArgument, Bool) {
+        switch propertyType {
+        case let argumentInfo as ArgumentInfo.Type:
+            let argument = try getArgument(
+                propertyType: propertyType,
+                argumentInfo: argumentInfo,
+                field: field
+            )
+
+            return (argument, true)
+        case let argumentType as MapInitializable.Type:
+            let argument = try getArgument(
+                argumentType: argumentType,
+                field: field
+            )
+
+            return (argument, false)
+        default:
+            throw GraphQLError(
+                message:
+                "Cannot use type \"\(propertyType)\" as an argument. " +
+                "\"\(propertyType)\" does not conform to the \"Argument\" protocol."
+            )
+        }
+    }
+
+    func arguments(
+        type: Any.Type,
+        field: String
+        ) throws -> ([String: GraphQLArgument], [String: Void])  {
+        var arguments: [String: GraphQLArgument] = [:]
+        var argumentInfoMap: [String: Void]  = [:]
+
+        for property in try properties(type) {
+            let (argument, hasArgumentInfo) = try getArgument(
+                propertyType: property.type,
+                field: field
+            )
+
+            arguments[property.key] = argument
+
+            if hasArgumentInfo {
+                argumentInfoMap[property.key] = Void()
+            }
+        }
+        
+        return (arguments, argumentInfoMap)
+    }
 }
 
 public struct Schema<Root> {
@@ -23,10 +447,10 @@ public struct Schema<Root> {
         }
 
         schema = try GraphQLSchema(
-            query: query.objectType,
-            mutation: builder.mutation?.objectType,
-            subscription: builder.subscription?.objectType,
-            types: builder.types.map({ try getNamedType(from: $0) }),
+            query: query,
+            mutation: builder.mutation,
+            subscription: builder.subscription,
+            types: builder.getTypes(),
             directives: builder.directives
         )
     }
