@@ -1,23 +1,27 @@
 import GraphQL
 
-public typealias ResolveType<Type> = (
-    _ value: Type,
-    _ context: Any,
+public typealias ResolveType<Value, Context> = (
+    _ value: Value,
+    _ context: Context,
     _ info: GraphQLResolveInfo
 ) throws -> Any.Type
 
-public final class InterfaceTypeBuilder<Root, Type> : FieldBuilder<Root, Type> {
+public final class InterfaceTypeBuilder<Root, Context, Type> : FieldBuilder<Root, Context, Type> {
     public var description: String? = nil
     var resolveType: GraphQLTypeResolve? = nil
 
-    public func resolveType(_ resolve: @escaping ResolveType<Type>) {
-        self.resolveType = { [weak self] value, context, info in
+    public func resolveType(_ resolve: @escaping ResolveType<Type, Context>) {
+        self.resolveType = { value, context, info in
             guard let v = value as? Type else {
-                throw GraphQLError(message: "Expected type \(Type.self) but got \(type(of: value))")
+                throw GraphQLError(message: "Expected value type \(Type.self) but got \(type(of: value))")
             }
 
-            let type = try resolve(v, context, info)
-            return try self?.schema.getObjectType(from: type) ?? "" // TODO: check this out
+            guard let c = context as? Context else {
+                throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+            }
+
+            let type = try resolve(v, c, info)
+            return try self.schema.getObjectType(from: type)
         }
     }
 }

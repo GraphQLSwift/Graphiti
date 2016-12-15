@@ -149,7 +149,7 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        result = try starWarsSchema.execute(request: query, variableValues: params)
+        result = try starWarsSchema.execute(request: query, variables: params)
         XCTAssertEqual(result, expected)
 
         params = [
@@ -164,7 +164,7 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        result = try starWarsSchema.execute(request: query, variableValues: params)
+        result = try starWarsSchema.execute(request: query, variables: params)
         XCTAssertEqual(result, expected)
 
 
@@ -178,7 +178,7 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        result = try starWarsSchema.execute(request: query, variableValues: params)
+        result = try starWarsSchema.execute(request: query, variables: params)
         XCTAssertEqual(result, expected)
     }
 
@@ -439,7 +439,7 @@ class StarWarsQueryTests : XCTestCase {
     }
 
     func testNonNullableFieldsQuery() throws {
-        let schema = try Schema<Void> { schema in
+        let schema = try Schema<NoRoot, NoContext> { schema in
             struct A : OutputType {}
 
             try schema.object(type: A.self) { a in
