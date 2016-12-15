@@ -252,15 +252,15 @@ class StarWarsIntrospectionTests : XCTestCase {
                         [
                             "name": "name",
                             "type": [
-                                "name": "String",
-                                "kind": "SCALAR",
+                                "name": nil,
+                                "kind": "NON_NULL",
                             ],
                         ],
                         [
                             "name": "primaryFunction",
                             "type": [
-                                "name": "String",
-                                "kind": "SCALAR",
+                                "name": nil,
+                                "kind": "NON_NULL",
                             ],
                         ],
                         [
@@ -308,9 +308,9 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "name": nil,
                                 "kind": "LIST",
                                 "ofType": [
-                                    "name": "Episode",
-                                    "kind": "ENUM",
-                                ],
+                                    "kind": "NON_NULL",
+                                    "name": nil
+                                ]
                             ],
                         ],
                         [
@@ -319,9 +319,9 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "name": nil,
                                 "kind": "LIST",
                                 "ofType": [
-                                    "name": "Character",
-                                    "kind": "INTERFACE",
-                                ],
+                                    "kind": "NON_NULL",
+                                    "name": nil
+                                ]
                             ],
                         ],
                         [
@@ -338,17 +338,23 @@ class StarWarsIntrospectionTests : XCTestCase {
                         [
                             "name": "name",
                             "type": [
-                                "name": "String",
-                                "kind": "SCALAR",
-                                "ofType": nil,
+                                "name": nil,
+                                "kind": "NON_NULL",
+                                "ofType": [
+                                    "name": "String",
+                                    "kind": "SCALAR",
+                                ],
                             ],
                         ],
                         [
                             "name": "primaryFunction",
                             "type": [
-                                "name": "String",
-                                "kind": "SCALAR",
-                                "ofType": nil,
+                                "name": nil,
+                                "kind": "NON_NULL",
+                                "ofType": [
+                                    "name": "String",
+                                    "kind": "SCALAR",
+                                ],
                             ],
                         ],
                         [

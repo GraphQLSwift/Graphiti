@@ -42,9 +42,9 @@ First, build a Graphiti type schema which maps to your code base.
 
 ```swift
 let schema = try Schema<Void> { schema in
-    schema.query = try ObjectType(name: "RootQueryType") { query in
-        try query.field(name: "hello", type: String.self) { _ in
-            "world"
+    schema.query { query in
+        try query.field(name: "hello", type: String.self) { _, _, _, _ in
+            return "world"
         }
     }
 }
@@ -93,7 +93,7 @@ Output:
                     "column": 3
                 }
             ], 
-            "message": "Cannot query field \"boyhowdy\" on type \"RootQueryType\"."
+            "message": "Cannot query field \"boyhowdy\" on type \"Query\"."
         }
     ]
 }

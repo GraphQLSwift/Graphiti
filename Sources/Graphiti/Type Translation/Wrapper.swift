@@ -29,6 +29,8 @@ extension Array : Wrapper {
     }
 }
 
+public struct TypeReference<Referent> {}
+
 extension TypeReference : Wrapper {
     static var wrappedType: Any.Type {
         return Referent.self

@@ -442,7 +442,7 @@ class StarWarsQueryTests : XCTestCase {
         let schema = try Schema<Void> { schema in
             struct A : OutputType {}
 
-            try ObjectType<A>(name: "A") { a in
+            try schema.object(type: A.self) { a in
                 try a.field(name: "nullableA", type: (TypeReference<A>?).self) { _ in A() }
                 try a.field(name: "nonNullA", type: TypeReference<A>.self) { _ in A() }
                 try a.field(name: "throws", type: String.self) { _ in
@@ -454,7 +454,7 @@ class StarWarsQueryTests : XCTestCase {
                 }
             }
 
-            schema.query = try ObjectType(name: "query") { query in
+            try schema.query { query in
                 try query.field(name: "nullableA", type: (A?).self) { _ in A() }
             }
         }

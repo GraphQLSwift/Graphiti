@@ -19,27 +19,3 @@ public final class EnumTypeBuilder<Type : MapFallibleRepresentable> {
         values[name] = enumValue
     }
 }
-
-public struct EnumType<Type : MapFallibleRepresentable> {
-    let enumType: GraphQLEnumType
-
-    @discardableResult
-    public init(build: (EnumTypeBuilder<Type>) throws -> Void) throws {
-        let name = fixName(String(describing: Type.self))
-        try self.init(name: name, build: build)
-    }
-
-    @discardableResult
-    public init(name: String, build: (EnumTypeBuilder<Type>) throws -> Void) throws {
-        let builder = EnumTypeBuilder<Type>()
-        try build(builder)
-
-        enumType = try GraphQLEnumType(
-            name: name,
-            description: builder.description,
-            values: builder.values
-        )
-        
-        link(Type.self, to: enumType)
-    }
-}

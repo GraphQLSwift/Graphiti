@@ -39,28 +39,28 @@ extension Droid : OutputType {}
  *
  *     interface Character {
  *         id: String!
- *         name: String
- *         friends: [Character]
- *         appearsIn: [Episode]
+ *         name: String!
+ *         friends: [Character!]
+ *         appearsIn: [Episode!]
  *         secretBackstory: String
  *     }
  *
  *     type Human : Character {
  *         id: String!
- *         name: String
- *         friends: [Character]
- *         appearsIn: [Episode]
+ *         name: String!
+ *         friends: [Character!]
+ *         appearsIn: [Episode!]
  *         secretBackstory: String
- *         homePlanet: String
+ *         homePlanet: String!
  *     }
  *
  *     type Droid : Character {
  *         id: String!
- *         name: String
- *         friends: [Character]
- *         appearsIn: [Episode]
+ *         name: String!
+ *         friends: [Character!]
+ *         appearsIn: [Episode!]
  *         secretBackstory: String
- *         primaryFunction: String
+ *         primaryFunction: String!
  *     }
  *
  *     type Query {
@@ -77,7 +77,7 @@ let starWarsSchema = try! Schema<Void> { schema in
      *
      *     enum Episode { NEWHOPE, EMPIRE, JEDI }
      */
-    try EnumType<Episode> { episode in
+    try schema.enum(type: Episode.self) { episode in
         episode.description = "One of the films in the Star Wars Trilogy"
 
         try episode.value(
@@ -106,13 +106,13 @@ let starWarsSchema = try! Schema<Void> { schema in
      *
      *     interface Character {
      *         id: String!
-     *         name: String
-     *         friends: [Character]
-     *         appearsIn: [Episode]
+     *         name: String!
+     *         friends: [Character!]
+     *         appearsIn: [Episode!]
      *         secretBackstory: String
      *     }
      */
-    try InterfaceType<Character> { character in
+    try schema.interface(type: Character.self) { character in
         character.description = "A character in the Star Wars Trilogy"
 
         try character.field(
@@ -123,19 +123,19 @@ let starWarsSchema = try! Schema<Void> { schema in
 
         try character.field(
             name: "name",
-            type: (String?).self,
+            type: String.self,
             description: "The name of the character."
         )
 
         try character.field(
             name: "friends",
-            type: [TypeReference<Character>?].self,
+            type: [TypeReference<Character>].self,
             description: "The friends of the character, or an empty list if they have none."
         )
 
         try character.field(
             name: "appearsIn",
-            type: [Episode?].self,
+            type: [Episode].self,
             description: "Which movies they appear in."
         )
 
@@ -144,15 +144,6 @@ let starWarsSchema = try! Schema<Void> { schema in
             type: (String?).self,
             description: "All secrets about their past."
         )
-
-        character.resolveType { character, _, _ in
-            switch character {
-            case is Human:
-                return Human.self
-            default:
-                return Droid.self
-            }
-        }
     }
 
     /**
@@ -162,31 +153,19 @@ let starWarsSchema = try! Schema<Void> { schema in
      *
      *     type Human : Character {
      *         id: String!
-     *         name: String
-     *         friends: [Character]
-     *         appearsIn: [Episode]
+     *         name: String!
+     *         friends: [Character!]
+     *         appearsIn: [Episode!]
      *         secretBackstory: String
      *         homePlanet: String
      *     }
      */
-    try ObjectType<Human>(interfaces: Character.self) { human in
+    try schema.object(type: Human.self, interfaces: Character.self) { human in
         human.description = "A humanoid creature in the Star Wars universe."
 
         try human.field(
-            name: "id",
-            type: String.self,
-            description: "The id of the human."
-        )
-
-        try human.field(
-            name: "name",
-            type: (String?).self,
-            description: "The name of the human."
-        )
-
-        try human.field(
             name: "friends",
-            type: [Character?].self,
+            type: [Character].self,
             description: "The friends of the human, or an empty list if they have none.",
             resolve: { human, _, _, _ in
                 getFriends(character: human)
@@ -194,22 +173,10 @@ let starWarsSchema = try! Schema<Void> { schema in
         )
 
         try human.field(
-            name: "appearsIn",
-            type: [Episode?].self,
-            description: "Which movies they appear in."
-        )
-
-        try human.field(
-            name: "homePlanet",
-            type: (String?).self,
-            description: "The home planet of the human, or null if unknown."
-        )
-
-        try human.field(
             name: "secretBackstory",
             type: (String?).self,
             description: "Where are they from and how they came to be who they are.",
-            resolve: { _ in
+            resolve: { _, _, _, _ in
                 try getSecretBackStory()
             }
         )
@@ -222,31 +189,19 @@ let starWarsSchema = try! Schema<Void> { schema in
      *
      *     type Droid : Character {
      *         id: String!
-     *         name: String
-     *         friends: [Character]
-     *         appearsIn: [Episode]
+     *         name: String!
+     *         friends: [Character!]
+     *         appearsIn: [Episode!]
      *         secretBackstory: String
-     *         primaryFunction: String
+     *         primaryFunction: String!
      *     }
      */
-    try ObjectType<Droid>(interfaces: Character.self) { droid in
+    try schema.object(type: Droid.self, interfaces: Character.self) { droid in
         droid.description = "A mechanical creature in the Star Wars universe."
 
         try droid.field(
-            name: "id",
-            type: String.self,
-            description: "The id of the droid."
-        )
-
-        try droid.field(
-            name: "name",
-            type: (String?).self,
-            description: "The name of the droid."
-        )
-
-        try droid.field(
             name: "friends",
-            type: [Character?].self,
+            type: [Character].self,
             description: "The friends of the droid, or an empty list if they have none.",
             resolve: { droid, _, _, _ in
                 getFriends(character: droid)
@@ -254,24 +209,12 @@ let starWarsSchema = try! Schema<Void> { schema in
         )
 
         try droid.field(
-            name: "appearsIn",
-            type: [Episode?].self,
-            description: "Which movies they appear in."
-        )
-
-        try droid.field(
             name: "secretBackstory",
             type: (String?).self,
             description: "Where are they from and how they came to be who they are.",
-            resolve: { _ in
+            resolve: { _, _, _, _ in
                 try getSecretBackStory()
             }
-        )
-
-        try droid.field(
-            name: "primaryFunction",
-            type: (String?).self,
-            description: "The primary function of the droid."
         )
     }
 
@@ -289,49 +232,37 @@ let starWarsSchema = try! Schema<Void> { schema in
      *         droid(id: String!): Droid
      *     }
      */
-    schema.query = try ObjectType(name: "Query") { query in
-        struct EpisodeArgument : Argument {
-            let value: Episode?
-            static let defaultValue: DefaultValue? = nil
-            static let description: String? =
-                "If omitted, returns the hero of the whole saga. If " +
-                "provided, returns the hero of that particular episode."
-        }
-
+    try schema.query { query in
         struct HeroArguments : Arguments {
-            let episode: EpisodeArgument
+            let episode: Episode?
+
+            static let descriptions = [
+                "episode":
+                    "If omitted, returns the hero of the whole saga. If " +
+                    "provided, returns the hero of that particular episode."
+            ]
         }
 
         try query.field(name: "hero") { (_, arguments: HeroArguments, _, _) in
-            getHero(episode: arguments.episode.value)
-        }
-
-        struct HumanIDArgument : Argument {
-            let value: String
-            static let defaultValue: DefaultValue? = nil
-            static let description: String? = "id of the human"
+            getHero(episode: arguments.episode)
         }
 
         struct HumanArguments : Arguments {
-            let id: HumanIDArgument
+            let id: String
+            static let descriptions = ["id": "id of the human"]
         }
 
         try query.field(name: "human") { (_, arguments: HumanArguments, _, _) in
-            getHuman(id: arguments.id.value)
-        }
-
-        struct DroidIDArgument : Argument {
-            let value: String
-            static let defaultValue: DefaultValue? = nil
-            static let description: String? = "id of the droid"
+            getHuman(id: arguments.id)
         }
 
         struct DroidArguments : Arguments {
-            let id: DroidIDArgument
+            let id: String
+            static let descriptions = ["id": "id of the droid"]
         }
 
         try query.field(name: "droid") { (_, arguments: DroidArguments, _, _) in
-            getDroid(id: arguments.id.value)
+            getDroid(id: arguments.id)
         }
     }
 
