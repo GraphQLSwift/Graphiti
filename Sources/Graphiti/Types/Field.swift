@@ -3,15 +3,20 @@ import GraphQL
 public protocol InputType  : MapInitializable {}
 public protocol OutputType : MapFallibleRepresentable {}
 
-public typealias DefaultValue = MapRepresentable
-
-public protocol ArgumentInfo {
-    static var defaultValue: DefaultValue? { get }
-    static var description: String? { get }
+public protocol Arguments : MapInitializable {
+    static var descriptions: [String: String] { get }
+    static var defaultValues: [String: MapRepresentable] { get }
 }
 
-public protocol Arguments : MapInitializable {}
-public protocol Argument  : MapInitializable, ArgumentInfo {}
+extension Arguments {
+    public static var descriptions: [String: String] {
+        return [:]
+    }
+
+    public static var defaultValues: [String: MapRepresentable] {
+        return [:]
+    }
+}
 
 public struct NoArguments : Arguments {
     init() {}
@@ -190,33 +195,20 @@ public class FieldBuilder<Root, Type> {
         deprecationReason: String? = nil,
         resolve: ResolveField<Type, A, O?>? = nil
     ) throws {
-        let (args, argumentInfoMap) = try schema.arguments(
-            type: A.self,
-            field: name
-        )
+        let arguments = try schema.arguments(type: A.self, field: name)
 
         let field = GraphQLField(
             type: try schema.getOutputType(from: (O?).self, field: name),
             description: description,
             deprecationReason: deprecationReason,
-            args: args,
+            args: arguments,
             resolve: resolve.map { resolve in
                 return { source, args, context, info in
                     guard let s = source as? Type else {
                         throw GraphQLError(message: "Expected type \(Type.self) but got \(type(of: source))")
                     }
 
-                    var dict = args.dictionary!
-
-                    for (key, _) in argumentInfoMap {
-                        if let value = dict[key] {
-                            dict[key] = ["value": value]
-                        } else {
-                            dict[key] = ["value": .null]
-                        }
-                    }
-
-                    let a = try A(map: dict.map)
+                    let a = try A(map: args)
 
                     guard let output = try resolve(s, a, context, info) else {
                         return nil
@@ -237,33 +229,20 @@ public class FieldBuilder<Root, Type> {
         deprecationReason: String? = nil,
         resolve: ResolveField<Type, A, O>? = nil
     ) throws {
-        let (args, argumentInfoMap) = try schema.arguments(
-            type: A.self,
-            field: name
-        )
+        let arguments = try schema.arguments(type: A.self, field: name)
 
         let field = GraphQLField(
             type: try schema.getOutputType(from: O.self, field: name),
             description: description,
             deprecationReason: deprecationReason,
-            args: args,
+            args: arguments,
             resolve: resolve.map { resolve in
                 return { source, args, context, info in
                     guard let s = source as? Type else {
                         throw GraphQLError(message: "Expected type \(Type.self) but got \(type(of: source))")
                     }
 
-                    var dict = args.dictionary!
-
-                    for (key, _) in argumentInfoMap {
-                        if let value = dict[key] {
-                            dict[key] = ["value": value]
-                        } else {
-                            dict[key] = ["value": .null]
-                        }
-                    }
-                    
-                    let a = try A(map: dict.map)
+                    let a = try A(map: args)
                     return try resolve(s, a, context, info)
                 }
             }

@@ -343,93 +343,26 @@ extension SchemaBuilder {
 }
 
 extension SchemaBuilder {
-    func getArgument(argumentType: MapInitializable.Type, field: String) throws -> GraphQLArgument {
-        return GraphQLArgument(
-            type: try getInputType(from: argumentType, field: field)
-        )
-    }
-
-    func getArgument(
-        propertyType: Any.Type,
-        argumentInfo: ArgumentInfo.Type,
-        field: String
-        ) throws -> GraphQLArgument {
-        var inputType: GraphQLInputType? = nil
-
-        // TODO: Change to Reflection.get
-        for property in try properties(argumentInfo) {
-            if property.key == "value" {
-                inputType = try getInputType(from: property.type, field: field)
-                break
-            }
-        }
-
-        guard let type = inputType else {
-            throw GraphQLError(
-                message:
-                "Cannot use type \"\(propertyType)\" as an argument. " +
-                    "\"\(propertyType)\" needs a property named \"value\" " +
-                "with a type that adopts the \"ArgumentType\" protocol."
-            )
-        }
-
-        return GraphQLArgument(
-            type: type,
-            description: argumentInfo.description,
-            defaultValue: argumentInfo.defaultValue?.map
-        )
-    }
-
-    func getArgument(
-        propertyType: Any.Type,
-        field: String
-        ) throws -> (GraphQLArgument, Bool) {
-        switch propertyType {
-        case let argumentInfo as ArgumentInfo.Type:
-            let argument = try getArgument(
-                propertyType: propertyType,
-                argumentInfo: argumentInfo,
-                field: field
-            )
-
-            return (argument, true)
-        case let argumentType as MapInitializable.Type:
-            let argument = try getArgument(
-                argumentType: argumentType,
-                field: field
-            )
-
-            return (argument, false)
-        default:
-            throw GraphQLError(
-                message:
-                "Cannot use type \"\(propertyType)\" as an argument. " +
-                "\"\(propertyType)\" does not conform to the \"Argument\" protocol."
-            )
-        }
-    }
-
-    func arguments(
-        type: Any.Type,
-        field: String
-        ) throws -> ([String: GraphQLArgument], [String: Void])  {
+    func arguments(type: Any.Type, field: String) throws -> [String: GraphQLArgument] {
         var arguments: [String: GraphQLArgument] = [:]
-        var argumentInfoMap: [String: Void]  = [:]
+
+        guard let argumentsType = type as? Arguments.Type else {
+            return [:]
+        }
 
         for property in try properties(type) {
-            let (argument, hasArgumentInfo) = try getArgument(
-                propertyType: property.type,
-                field: field
-            )
+            if case let propertyType as MapInitializable.Type = property.type {
+                let argument =  GraphQLArgument(
+                    type: try getInputType(from: propertyType, field: field),
+                    description: argumentsType.descriptions[property.key],
+                    defaultValue: argumentsType.defaultValues[property.key]?.map
+                )
 
-            arguments[property.key] = argument
-
-            if hasArgumentInfo {
-                argumentInfoMap[property.key] = Void()
+                arguments[property.key] = argument
             }
         }
         
-        return (arguments, argumentInfoMap)
+        return arguments
     }
 }
 
