@@ -117,6 +117,9 @@ class StarWarsIntrospectionTests : XCTestCase {
                             "name": "Human",
                         ],
                         [
+                            "name": "Int",
+                        ],
+                        [
                             "name": "Planet",
                         ],
                         [
@@ -124,9 +127,6 @@ class StarWarsIntrospectionTests : XCTestCase {
                         ],
                         [
                             "name": "String",
-                        ],
-                        [
-                            "name": "Int",
                         ],
                     ],
                 ],
