@@ -41,11 +41,15 @@ public class FieldBuilder<Root, Context, Type> {
 
     func addAllFields() throws {
         for property in try properties(Type.self) {
-            let field = GraphQLField(
-                type: try schema.getOutputType(from: property.type, field: property.key)
-            )
+            do {
+                let field = GraphQLField(
+                    type: try schema.getOutputType(from: property.type, field: property.key)
+                )
 
-            fields[property.key] = field
+                fields[property.key] = field
+            } catch {
+
+            }
         }
     }
 

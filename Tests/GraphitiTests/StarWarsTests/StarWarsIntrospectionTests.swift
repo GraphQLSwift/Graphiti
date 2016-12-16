@@ -32,11 +32,18 @@ class StarWarsIntrospectionTests : XCTestCase {
                             "name": "Human",
                         ],
                         [
+                            "name": "Int",
+                        ],
+                        [
+                            "name": "Planet",
+                        ],
+                        [
                             "name": "Query",
                         ],
                         [
                             "name": "String",
                         ],
+
                         [
                             "name": "__Directive",
                         ],
@@ -110,10 +117,16 @@ class StarWarsIntrospectionTests : XCTestCase {
                             "name": "Human",
                         ],
                         [
+                            "name": "Planet",
+                        ],
+                        [
                             "name": "Query",
                         ],
                         [
                             "name": "String",
+                        ],
+                        [
+                            "name": "Int",
                         ],
                     ],
                 ],

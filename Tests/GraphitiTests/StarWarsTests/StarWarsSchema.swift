@@ -30,6 +30,7 @@ extension Episode : InputType, OutputType {
 
 extension Human : OutputType {}
 extension Droid : OutputType {}
+extension Planet: OutputType {}
 
 /**
  * Using our shorthand to describe type systems, the type system for our
@@ -150,6 +151,30 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
     }
 
     /**
+     * Planet in the Star Warts trilogy.
+     *
+     * This implements the following type system shorthand:
+     *
+     *     interface Planet {
+     *         id: String!
+     *         name: String!
+     *         diameter: Int!
+     *         rotationPeriod: Int!
+     *         orbitalPeriod: Int!
+     *         residents: [Human!]
+     *     }
+     */
+    try schema.object(type: Planet.self) { planet in
+        planet.description = "A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY."
+
+        try planet.field(
+            name: "residents",
+            type: [TypeReference<Human>].self,
+            description: "")
+
+    }
+
+    /**
      * We define our human type, which implements the character interface.
      *
      * This implements the following type system shorthand:
@@ -160,7 +185,7 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
      *         friends: [Character!]
      *         appearsIn: [Episode!]
      *         secretBackstory: String
-     *         homePlanet: String
+     *         homePlanet: Planet!
      *     }
      */
     try schema.object(type: Human.self, interfaces: Character.self) { human in

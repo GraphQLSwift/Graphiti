@@ -230,11 +230,11 @@ class StarWarsQueryTests : XCTestCase {
         let query = "query DuplicateFieldsQuery {" +
                     "    luke: human(id: \"1000\") {" +
                     "        name" +
-                    "        homePlanet" +
+                    "        homePlanet { name }" +
                     "    }" +
                     "    leia: human(id: \"1003\") {" +
                     "        name" +
-                    "        homePlanet" +
+                    "        homePlanet  { name }" +
                     "    }" +
                     "}"
 
@@ -242,11 +242,11 @@ class StarWarsQueryTests : XCTestCase {
             "data": [
                 "luke": [
                     "name": "Luke Skywalker",
-                    "homePlanet": "Tatooine",
+                    "homePlanet": ["name":"Tatooine"],
                 ],
                 "leia": [
                     "name": "Leia Organa",
-                    "homePlanet": "Alderaan",
+                    "homePlanet": ["name":"Alderaan"],
                 ],
             ],
         ]
@@ -266,18 +266,18 @@ class StarWarsQueryTests : XCTestCase {
                     "}" +
                     "fragment HumanFragment on Human {" +
                     "    name" +
-                    "    homePlanet" +
+                    "    homePlanet { name }" +
                     "}"
 
         let expected: Map = [
             "data": [
                 "luke": [
                     "name": "Luke Skywalker",
-                    "homePlanet": "Tatooine",
+                    "homePlanet": ["name":"Tatooine"],
                 ],
                 "leia": [
                     "name": "Leia Organa",
-                    "homePlanet": "Alderaan",
+                    "homePlanet": ["name":"Alderaan"],
                 ],
             ]
         ]

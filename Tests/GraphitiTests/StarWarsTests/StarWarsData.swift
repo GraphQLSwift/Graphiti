@@ -27,14 +27,23 @@ protocol Character {
     var appearsIn: [Episode] { get }
 }
 
+struct Planet {
+    let id: String
+    let name: String
+    let diameter: Int
+    let rotationPeriod: Int
+    let orbitalPeriod: Int
+    var residents: [Human]
+}
+
 struct Human : Character {
     let id: String
     let name: String
     let friends: [String]
     let appearsIn: [Episode]
-    let homePlanet: String?
+    let homePlanet: Planet
 
-    init(id: String, name: String, friends: [String], appearsIn: [Episode], homePlanet: String? = nil) {
+    init(id: String, name: String, friends: [String], appearsIn: [Episode], homePlanet: Planet) {
         self.id = id
         self.name = name
         self.friends = friends
@@ -51,27 +60,32 @@ struct Droid : Character {
     let primaryFunction: String
 }
 
+var tatooine = Planet(id:"10001", name: "Tatooine", diameter: 10465, rotationPeriod: 23, orbitalPeriod: 304,residents: [Human]() )
+var alderaan = Planet(id: "10002", name: "Alderaan", diameter: 12500, rotationPeriod: 24, orbitalPeriod: 364, residents: [Human]())
+
 let luke = Human(
     id: "1000",
     name: "Luke Skywalker",
     friends: ["1002", "1003", "2000", "2001"],
     appearsIn: [.newHope, .empire, .jedi],
-    homePlanet: "Tatooine"
+    homePlanet: tatooine
 )
+
 
 let vader = Human(
     id: "1001",
     name: "Darth Vader",
     friends: [ "1004" ],
     appearsIn: [.newHope, .empire, .jedi],
-    homePlanet: "Tatooine"
+    homePlanet: tatooine
 )
 
 let han = Human(
     id: "1002",
     name: "Han Solo",
     friends: ["1000", "1003", "2001"],
-    appearsIn: [.newHope, .empire, .jedi]
+    appearsIn: [.newHope, .empire, .jedi],
+    homePlanet: alderaan
 )
 
 let leia = Human(
@@ -79,14 +93,15 @@ let leia = Human(
     name: "Leia Organa",
     friends: ["1000", "1002", "2000", "2001"],
     appearsIn: [.newHope, .empire, .jedi],
-    homePlanet: "Alderaan"
+    homePlanet: alderaan
 )
 
 let tarkin = Human(
     id: "1004",
     name: "Wilhuff Tarkin",
     friends: ["1001"],
-    appearsIn: [.newHope]
+    appearsIn: [.newHope],
+    homePlanet: alderaan
 )
 
 let humanData: [String: Human] = [
