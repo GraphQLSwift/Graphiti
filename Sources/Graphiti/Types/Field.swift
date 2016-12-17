@@ -39,16 +39,16 @@ public class FieldBuilder<Root, Context, Type> {
 
     var fields: GraphQLFieldMap = [:]
 
-    func addAllFields() throws {
+
+    /// Export all properties using reflection
+    ///
+    /// - Parameter excluding: properties excluded from the export
+    /// - Throws: Reflection Errors
+    public func exportFields(excluding: String...) throws {
         for property in try properties(Type.self) {
-            do {
-                let field = GraphQLField(
-                    type: try schema.getOutputType(from: property.type, field: property.key)
-                )
-
+            if !excluding.contains(property.key) {
+                let field = GraphQLField(type: try schema.getOutputType(from: property.type, field: property.key))
                 fields[property.key] = field
-            } catch {
-
             }
         }
     }

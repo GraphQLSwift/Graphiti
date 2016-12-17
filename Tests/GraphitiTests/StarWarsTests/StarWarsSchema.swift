@@ -167,6 +167,8 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
     try schema.object(type: Planet.self) { planet in
         planet.description = "A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY."
 
+        try planet.exportFields(excluding:"residents")
+
         try planet.field(
             name: "residents",
             type: [TypeReference<Human>].self,
@@ -190,6 +192,8 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
      */
     try schema.object(type: Human.self, interfaces: Character.self) { human in
         human.description = "A humanoid creature in the Star Wars universe."
+
+        try human.exportFields()
 
         try human.field(
             name: "friends",
@@ -226,6 +230,8 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
      */
     try schema.object(type: Droid.self, interfaces: Character.self) { droid in
         droid.description = "A mechanical creature in the Star Wars universe."
+
+        try droid.exportFields()
 
         try droid.field(
             name: "friends",
