@@ -77,8 +77,7 @@ public final class SchemaBuilder<Root, Context> {
         interfaces: [Any.Type],
         build: (ObjectTypeBuilder<Root, Context, Type>) throws -> Void
     ) throws {
-        let builder = ObjectTypeBuilder<Root, Context, Type>(schema: self)
-        try builder.addAllFields()
+        let builder = ObjectTypeBuilder<Root, Context, Type>(schema: self)        
         try build(builder)
 
         let objectType = try GraphQLObjectType(
