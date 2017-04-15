@@ -41,16 +41,16 @@ extension Planet: OutputType {}
  *     interface Character {
  *         id: String!
  *         name: String!
- *         friends: [Character!]
- *         appearsIn: [Episode!]
+ *         friends: [Character!]!
+ *         appearsIn: [Episode!]!
  *         secretBackstory: String
  *     }
  *
  *     type Human : Character {
  *         id: String!
  *         name: String!
- *         friends: [Character!]
- *         appearsIn: [Episode!]
+ *         friends: [Character!]!
+ *         appearsIn: [Episode!]!
  *         secretBackstory: String
  *         homePlanet: String!
  *     }
@@ -58,8 +58,8 @@ extension Planet: OutputType {}
  *     type Droid : Character {
  *         id: String!
  *         name: String!
- *         friends: [Character!]
- *         appearsIn: [Episode!]
+ *         friends: [Character!]!
+ *         appearsIn: [Episode!]!
  *         secretBackstory: String
  *         primaryFunction: String!
  *     }
@@ -111,8 +111,8 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
      *     interface Character {
      *         id: String!
      *         name: String!
-     *         friends: [Character!]
-     *         appearsIn: [Episode!]
+     *         friends: [Character!]!
+     *         appearsIn: [Episode!]!
      *         secretBackstory: String
      *     }
      */
@@ -161,7 +161,7 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
      *         diameter: Int!
      *         rotationPeriod: Int!
      *         orbitalPeriod: Int!
-     *         residents: [Human!]
+     *         residents: [Human!]!
      *     }
      */
     try schema.object(type: Planet.self) { planet in
@@ -184,8 +184,8 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
      *     type Human : Character {
      *         id: String!
      *         name: String!
-     *         friends: [Character!]
-     *         appearsIn: [Episode!]
+     *         friends: [Character!]!
+     *         appearsIn: [Episode!]!
      *         secretBackstory: String
      *         homePlanet: Planet!
      *     }
@@ -222,8 +222,8 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
      *     type Droid : Character {
      *         id: String!
      *         name: String!
-     *         friends: [Character!]
-     *         appearsIn: [Episode!]
+     *         friends: [Character!]!
+     *         appearsIn: [Episode!]!
      *         secretBackstory: String
      *         primaryFunction: String!
      *     }
