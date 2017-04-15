@@ -205,41 +205,36 @@ extension SchemaBuilder {
         return try types.map({ try getNamedType(from: $0) })
     }
 
-    func getGraphQLType(from type: Any.Type) -> GraphQLType? {
+    static private func getGraphQLOptionalType(from type: GraphQLType, isOptional: Bool) -> GraphQLType? {
+        if isOptional {
+            return type
+        } else if let type = type as? GraphQLNullableType {
+            return GraphQLNonNull(type)
+        } else {
+            // TODO: Throw error
+            return nil
+        }
+    }
+
+    func getGraphQLType(from type: Any.Type, isOptional: Bool = false) -> GraphQLType? {
         if let type = type as? Wrapper.Type {
             switch type.modifier {
             case .optional:
-                if let wrapper = type.wrappedType as? Wrapper.Type {
-                    if case .reference = wrapper.modifier {
-                        let name = fixName(String(describing: wrapper.wrappedType))
-                        return GraphQLTypeReference(name)
-                    } else {
-                        return getGraphQLType(from: type.wrappedType)
-                    }
-                } else {
-                    return graphQLTypeMap[AnyType(type.wrappedType)]
-                }
+                return getGraphQLType(from: type.wrappedType, isOptional: true)
             case .list:
-                if type.wrappedType is Wrapper.Type {
-                    let unwrapped = getGraphQLType(from: type.wrappedType)
-                    return unwrapped.map { GraphQLList($0) }
-                } else {
-                    let unwrapped = graphQLTypeMap[AnyType(type.wrappedType)]
-                    // TODO: check if it's nullable and throw error
-                    return unwrapped.map { GraphQLList(GraphQLNonNull($0 as! GraphQLNullableType)) }
+                return getGraphQLType(from: type.wrappedType).flatMap {
+                    SchemaBuilder.getGraphQLOptionalType(from: GraphQLList($0), isOptional: isOptional)
                 }
             case .reference:
                 let name = fixName(String(describing: type.wrappedType))
-                return GraphQLNonNull(GraphQLTypeReference(name))
-            }
-        }
+                let referenceType = GraphQLTypeReference(name)
 
-        return graphQLTypeMap[AnyType(type)].flatMap {
-            guard let nullable = $0 as? GraphQLNullableType else {
-                return nil
+                return SchemaBuilder.getGraphQLOptionalType(from: referenceType, isOptional: isOptional)
             }
-            
-            return GraphQLNonNull(nullable)
+        } else {
+            return graphQLTypeMap[AnyType(type)].flatMap {
+                SchemaBuilder.getGraphQLOptionalType(from: $0, isOptional: isOptional)
+            }
         }
     }
 
