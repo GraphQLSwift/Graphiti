@@ -245,14 +245,14 @@ class StarWarsIntrospectionTests : XCTestCase {
                             "name": "appearsIn",
                             "type": [
                                 "name": nil,
-                                "kind": "LIST",
+                                "kind": "NON_NULL",
                             ],
                         ],
                         [
                             "name": "friends",
                             "type": [
                                 "name": nil,
-                                "kind": "LIST",
+                                "kind": "NON_NULL",
                             ],
                         ],
                         [
@@ -319,9 +319,9 @@ class StarWarsIntrospectionTests : XCTestCase {
                             "name": "appearsIn",
                             "type": [
                                 "name": nil,
-                                "kind": "LIST",
+                                "kind": "NON_NULL",
                                 "ofType": [
-                                    "kind": "NON_NULL",
+                                    "kind": "LIST",
                                     "name": nil
                                 ]
                             ],
@@ -330,9 +330,9 @@ class StarWarsIntrospectionTests : XCTestCase {
                             "name": "friends",
                             "type": [
                                 "name": nil,
-                                "kind": "LIST",
+                                "kind": "NON_NULL",
                                 "ofType": [
-                                    "kind": "NON_NULL",
+                                    "kind": "LIST",
                                     "name": nil
                                 ]
                             ],
