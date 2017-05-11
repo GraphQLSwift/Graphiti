@@ -117,6 +117,32 @@ public final class SchemaBuilder<Root, Context> {
         map(Type.self, to: interfaceType)
     }
 
+    public func union<Type>(
+        type: Type.Type,
+        build: (UnionTypeBuilder<Type>) throws -> Void
+        ) throws {
+        let name = fixName(String(describing: Type.self))
+        try union(name: name, type: type, build: build)
+    }
+
+    public func union<Type>(
+        name: String,
+        type: Type.Type,
+        build: (UnionTypeBuilder<Type>) throws -> Void
+        ) throws {
+        let builder = UnionTypeBuilder<Type>()
+        try build(builder)
+
+        let interfaceType = try GraphQLUnionType(
+            name: name,
+            description: builder.description,
+            resolveType: builder.resolveType,
+            types: builder.types.map { try getObjectType(from: $0) }
+        )
+
+        map(Type.self, to: interfaceType)
+    }
+
     public func `enum`<Type : OutputType>(
         type: Type.Type,
         build: (EnumTypeBuilder<Type>) throws -> Void
@@ -517,3 +543,4 @@ public struct Schema<Root, Context> {
         )
     }
 }
+
