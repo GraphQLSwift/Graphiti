@@ -119,6 +119,24 @@ public final class SchemaBuilder<Root, Context> {
 
     public func union<Type>(
         type: Type.Type,
+        members: [Any.Type]
+        ) throws {
+        let name = fixName(String(describing: Type.self))
+        try union(name: name, type: type, members: members)
+    }
+
+    public func union<Type>(
+        name: String,
+        type: Type.Type,
+        members: [Any.Type]
+    ) throws {
+        try union(name: name, type: type) { builder in
+            builder.types = members
+        }
+    }
+
+    public func union<Type>(
+        type: Type.Type,
         build: (UnionTypeBuilder<Type>) throws -> Void
         ) throws {
         let name = fixName(String(describing: Type.self))
