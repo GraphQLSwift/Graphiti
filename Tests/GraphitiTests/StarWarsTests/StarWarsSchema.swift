@@ -253,6 +253,15 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
     }
 
     /**
+     * A search result can be a include a number of different types.
+     *
+     * This implements the following type system shorthand:
+     *
+     * union SearchResult = Planet | Human | Droid
+     */
+    try schema.union(type: SearchResult.self, members: [ Planet.self, Human.self, Droid.self ])
+
+    /**
      * This is the type that will be the root of our query, and the
      * entry point into our schema. It gives us the ability to fetch
      * objects by their IDs, as well as to fetch the undisputed hero
@@ -264,6 +273,7 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
      *         hero(episode: Episode): Character
      *         human(id: String!): Human
      *         droid(id: String!): Droid
+     *         search(query: String!): SearchResult
      *     }
      */
     try schema.query { query in
@@ -298,6 +308,16 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
         try query.field(name: "droid") { (_, arguments: DroidArguments, _, _) in
             getDroid(id: arguments.id)
         }
+
+        struct SearchArguments : Arguments {
+            let query: String
+            static let descriptions = ["query": "text to find"]
+        }
+
+        try query.field(name: "search") { (_, arguments: SearchArguments, _, _) in
+            search(for: arguments.query)
+        }
+
     }
 
     schema.types = [Human.self, Droid.self]

@@ -490,6 +490,38 @@ class StarWarsQueryTests : XCTestCase {
         let result = try schema.execute(request: query)
         XCTAssertEqual(result, expected)
     }
+
+    func testSearchQuery() throws {
+        let query = "query {" +
+            "    search(query: \"o\") {" +
+            "        ... on Planet {" +
+            "            name " +
+            "            diameter " +
+            "        }" +
+            "        ... on Human {" +
+            "            name " +
+            "        }" +
+            "        ... on Droid {" +
+            "            name " +
+            "            primaryFunction " +
+            "        }" +
+            "    }" +
+            "}"
+
+        let expected: Map = [
+            "data": [
+                "search": [
+                    [ "name": "Tatooine", "diameter": 10465 ],
+                    [ "name": "Han Solo" ],
+                    [ "name": "Leia Organa" ],
+                    [ "name": "C-3PO", "primaryFunction": "Protocol" ],
+                ],
+            ],
+            ]
+
+        let result = try starWarsSchema.execute(request: query)
+        XCTAssertEqual(result, expected)
+    }
 }
 
 extension StarWarsQueryTests {

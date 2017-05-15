@@ -60,8 +60,18 @@ struct Droid : Character {
     let primaryFunction: String
 }
 
+protocol SearchResult {}
+extension Planet: SearchResult {}
+extension Human: SearchResult {}
+extension Droid: SearchResult {}
+
 var tatooine = Planet(id:"10001", name: "Tatooine", diameter: 10465, rotationPeriod: 23, orbitalPeriod: 304,residents: [Human]() )
 var alderaan = Planet(id: "10002", name: "Alderaan", diameter: 12500, rotationPeriod: 24, orbitalPeriod: 364, residents: [Human]())
+
+let planetData: [String: Planet] = [
+    "10001": tatooine,
+    "10002": alderaan,
+]
 
 let luke = Human(
     id: "1000",
@@ -193,3 +203,30 @@ func getSecretBackStory() throws -> String? {
     throw Secret(description: "secretBackstory is secret.")
 }
 
+/**
+ * Allos us to query for either a Human, Droid, or Planet.
+ */
+func search(for value: String) -> [SearchResult] {
+    let value = value.lowercased()
+    var result: [SearchResult] = []
+
+    result.append(contentsOf: 
+        planetData.filter({
+            return $1.name.lowercased().range(of:value) != nil
+        }).map({ $1 })
+    )
+
+    result.append(contentsOf:
+        humanData.filter({
+            return $1.name.lowercased().range(of:value) != nil
+        }).map({ $1 })
+    )
+
+    result.append(contentsOf:
+        droidData.filter({
+            return $1.name.lowercased().range(of:value) != nil
+        }).map({ $1 })
+    )
+
+    return result
+}
