@@ -41,9 +41,11 @@ class StarWarsIntrospectionTests : XCTestCase {
                             "name": "Query",
                         ],
                         [
+                            "name": "SearchResult",
+                        ],
+                        [
                             "name": "String",
                         ],
-
                         [
                             "name": "__Directive",
                         ],
@@ -124,6 +126,9 @@ class StarWarsIntrospectionTests : XCTestCase {
                         ],
                         [
                             "name": "Query",
+                        ],
+                        [
+                            "name": "SearchResult",
                         ],
                         [
                             "name": "String",
@@ -455,6 +460,24 @@ class StarWarsIntrospectionTests : XCTestCase {
                                     [
                                         "name": "id",
                                         "description": "id of the human",
+                                        "type": [
+                                            "name": nil,
+                                            "kind": "NON_NULL",
+                                            "ofType": [
+                                                "name": "String",
+                                                "kind": "SCALAR",
+                                            ]
+                                        ],
+                                        "defaultValue": nil,
+                                    ],
+                                ],
+                            ],
+                            [
+                                "name": "search",
+                                "args": [
+                                    [
+                                        "name": "query",
+                                        "description": "text to find",
                                         "type": [
                                             "name": nil,
                                             "kind": "NON_NULL",
