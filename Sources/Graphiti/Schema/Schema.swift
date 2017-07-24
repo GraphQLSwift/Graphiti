@@ -91,6 +91,31 @@ public final class SchemaBuilder<Root, Context> {
         map(Type.self, to: objectType)
     }
 
+    public func inputObject<Type: InputType>(
+        type: Type.Type,
+        build: (InputObjectTypeBuilder<Root, Context, Type>) throws -> Void
+        ) throws {
+        let name = fixName(String(describing: Type.self))
+        try inputObject(name: name, type: type, build: build)
+    }
+    
+    public func inputObject<Type: InputType>(
+        name: String,
+        type: Type.Type,
+        build: (InputObjectTypeBuilder<Root, Context, Type>) throws -> Void
+        ) throws {
+        let builder = InputObjectTypeBuilder<Root, Context, Type>(schema: self)
+        try build(builder)
+        
+        let inputObjectType = try GraphQLInputObjectType(
+            name: name,
+            description: builder.description,
+            fields: builder.fields
+        )
+        
+        map(Type.self, to: inputObjectType)
+    }
+    
     public func interface<Type>(
         type: Type.Type,
         build: (InterfaceTypeBuilder<Root, Context, Type>) throws -> Void

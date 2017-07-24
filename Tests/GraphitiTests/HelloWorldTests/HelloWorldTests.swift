@@ -101,6 +101,72 @@ class HelloWorldTests : XCTestCase {
         result = try schema.execute(request: query)
         XCTAssertEqual(result, expected)
     }
+    
+    func testInput() throws {
+        
+        struct Foo : OutputType {
+            let id: String
+            let name : String?
+            
+            static func fromInput(_ input: FooInput) -> Foo {
+                return Foo(id: input.id, name: input.name)
+            }
+        }
+        
+        struct FooInput : InputType {
+            let id: String
+            let name : String?
+        }
+        
+        let schema = try Schema<NoRoot, NoContext> { schema in
+            
+            try schema.object(type: Foo.self) { builder in
+                
+                try builder.exportFields()
+            }
+            
+            try schema.query { query in
+                
+                try query.field(name: "foo", type: (Foo?).self) { (_,_,_,_) in
+                    
+                    return Foo(id: "123", name: "bar")
+                }
+            }
+            
+            try schema.inputObject(type: FooInput.self) { builder in
+                
+                try builder.exportFields()
+            }
+            
+            struct AddFooArguments : Arguments {
+                
+                let input: FooInput
+            }
+            
+            try schema.mutation { mutation in
+                
+                try mutation.field(name: "addFoo", type: Foo.self) { (_, arguments: AddFooArguments, _, _) in
+                    
+                    debugPrint(arguments)
+                    return Foo.fromInput(arguments.input)
+                }
+            }
+            
+        }
+        
+        let mutation = "mutation addFoo($input: FooInput!) { addFoo(input:$input) { id, name } }"
+        let variables: [String:Map] = ["input" : [ "id" : "123", "name" : "bob" ]]
+        let expected: Map = ["data": ["addFoo" : [ "id" : "123", "name" : "bob" ]]]
+        do {
+            let result = try schema.execute(request: mutation, variables: variables)
+            XCTAssertEqual(result, expected)
+            debugPrint(result)
+        }
+            catch {
+                debugPrint(error)
+            }
+        
+    }
 }
 
 extension HelloWorldTests {
