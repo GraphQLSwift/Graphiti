@@ -24,21 +24,24 @@ func isProtocol(type: Any.Type) -> Bool {
 }
 
 func fixName(_ name: String) -> String {
+    // In Swift 4, String(describing: MyClass.self) appends ' #1' for locally defined classes,
+    // which we consider invalid for a type name. Strip this by copying until the first space.
+    var workingString = name
+    
     if name.hasPrefix("(") {
-        var newName: [Character] = []
-
-        for character in String(name.characters.dropFirst()).characters {
-            if character != " " {
-                newName.append(character)
-            } else {
-                break
-            }
+        workingString = String(name.characters.dropFirst())
+    }
+    
+    var newName: [Character] = []
+    for character in workingString.characters {
+        if character != " " {
+            newName.append(character)
+        } else {
+            break
         }
-
-        return String(newName)
     }
 
-    return name
+    return String(newName)
 }
 
 
