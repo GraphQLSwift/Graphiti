@@ -261,7 +261,7 @@ public final class SchemaBuilder<Root, Context> {
     }
 }
 
-extension SchemaBuilder {
+public extension SchemaBuilder {
     func map(_ type: Any.Type, to graphQLType: GraphQLType) {
         guard !(type is Void.Type) else {
             return
@@ -339,7 +339,7 @@ extension SchemaBuilder {
         return outputType
     }
 
-    func getInputType(from type: Any.Type, field: String) throws -> GraphQLInputType {
+    public func getInputType(from type: Any.Type, field: String) throws -> GraphQLInputType {
         guard let graphQLType = getGraphQLType(from: type) else {
             throw GraphQLError(
                 message:

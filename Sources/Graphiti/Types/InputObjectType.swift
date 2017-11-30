@@ -14,11 +14,17 @@ public final class InputObjectTypeBuilder<Root, Context, Type> {
     /// Export all properties using reflection
     ///
     /// - Throws: Reflection Errors
-    public func exportFields() throws {
+    public func exportFields(excluding: String...) throws {
         for property in try properties(Type.self) {
-            let field = InputObjectField(type: try schema.getInputType(from: property.type, field: property.key))
-            fields[property.key] = field
+            if !excluding.contains(property.key) {
+                let field = InputObjectField(type: try schema.getInputType(from: property.type, field: property.key))
+                fields[property.key] = field
+            }
         }
+    }
+    
+    public func addFieldMap(key: String, fieldMap: InputObjectField) {
+        fields[key] = fieldMap
     }
 }
 
