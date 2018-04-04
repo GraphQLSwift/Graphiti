@@ -1,4 +1,5 @@
 import GraphQL
+import Runtime
 
 public final class InputObjectTypeBuilder<Root, Context, Type> {
     var schema: SchemaBuilder<Root, Context>
@@ -15,10 +16,13 @@ public final class InputObjectTypeBuilder<Root, Context, Type> {
     ///
     /// - Throws: Reflection Errors
     public func exportFields(excluding: String...) throws {
-        for property in try properties(Type.self) {
-            if !excluding.contains(property.key) {
-                let field = InputObjectField(type: try schema.getInputType(from: property.type, field: property.key))
-                fields[property.key] = field
+        
+        let info = try typeInfo(of: Type.self)
+        
+        for property in info.properties {
+            if !excluding.contains(property.name) {
+                let field = InputObjectField(type: try schema.getInputType(from: property.type, field: property.name))
+                fields[property.name] = field
             }
         }
     }

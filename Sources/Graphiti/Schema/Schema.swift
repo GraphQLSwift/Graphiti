@@ -1,4 +1,5 @@
 import GraphQL
+import Runtime
 
 public final class SchemaBuilder<Root, Context> {
     var graphQLTypeMap: [AnyType: GraphQLType] = [
@@ -462,15 +463,17 @@ extension SchemaBuilder {
             return [:]
         }
 
-        for property in try properties(type) {
+        let info = try typeInfo(of: type)
+        
+        for property in info.properties {
             if case let propertyType as MapInitializable.Type = property.type {
                 let argument =  GraphQLArgument(
                     type: try getInputType(from: propertyType, field: field),
-                    description: argumentsType.descriptions[property.key],
-                    defaultValue: try argumentsType.defaultValues[property.key]?.asMap()
+                    description: argumentsType.descriptions[property.name],
+                    defaultValue: try argumentsType.defaultValues[property.name]?.asMap()
                 )
 
-                arguments[property.key] = argument
+                arguments[property.name] = argument
             }
         }
         

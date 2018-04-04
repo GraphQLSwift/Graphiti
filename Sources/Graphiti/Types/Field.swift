@@ -1,4 +1,5 @@
 import GraphQL
+import Runtime
 
 public protocol InputType  : MapInitializable {}
 public protocol OutputType : MapFallibleRepresentable {}
@@ -45,10 +46,13 @@ public class FieldBuilder<Root, Context, Type> {
     /// - Parameter excluding: properties excluded from the export
     /// - Throws: Reflection Errors
     public func exportFields(excluding: String...) throws {
-        for property in try properties(Type.self) {
-            if !excluding.contains(property.key) {
-                let field = GraphQLField(type: try schema.getOutputType(from: property.type, field: property.key))
-                fields[property.key] = field
+        
+        let info = try typeInfo(of: Type.self)
+        
+        for property in info.properties {
+            if !excluding.contains(property.name) {
+                let field = GraphQLField(type: try schema.getOutputType(from: property.type, field: property.name))
+                fields[property.name] = field
             }
         }
     }
