@@ -464,7 +464,6 @@ extension SchemaBuilder {
         }
 
         let info = try typeInfo(of: type)
-        
         for property in info.properties {
             if case let propertyType as MapInitializable.Type = property.type {
                 let argument =  GraphQLArgument(

@@ -443,9 +443,15 @@ class StarWarsQueryTests : XCTestCase {
             struct A : OutputType {}
 
             try schema.object(type: A.self) { a in
-                try a.field(name: "nullableA", type: (TypeReference<A>?).self) { _ in A() }
-                try a.field(name: "nonNullA", type: TypeReference<A>.self) { _ in A() }
-                try a.field(name: "throws", type: String.self) { _ in
+                try a.field(name: "nullableA", type: (TypeReference<A>?).self) { (_, _, _, _) -> A?
+                    in A()
+                }
+                
+                try a.field(name: "nonNullA", type: TypeReference<A>.self) { (_, _, _, _) -> A
+                    in A()
+                }
+                
+                try a.field(name: "throws", type: String.self) { (_, _, _, _) -> String in
                     struct 🏃 : Error, CustomStringConvertible {
                         let description: String
                     }
@@ -455,7 +461,9 @@ class StarWarsQueryTests : XCTestCase {
             }
 
             try schema.query { query in
-                try query.field(name: "nullableA", type: (A?).self) { _ in A() }
+                try query.field(name: "nullableA", type: (A?).self) { (_, _, _, _) -> A? in
+                    A()
+                }
             }
         }
 

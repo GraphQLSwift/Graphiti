@@ -46,7 +46,6 @@ public class FieldBuilder<Root, Context, Type> {
     /// - Parameter excluding: properties excluded from the export
     /// - Throws: Reflection Errors
     public func exportFields(excluding: String...) throws {
-        
         let info = try typeInfo(of: Type.self)
         
         for property in info.properties {
@@ -69,11 +68,11 @@ public class FieldBuilder<Root, Context, Type> {
         if let resolve = resolve {
             r = { source, _, context, info in
                 guard let s = source as? Type else {
-                    throw GraphQLError(message: "Expected source type \(Type.self) but got \(type(of: source))")
+                    throw GraphQLError(message: "Expected source type \(Type.self) but got \(Swift.type(of: source))")
                 }
 
                 guard let c = context as? Context else {
-                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(Swift.type(of: context))")
                 }
 
                 guard let output = try resolve(s, NoArguments(), c, info) else {
@@ -107,11 +106,11 @@ public class FieldBuilder<Root, Context, Type> {
         if let resolve = resolve {
             r = { source, _, context, info in
                 guard let s = source as? Type else {
-                    throw GraphQLError(message: "Expected source type \(Type.self) but got \(type(of: source))")
+                    throw GraphQLError(message: "Expected source type \(Type.self) but got \(Swift.type(of: source))")
                 }
 
                 guard let c = context as? Context else {
-                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(Swift.type(of: context))")
                 }
 
                 return try resolve(s, NoArguments(), c, info)
@@ -141,11 +140,11 @@ public class FieldBuilder<Root, Context, Type> {
         if let resolve = resolve {
             r = { source, _, context, info in
                 guard let s = source as? Type else {
-                    throw GraphQLError(message: "Expected source type \(Type.self) but got \(type(of: source))")
+                    throw GraphQLError(message: "Expected source type \(Type.self) but got \(Swift.type(of: source))")
                 }
 
                 guard let c = context as? Context else {
-                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(Swift.type(of: context))")
                 }
 
                 return try resolve(s, NoArguments(), c, info)
@@ -190,11 +189,11 @@ public class FieldBuilder<Root, Context, Type> {
         if let resolve = resolve {
             r = { source, _, context, info in
                 guard let s = source as? Type else {
-                    throw GraphQLError(message: "Expected source type \(Type.self) but got \(type(of: source))")
+                    throw GraphQLError(message: "Expected source type \(Type.self) but got \(Swift.type(of: source))")
                 }
 
                 guard let c = context as? Context else {
-                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(Swift.type(of: context))")
                 }
 
                 return try resolve(s, NoArguments(), c, info)
@@ -229,13 +228,13 @@ public class FieldBuilder<Root, Context, Type> {
             resolve: resolve.map { resolve in
                 return { source, args, context, info in
                     guard let s = source as? Type else {
-                        throw GraphQLError(message: "Expected source type \(Type.self) but got \(type(of: source))")
+                        throw GraphQLError(message: "Expected source type \(Type.self) but got \(Swift.type(of: source))")
                     }
 
                     let a = try A(map: args)
 
                     guard let c = context as? Context else {
-                        throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                        throw GraphQLError(message: "Expected context type \(Context.self) but got \(Swift.type(of: context))")
                     }
 
                     guard let output = try resolve(s, a, c, info) else {
@@ -267,13 +266,13 @@ public class FieldBuilder<Root, Context, Type> {
             resolve: resolve.map { resolve in
                 return { source, args, context, info in
                     guard let s = source as? Type else {
-                        throw GraphQLError(message: "Expected type \(Type.self) but got \(type(of: source))")
+                        throw GraphQLError(message: "Expected type \(Type.self) but got \(Swift.type(of: source))")
                     }
 
                     let a = try A(map: args)
 
                     guard let c = context as? Context else {
-                        throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                        throw GraphQLError(message: "Expected context type \(Context.self) but got \(Swift.type(of: context))")
                     }
 
                     return try resolve(s, a, c, info)
