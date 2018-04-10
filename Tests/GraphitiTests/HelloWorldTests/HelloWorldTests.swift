@@ -15,7 +15,7 @@ extension Float : InputType, OutputType {
 class HelloWorldTests : XCTestCase {
     let schema = try! Schema<NoRoot, NoContext> { schema in
         try schema.query { query in
-            try query.field(name: "hello", type: String.self) { _ in
+            try query.field(name: "hello", type: String.self) { (_, _, _, _) -> String in
                 "world"
             }
         }

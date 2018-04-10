@@ -5,7 +5,7 @@ matrix:
   include:
     - os: osx
       env: JOB=SwiftPM_OSX
-      osx_image: xcode9
+      osx_image: xcode9.3beta
     - os: linux
       env: JOB=SwiftPM_linux
       dist: trusty
@@ -16,4 +16,6 @@ script:
   - swift build -c release
   - swift build
   - swift test
-  - eval "$(curl -sL https://raw.githubusercontent.com/lgaches/swifttravisci/master/codecov)"
+  - 'if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+       eval "$(curl -sL https://raw.githubusercontent.com/lgaches/swifttravisci/master/codecov)";
+     fi'

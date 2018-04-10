@@ -1,8 +1,20 @@
+// swift-tools-version:4.0
 import PackageDescription
 
 let package = Package(
     name: "Graphiti",
+    
+    products: [
+        .library(name: "Graphiti", targets: ["Graphiti"]),
+    ],
+
     dependencies: [
-        .Package(url: "https://github.com/GraphQLSwift/GraphQL.git", majorVersion: 0, minor: 3),
+        .package(url: "https://github.com/GraphQLSwift/GraphQL.git", from: "0.5.0"),
+    ],
+
+    targets: [
+        .target(name: "Graphiti", dependencies: ["GraphQL"]),
+        
+        .testTarget(name: "GraphitiTests", dependencies: ["Graphiti"]),
     ]
 )

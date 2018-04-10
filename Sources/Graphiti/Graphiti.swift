@@ -19,7 +19,7 @@ final class AnyType : Hashable {
 }
 
 func isProtocol(type: Any.Type) -> Bool {
-    let description = String(describing: type(of: type))
+    let description = String(describing: Swift.type(of: type))
     return description.hasSuffix("Protocol")
 }
 
@@ -29,11 +29,11 @@ func fixName(_ name: String) -> String {
     var workingString = name
     
     if name.hasPrefix("(") {
-        workingString = String(name.characters.dropFirst())
+        workingString = String(name.dropFirst())
     }
     
     var newName: [Character] = []
-    for character in workingString.characters {
+    for character in workingString {
         if character != " " {
             newName.append(character)
         } else {

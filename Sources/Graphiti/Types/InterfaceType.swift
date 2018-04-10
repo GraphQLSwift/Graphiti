@@ -13,11 +13,11 @@ public final class InterfaceTypeBuilder<Root, Context, Type> : FieldBuilder<Root
     public func resolveType(_ resolve: @escaping ResolveType<Type, Context>) {
         self.resolveType = { value, context, info in
             guard let v = value as? Type else {
-                throw GraphQLError(message: "Expected value type \(Type.self) but got \(type(of: value))")
+                throw GraphQLError(message: "Expected value type \(Type.self) but got \(Swift.type(of: value))")
             }
 
             guard let c = context as? Context else {
-                throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                throw GraphQLError(message: "Expected context type \(Context.self) but got \(Swift.type(of: context))")
             }
 
             let type = try resolve(v, c, info)
