@@ -1,7 +1,8 @@
 import GraphQL
 import Runtime
+import NIO
 
-public final class InputObjectTypeBuilder<Root, Context, Type> {
+public final class InputObjectTypeBuilder<Root, Context: EventLoopGroup, Type> {
     var schema: SchemaBuilder<Root, Context>
     
     init(schema: SchemaBuilder<Root, Context>) {

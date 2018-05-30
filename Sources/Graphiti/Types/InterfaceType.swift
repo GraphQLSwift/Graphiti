@@ -1,4 +1,5 @@
 import GraphQL
+import NIO
 
 public typealias ResolveType<Value, Context> = (
     _ value: Value,
@@ -6,7 +7,7 @@ public typealias ResolveType<Value, Context> = (
     _ info: GraphQLResolveInfo
 ) throws -> Any.Type
 
-public final class InterfaceTypeBuilder<Root, Context, Type> : FieldBuilder<Root, Context, Type> {
+public final class InterfaceTypeBuilder<Root, Context: EventLoopGroup, Type> : FieldBuilder<Root, Context, Type> {
     public var description: String? = nil
     var resolveType: GraphQLTypeResolve? = nil
 
