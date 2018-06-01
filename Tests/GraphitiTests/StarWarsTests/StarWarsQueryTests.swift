@@ -515,19 +515,19 @@ class StarWarsQueryTests : XCTestCase {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
 
-        let schema = try Schema<NoRoot, MultiThreadedEventLoopGroup> { schema in
+        let schema = try Schema<NoRoot, NoContext, MultiThreadedEventLoopGroup> { schema in
             struct A : OutputType {}
 
             try schema.object(type: A.self) { a in
-                try a.field(name: "nullableA", type: (TypeReference<A>?).self) { (_, _, eventLoopGroup, _) in
+                try a.field(name: "nullableA", type: (TypeReference<A>?).self) { (_, _, _, eventLoopGroup, _) in
                     eventLoopGroup.next().newSucceededFuture(result: A())
                 }
                 
-                try a.field(name: "nonNullA", type: TypeReference<A>.self) { (_, _, eventLoopGroup, _) in
+                try a.field(name: "nonNullA", type: TypeReference<A>.self) { (_, _, _, eventLoopGroup, _) in
                     eventLoopGroup.next().newSucceededFuture(result: A())
                 }
                 
-                try a.field(name: "throws", type: String.self) { (_, _, _, _) in
+                try a.field(name: "throws", type: String.self) { (_, _, _, _, _) in
                     struct 🏃 : Error, CustomStringConvertible {
                         let description: String
                     }
@@ -537,7 +537,7 @@ class StarWarsQueryTests : XCTestCase {
             }
 
             try schema.query { query in
-                try query.field(name: "nullableA", type: (A?).self) { (_, _, eventLoopGroup, _) in
+                try query.field(name: "nullableA", type: (A?).self) { (_, _, _, eventLoopGroup, _) in
                     eventLoopGroup.next().newSucceededFuture(result: A())
                 }
             }

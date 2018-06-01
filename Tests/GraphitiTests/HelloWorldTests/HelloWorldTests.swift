@@ -14,10 +14,10 @@ extension Float : InputType, OutputType {
 }
 
 class HelloWorldTests : XCTestCase {
-    let schema = try! Schema<NoRoot, MultiThreadedEventLoopGroup> { schema in
+    let schema = try! Schema<NoRoot, NoContext, MultiThreadedEventLoopGroup> { schema in
         try schema.query { query in
 
-            try query.field(name: "hello", type: String.self) { (_, _, eventLoopGroup, _) in
+            try query.field(name: "hello", type: String.self) { (_, _, _, eventLoopGroup, _) in
                 return eventLoopGroup.next().newSucceededFuture(result: "world")
             }
         }
@@ -66,7 +66,7 @@ class HelloWorldTests : XCTestCase {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
 
-        let schema = try Schema<NoRoot, MultiThreadedEventLoopGroup> { schema in
+        let schema = try Schema<NoRoot, NoContext, MultiThreadedEventLoopGroup> { schema in
             try schema.scalar(type: Float.self) { scalar in
                 scalar.description = "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point)."
 
@@ -100,7 +100,7 @@ class HelloWorldTests : XCTestCase {
                     let float: Float
                 }
 
-                try query.field(name: "float", type: Float.self) { (_, arguments: FloatArguments, eventLoopGroup, _) in
+                try query.field(name: "float", type: Float.self) { (_, arguments: FloatArguments, _, eventLoopGroup, _) in
                     return eventLoopGroup.next().newSucceededFuture(result: arguments.float)
                 }
             }
@@ -139,7 +139,7 @@ class HelloWorldTests : XCTestCase {
             let name : String?
         }
 
-        let schema = try Schema<NoRoot, MultiThreadedEventLoopGroup> { schema in
+        let schema = try Schema<NoRoot, NoContext, MultiThreadedEventLoopGroup> { schema in
 
             try schema.object(type: Foo.self) { builder in
 
@@ -148,7 +148,7 @@ class HelloWorldTests : XCTestCase {
 
             try schema.query { query in
 
-                try query.field(name: "foo", type: (Foo?).self) { (_,_,eventLoopGroup,_) in
+                try query.field(name: "foo", type: (Foo?).self) { (_, _, _, eventLoopGroup, _) in
                     return eventLoopGroup.next().newSucceededFuture(result: Foo(id: "123", name: "bar"))
                 }
             }
@@ -165,7 +165,7 @@ class HelloWorldTests : XCTestCase {
 
             try schema.mutation { mutation in
 
-                try mutation.field(name: "addFoo", type: Foo.self) { (_, arguments: AddFooArguments, eventLoopgroup, _) in
+                try mutation.field(name: "addFoo", type: Foo.self) { (_, arguments: AddFooArguments, _, eventLoopgroup, _) in
 
                     debugPrint(arguments)
                     return eventLoopGroup.next().newSucceededFuture(result: Foo.fromInput(arguments.input))

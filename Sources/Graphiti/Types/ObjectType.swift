@@ -7,7 +7,7 @@ public typealias IsTypeOf<S, C> = (
     _ info: GraphQLResolveInfo
 ) throws -> Bool
 
-public final class ObjectTypeBuilder<Root, Context: EventLoopGroup, Type> : FieldBuilder<Root, Context, Type> {
+public final class ObjectTypeBuilder<Root, Context, EventLoop: EventLoopGroup, Type> : FieldBuilder<Root, Context, EventLoop, Type> {
     public var description: String? = nil
 
     var isTypeOf: GraphQLIsTypeOf = { source, _, _ in

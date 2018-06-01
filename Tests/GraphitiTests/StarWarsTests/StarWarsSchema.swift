@@ -74,7 +74,7 @@ extension Planet: OutputType {}
 
 import GraphQL
 
-let starWarsSchema = try! Schema<NoRoot, MultiThreadedEventLoopGroup> { schema in
+let starWarsSchema = try! Schema<NoRoot, NoContext, MultiThreadedEventLoopGroup> { schema in
     /**
      * The original trilogy consists of three movies.
      *
@@ -200,7 +200,7 @@ let starWarsSchema = try! Schema<NoRoot, MultiThreadedEventLoopGroup> { schema i
             name: "friends",
             type: [Character].self,
             description: "The friends of the human, or an empty list if they have none.",
-            resolve: { human, _, eventLoopGroup, _ in
+            resolve: { human, _, _, eventLoopGroup, _ in
                 return eventLoopGroup.next().newSucceededFuture(result: getFriends(character: human))
             }
         )
@@ -209,7 +209,7 @@ let starWarsSchema = try! Schema<NoRoot, MultiThreadedEventLoopGroup> { schema i
             name: "secretBackstory",
             type: (String?).self,
             description: "Where are they from and how they came to be who they are.",
-            resolve: { _, _, eventLoopGroup, _ in
+            resolve: { _, _, _, eventLoopGroup, _ in
                 return eventLoopGroup.next().newSucceededFuture(result: try getSecretBackStory())
             }
         )
@@ -238,7 +238,7 @@ let starWarsSchema = try! Schema<NoRoot, MultiThreadedEventLoopGroup> { schema i
             name: "friends",
             type: [Character].self,
             description: "The friends of the droid, or an empty list if they have none.",
-            resolve: { droid, _, eventLoopGroup, _ in
+            resolve: { droid, _, _, eventLoopGroup, _ in
                 return eventLoopGroup.next().newSucceededFuture(result: getFriends(character: droid))
 
             }
@@ -248,7 +248,7 @@ let starWarsSchema = try! Schema<NoRoot, MultiThreadedEventLoopGroup> { schema i
             name: "secretBackstory",
             type: (String?).self,
             description: "Where are they from and how they came to be who they are.",
-            resolve: { _, _, eventLoopGroup, _ in
+            resolve: { _, _, _, eventLoopGroup, _ in
                 return eventLoopGroup.next().newSucceededFuture(result: try getSecretBackStory())
             }
         )
@@ -289,7 +289,7 @@ let starWarsSchema = try! Schema<NoRoot, MultiThreadedEventLoopGroup> { schema i
             ]
         }
 
-        try query.field(name: "hero") { (_, arguments: HeroArguments, eventLoopGroup, _) in
+        try query.field(name: "hero") { (_, arguments: HeroArguments, _, eventLoopGroup, _) in
             return eventLoopGroup.next().newSucceededFuture(result: getHero(episode: arguments.episode))
 
         }
@@ -299,7 +299,7 @@ let starWarsSchema = try! Schema<NoRoot, MultiThreadedEventLoopGroup> { schema i
             static let descriptions = ["id": "id of the human"]
         }
 
-        try query.field(name: "human") { (_, arguments: HumanArguments, eventLoopGroup, _) in
+        try query.field(name: "human") { (_, arguments: HumanArguments, _, eventLoopGroup, _) in
             return eventLoopGroup.next().newSucceededFuture(result: getHuman(id: arguments.id))
 
         }
@@ -309,7 +309,7 @@ let starWarsSchema = try! Schema<NoRoot, MultiThreadedEventLoopGroup> { schema i
             static let descriptions = ["id": "id of the droid"]
         }
 
-        try query.field(name: "droid") { (_, arguments: DroidArguments, eventLoopGroup, _) in
+        try query.field(name: "droid") { (_, arguments: DroidArguments, _, eventLoopGroup, _) in
             return eventLoopGroup.next().newSucceededFuture(result: getDroid(id: arguments.id))
 
         }
@@ -319,7 +319,7 @@ let starWarsSchema = try! Schema<NoRoot, MultiThreadedEventLoopGroup> { schema i
             static let descriptions = ["query": "text to find"]
         }
 
-        try query.field(name: "search") { (_, arguments: SearchArguments, eventLoopGroup, _) in
+        try query.field(name: "search") { (_, arguments: SearchArguments, _, eventLoopGroup, _) in
             return eventLoopGroup.next().newSucceededFuture(result: search(for: arguments.query))
 
         }
