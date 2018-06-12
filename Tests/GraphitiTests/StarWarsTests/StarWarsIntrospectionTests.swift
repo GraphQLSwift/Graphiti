@@ -5,7 +5,7 @@ import NIO
 
 class StarWarsIntrospectionTests : XCTestCase {
     func testIntrospectionTypeQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: 1)
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -151,7 +151,7 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionQueryTypeQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: 1)
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -179,7 +179,7 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionDroidTypeQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: 1)
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -203,7 +203,7 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionDroidKindQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: 1)
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -229,7 +229,7 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionCharacterKindQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: 1)
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -255,7 +255,7 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionDroidFieldsQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: 1)
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -330,7 +330,7 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionDroidNestedFieldsQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: 1)
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -430,7 +430,7 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionFieldArgsQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: 1)
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -543,7 +543,7 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionDroidDescriptionQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: 1)
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
