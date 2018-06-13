@@ -30,7 +30,7 @@ import PackageDescription
 
 let package = Package(
     dependencies: [
-        .Package(url: "https://github.com/GraphQLSwift/Graphiti.git", majorVersion: 0, minor: 1),
+        .Package(url: "https://github.com/GraphQLSwift/Graphiti.git", majorVersion: 0, minor: 6),
     ]
 )
 ```
@@ -43,8 +43,8 @@ First, build a Graphiti type schema which maps to your code base.
 ```swift
 let schema = try Schema<Void> { schema in
     schema.query { query in
-        try query.field(name: "hello", type: String.self) { _, _, _, _ in
-            return "world"
+        try query.field(name: "hello", type: String.self) { (_, _, _, eventLoop, _) in
+            return eventLoop.next().newSucceededFuture(result: "world")
         }
     }
 }
@@ -57,7 +57,9 @@ Then, serve the result of a query against that type schema.
 
 ```swift
 let query = "{ hello }"
-let result = try schema.execute(request: query)
+let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+let result = try schema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+try eventLoopGroup.syncShutdownGracefully()
 print(result)
 ```
 
