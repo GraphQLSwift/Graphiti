@@ -1,13 +1,14 @@
 import GraphQL
 import Runtime
+import NIO
 
-public final class SchemaBuilder<Root, Context> {
+public final class SchemaBuilder<Root, Context, EventLoop: EventLoopGroup> {
     var graphQLTypeMap: [AnyType: GraphQLType] = [
         AnyType(Int.self): GraphQLInt,
         AnyType(Double.self): GraphQLFloat,
         AnyType(String.self): GraphQLString,
         AnyType(Bool.self): GraphQLBoolean,
-    ]
+        ]
 
     var query: GraphQLObjectType? = nil
     var mutation: GraphQLObjectType? = nil
@@ -18,8 +19,8 @@ public final class SchemaBuilder<Root, Context> {
 
     init() {}
 
-    public func query(name: String = "Query", build: (ObjectTypeBuilder<Root, Context, Root>) throws -> Void) throws {
-        let builder = ObjectTypeBuilder<Root, Context, Root>(schema: self)
+    public func query(name: String = "Query", build: (ObjectTypeBuilder<Root, Context, EventLoop, Root>) throws -> Void) throws {
+        let builder = ObjectTypeBuilder<Root, Context, EventLoop, Root>(schema: self)
         try build(builder)
 
         query = try GraphQLObjectType(
@@ -30,8 +31,8 @@ public final class SchemaBuilder<Root, Context> {
         )
     }
 
-    public func mutation(name: String = "Mutation", build: (ObjectTypeBuilder<Root, Context, Root>) throws -> Void) throws {
-        let builder = ObjectTypeBuilder<Root, Context, Root>(schema: self)
+    public func mutation(name: String = "Mutation", build: (ObjectTypeBuilder<Root, Context, EventLoop, Root>) throws -> Void) throws {
+        let builder = ObjectTypeBuilder<Root, Context, EventLoop, Root>(schema: self)
         try build(builder)
 
         mutation = try GraphQLObjectType(
@@ -42,8 +43,8 @@ public final class SchemaBuilder<Root, Context> {
         )
     }
 
-    public func subscription(name: String = "Subscription", build: (ObjectTypeBuilder<Root, Context, Root>) throws -> Void) throws {
-        let builder = ObjectTypeBuilder<Root, Context, Root>(schema: self)
+    public func subscription(name: String = "Subscription", build: (ObjectTypeBuilder<Root, Context, EventLoop, Root>) throws -> Void) throws {
+        let builder = ObjectTypeBuilder<Root, Context, EventLoop, Root>(schema: self)
         try build(builder)
 
         subscription = try GraphQLObjectType(
@@ -57,8 +58,8 @@ public final class SchemaBuilder<Root, Context> {
     public func object<Type>(
         type: Type.Type,
         interfaces: Any.Type...,
-        build: (ObjectTypeBuilder<Root, Context, Type>) throws -> Void
-    ) throws {
+        build: (ObjectTypeBuilder<Root, Context, EventLoop, Type>) throws -> Void
+        ) throws {
         let name = fixName(String(describing: Type.self))
         try `object`(name: name, type: type, interfaces: interfaces, build: build)
     }
@@ -67,8 +68,8 @@ public final class SchemaBuilder<Root, Context> {
         type: Type.Type,
         name: String,
         interfaces: Any.Type...,
-        build: (ObjectTypeBuilder<Root, Context, Type>) throws -> Void
-    ) throws {
+        build: (ObjectTypeBuilder<Root, Context, EventLoop, Type>) throws -> Void
+        ) throws {
         try `object`(name: name, type: type, interfaces: interfaces, build: build)
     }
 
@@ -76,9 +77,9 @@ public final class SchemaBuilder<Root, Context> {
         name: String,
         type: Type.Type,
         interfaces: [Any.Type],
-        build: (ObjectTypeBuilder<Root, Context, Type>) throws -> Void
-    ) throws {
-        let builder = ObjectTypeBuilder<Root, Context, Type>(schema: self)        
+        build: (ObjectTypeBuilder<Root, Context, EventLoop, Type>) throws -> Void
+        ) throws {
+        let builder = ObjectTypeBuilder<Root, Context, EventLoop, Type>(schema: self)
         try build(builder)
 
         let objectType = try GraphQLObjectType(
@@ -89,38 +90,38 @@ public final class SchemaBuilder<Root, Context> {
             isTypeOf: builder.isTypeOf
         )
 
-        map(Type.self, to: objectType)
+        try map(Type.self, to: objectType)
     }
 
     public func inputObject<Type: InputType>(
         type: Type.Type,
-        build: (InputObjectTypeBuilder<Root, Context, Type>) throws -> Void
+        build: (InputObjectTypeBuilder<Root, Context, EventLoop, Type>) throws -> Void
         ) throws {
         let name = fixName(String(describing: Type.self))
         try inputObject(name: name, type: type, build: build)
     }
-    
+
     public func inputObject<Type: InputType>(
         name: String,
         type: Type.Type,
-        build: (InputObjectTypeBuilder<Root, Context, Type>) throws -> Void
+        build: (InputObjectTypeBuilder<Root, Context, EventLoop, Type>) throws -> Void
         ) throws {
-        let builder = InputObjectTypeBuilder<Root, Context, Type>(schema: self)
+        let builder = InputObjectTypeBuilder<Root, Context, EventLoop, Type>(schema: self)
         try build(builder)
-        
+
         let inputObjectType = try GraphQLInputObjectType(
             name: name,
             description: builder.description,
             fields: builder.fields
         )
-        
-        map(Type.self, to: inputObjectType)
+
+        try map(Type.self, to: inputObjectType)
     }
-    
+
     public func interface<Type>(
         type: Type.Type,
-        build: (InterfaceTypeBuilder<Root, Context, Type>) throws -> Void
-    ) throws {
+        build: (InterfaceTypeBuilder<Root, Context, EventLoop, Type>) throws -> Void
+        ) throws {
         let name = fixName(String(describing: Type.self))
         try interface(name: name, type: type, build: build)
     }
@@ -128,9 +129,9 @@ public final class SchemaBuilder<Root, Context> {
     public func interface<Type>(
         name: String,
         type: Type.Type,
-        build: (InterfaceTypeBuilder<Root, Context, Type>) throws -> Void
-    ) throws {
-        let builder = InterfaceTypeBuilder<Root, Context, Type>(schema: self)
+        build: (InterfaceTypeBuilder<Root, Context, EventLoop, Type>) throws -> Void
+        ) throws {
+        let builder = InterfaceTypeBuilder<Root, Context, EventLoop, Type>(schema: self)
         try build(builder)
 
         let interfaceType = try GraphQLInterfaceType(
@@ -140,7 +141,7 @@ public final class SchemaBuilder<Root, Context> {
             resolveType: builder.resolveType
         )
 
-        map(Type.self, to: interfaceType)
+        try map(Type.self, to: interfaceType)
     }
 
     public func union<Type>(
@@ -155,7 +156,7 @@ public final class SchemaBuilder<Root, Context> {
         name: String,
         type: Type.Type,
         members: [Any.Type]
-    ) throws {
+        ) throws {
         try union(name: name, type: type) { builder in
             builder.types = members
         }
@@ -184,13 +185,13 @@ public final class SchemaBuilder<Root, Context> {
             types: builder.types.map { try getObjectType(from: $0) }
         )
 
-        map(Type.self, to: interfaceType)
+        try map(Type.self, to: interfaceType)
     }
 
     public func `enum`<Type : OutputType>(
         type: Type.Type,
         build: (EnumTypeBuilder<Type>) throws -> Void
-    ) throws {
+        ) throws {
         let name = fixName(String(describing: Type.self))
         try `enum`(name: name, type: type, build: build)
     }
@@ -199,7 +200,7 @@ public final class SchemaBuilder<Root, Context> {
         name: String,
         type: Type.Type,
         build: (EnumTypeBuilder<Type>) throws -> Void
-    ) throws {
+        ) throws {
         let builder = EnumTypeBuilder<Type>()
         try build(builder)
 
@@ -209,13 +210,13 @@ public final class SchemaBuilder<Root, Context> {
             values: builder.values
         )
 
-        map(Type.self, to: enumType)
+        try map(Type.self, to: enumType)
     }
 
     public func scalar<Type : OutputType>(
         type: Type.Type,
         build: (ScalarTypeBuilder<Type>) throws -> Void
-    ) throws {
+        ) throws {
         let name = fixName(String(describing: Type.self))
         try scalar(name: name, type: type, build: build)
     }
@@ -224,7 +225,7 @@ public final class SchemaBuilder<Root, Context> {
         name: String,
         type: Type.Type,
         build: (ScalarTypeBuilder<Type>) throws -> Void
-    ) throws {
+        ) throws {
         let builder = ScalarTypeBuilder<Type>()
         try build(builder)
 
@@ -258,17 +259,24 @@ public final class SchemaBuilder<Root, Context> {
             )
         }
 
-        map(Type.self, to: scalarType)
+        try map(Type.self, to: scalarType)
     }
 }
 
 public extension SchemaBuilder {
-    func map(_ type: Any.Type, to graphQLType: GraphQLType) {
+    func map(_ type: Any.Type, to graphQLType: GraphQLType) throws {
         guard !(type is Void.Type) else {
             return
         }
 
-        graphQLTypeMap[AnyType(type)] = graphQLType
+        let key = AnyType(type)
+        guard graphQLTypeMap[key] == nil else {
+            throw GraphQLError(
+                message: "Duplicate type registration: \(graphQLType.debugDescription)"
+            )
+        }
+
+        graphQLTypeMap[key] = graphQLType
     }
 
     func getTypes() throws -> [GraphQLNamedType] {
@@ -441,7 +449,7 @@ public extension SchemaBuilder {
                 "Mapped GraphQL type is nullable."
             )
         }
-        
+
         guard let objectType = nonNull.ofType as? GraphQLObjectType else {
             throw GraphQLError(
                 message:
@@ -450,7 +458,7 @@ public extension SchemaBuilder {
                 "Mapped GraphQL type is not an object type."
             )
         }
-        
+
         return objectType
     }
 }
@@ -475,7 +483,7 @@ extension SchemaBuilder {
                 arguments[property.name] = argument
             }
         }
-        
+
         return arguments
     }
 }
@@ -483,11 +491,11 @@ extension SchemaBuilder {
 public typealias NoRoot = Void
 public typealias NoContext = Void
 
-public struct Schema<Root, Context> {
+public struct Schema<Root, Context, EventLoop: EventLoopGroup> {
     let schema: GraphQLSchema
 
-    public init(_ build: (SchemaBuilder<Root, Context>) throws -> Void) throws {
-        let builder = SchemaBuilder<Root, Context>()
+    public init(_ build: (SchemaBuilder<Root, Context, EventLoop>) throws -> Void) throws {
+        let builder = SchemaBuilder<Root, Context, EventLoop>()
         try build(builder)
 
         guard let query = builder.query else {
@@ -504,26 +512,23 @@ public struct Schema<Root, Context> {
             directives: builder.directives
         )
     }
+
     public func execute(
         request: String,
+        eventLoopGroup: EventLoopGroup,
         variables: [String: Map] = [:],
         operationName: String? = nil
-    ) throws -> Map {
+        ) throws -> EventLoopFuture<Map> {
         guard Root.self is Void.Type else {
             throw GraphQLError(
                 message: "Root value is required."
             )
         }
 
-        guard Context.self is Void.Type else {
-            throw GraphQLError(
-                message: "Context value is required."
-            )
-        }
-
         return try graphql(
             schema: schema,
             request: request,
+            eventLoopGroup: eventLoopGroup,
             variableValues: variables,
             operationName: operationName
         )
@@ -532,60 +537,17 @@ public struct Schema<Root, Context> {
     public func execute(
         request: String,
         rootValue: Root,
+        worker: EventLoopGroup,
         variables: [String: Map] = [:],
         operationName: String? = nil
-    ) throws -> Map {
-        guard Context.self is Void.Type else {
-            throw GraphQLError(
-                message: "Context value is required."
-            )
-        }
-
+        ) throws -> EventLoopFuture<Map> {
         return try graphql(
             schema: schema,
             request: request,
             rootValue: rootValue,
-            variableValues: variables,
-            operationName: operationName
-        )
-    }
-
-    public func execute(
-        request: String,
-        context: Context,
-        variables: [String: Map] = [:],
-        operationName: String? = nil
-    ) throws -> Map {
-        guard Root.self is Void.Type else {
-            throw GraphQLError(
-                message: "Root value is required."
-            )
-        }
-        
-        return try graphql(
-            schema: schema,
-            request: request,
-            contextValue: context,
-            variableValues: variables,
-            operationName: operationName
-        )
-    }
-
-    public func execute(
-        request: String,
-        rootValue: Root,
-        context: Context,
-        variables: [String: Map] = [:],
-        operationName: String? = nil
-    ) throws -> Map {
-        return try graphql(
-            schema: schema,
-            request: request,
-            rootValue: rootValue,
-            contextValue: context,
+            eventLoopGroup: worker,
             variableValues: variables,
             operationName: operationName
         )
     }
 }
-
