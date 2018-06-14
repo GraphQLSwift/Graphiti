@@ -550,4 +550,46 @@ public struct Schema<Root, Context, EventLoop: EventLoopGroup> {
             operationName: operationName
         )
     }
+
+    public func execute(
+        request: String,
+        context: Context,
+        eventLoopGroup: EventLoopGroup,
+        variables: [String: Map] = [:],
+        operationName: String? = nil
+        ) throws -> EventLoopFuture<Map> {
+        guard Root.self is Void.Type else {
+            throw GraphQLError(
+                message: "Root value is required."
+            )
+        }
+
+        return try graphql(
+            schema: schema,
+            request: request,
+            context: context,
+            eventLoopGroup: eventLoopGroup,
+            variableValues: variables,
+            operationName: operationName
+        )
+    }
+
+    public func execute(
+        request: String,
+        rootValue: Root,
+        context: Context,
+        worker: EventLoopGroup,
+        variables: [String: Map] = [:],
+        operationName: String? = nil
+        ) throws -> EventLoopFuture<Map> {
+        return try graphql(
+            schema: schema,
+            request: request,
+            rootValue: rootValue,
+            context: context,
+            eventLoopGroup: worker,
+            variableValues: variables,
+            operationName: operationName
+        )
+    }
 }
