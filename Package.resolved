@@ -6,17 +6,26 @@
         "repositoryURL": "https://github.com/vapor/core.git",
         "state": {
           "branch": null,
-          "revision": "174f909bc048a6aff27d6cb4c31810971f912cca",
-          "version": "3.2.2"
+          "revision": "1794ff138bd669175a2528d27695028d7cb30471",
+          "version": "3.5.0"
+        }
+      },
+      {
+        "package": "CRuntime",
+        "repositoryURL": "https://github.com/wickwirew/CRuntime.git",
+        "state": {
+          "branch": null,
+          "revision": "8d0dd0ca3787d15682c1f44de3d298459870b121",
+          "version": "1.0.0"
         }
       },
       {
         "package": "GraphQL",
-        "repositoryURL": "https://github.com/GraphQLSwift/GraphQL.git",
+        "repositoryURL": "https://github.com/SportlabsTechnology/GraphQL.git",
         "state": {
           "branch": null,
-          "revision": "1ab3c9050cb0aea4350dbc343454bb8c83adff34",
-          "version": "0.6.0"
+          "revision": "0fb10c111e7593884084ed9d7e3c7ea1012260d9",
+          "version": null
         }
       },
       {
@@ -24,8 +33,8 @@
         "repositoryURL": "https://github.com/wickwirew/Runtime.git",
         "state": {
           "branch": null,
-          "revision": "23357609f0df427d870bb4bd22ac14e0a4ea1346",
-          "version": "0.7.1"
+          "revision": "40cdfbad9650512507c060824e1c4e9fc2ca721d",
+          "version": "1.1.0"
         }
       },
       {
@@ -33,8 +42,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "695afc5205aaa49fca092b94b479ff71c43d9d3c",
-          "version": "1.8.0"
+          "revision": "03c541a24dd0558c942b15d8464eb75d70a921c4",
+          "version": "1.12.1"
         }
       },
       {

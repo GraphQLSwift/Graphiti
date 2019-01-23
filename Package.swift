@@ -9,7 +9,7 @@ let package = Package(
     ],
 
     dependencies: [
-    .package(url: "https://github.com/GraphQLSwift/GraphQL.git", from: "0.6.0"),
+    .package(url: "https://github.com/SportlabsTechnology/GraphQL.git", .revision("0fb10c111e7593884084ed9d7e3c7ea1012260d9")),
     ],
 
     targets: [
