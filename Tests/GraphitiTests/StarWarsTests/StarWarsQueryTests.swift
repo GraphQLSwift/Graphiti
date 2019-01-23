@@ -1,8 +1,14 @@
 import XCTest
+import NIO
 @testable import Graphiti
 
 class StarWarsQueryTests : XCTestCase {
     func testHeroNameQuery() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query HeroNameQuery {" +
                     "    hero {" +
                     "        name" +
@@ -17,11 +23,16 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        let result = try starWarsSchema.execute(request: query)
+        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testHeroNameAndFriendsQuery() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query HeroNameAndFriendsQuery {" +
                     "    hero {" +
                     "        id" +
@@ -46,11 +57,16 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        let result = try starWarsSchema.execute(request: query)
+        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testNestedQuery() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query NestedQuery {" +
                     "    hero {" +
                     "        name" +
@@ -103,11 +119,16 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        let result = try starWarsSchema.execute(request: query)
+        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testFetchLukeQuery() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query FetchLukeQuery {" +
                     "    human(id: \"1000\") {" +
                     "        name" +
@@ -122,11 +143,16 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        let result = try starWarsSchema.execute(request: query)
+        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testFetchSomeIDQuery() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query FetchSomeIDQuery($someId: String!) {" +
                     "    human(id: $someId) {" +
                     "        name" +
@@ -149,7 +175,7 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        result = try starWarsSchema.execute(request: query, variables: params)
+        result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup, variables: params).wait()
         XCTAssertEqual(result, expected)
 
         params = [
@@ -164,7 +190,7 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        result = try starWarsSchema.execute(request: query, variables: params)
+        result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup, variables: params).wait()
         XCTAssertEqual(result, expected)
 
 
@@ -178,11 +204,16 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        result = try starWarsSchema.execute(request: query, variables: params)
+        result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup, variables: params).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testFetchLukeAliasedQuery() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query FetchLukeAliasedQuery {" +
                     "    luke: human(id: \"1000\") {" +
                     "        name" +
@@ -197,11 +228,16 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        let result = try starWarsSchema.execute(request: query)
+        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testFetchLukeAndLeiaAliasedQuery() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query FetchLukeAndLeiaAliasedQuery {" +
                     "    luke: human(id: \"1000\") {" +
                     "        name" +
@@ -222,11 +258,16 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        let result = try starWarsSchema.execute(request: query)
+        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testDuplicateFieldsQuery() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query DuplicateFieldsQuery {" +
                     "    luke: human(id: \"1000\") {" +
                     "        name" +
@@ -251,11 +292,16 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        let result = try starWarsSchema.execute(request: query)
+        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testUseFragmentQuery() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query UseFragmentQuery {" +
                     "    luke: human(id: \"1000\") {" +
                     "        ...HumanFragment" +
@@ -282,11 +328,16 @@ class StarWarsQueryTests : XCTestCase {
             ]
         ]
 
-        let result = try starWarsSchema.execute(request: query)
+        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testCheckTypeOfR2Query() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query CheckTypeOfR2Query {" +
                     "    hero {" +
                     "        __typename" +
@@ -303,11 +354,16 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        let result = try starWarsSchema.execute(request: query)
+        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testCheckTypeOfLukeQuery() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query CheckTypeOfLukeQuery {" +
                     "    hero(episode: EMPIRE) {" +
                     "        __typename" +
@@ -324,11 +380,16 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        let result = try starWarsSchema.execute(request: query)
+        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testSecretBackstoryQuery() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query SecretBackstoryQuery {\n" +
                     "    hero {\n" +
                     "        name\n" +
@@ -352,11 +413,16 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        let result = try starWarsSchema.execute(request: query)
+        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testSecretBackstoryListQuery() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query SecretBackstoryListQuery {\n" +
                     "    hero {\n" +
                     "        name\n" +
@@ -406,11 +472,16 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        let result = try starWarsSchema.execute(request: query)
+        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testSecretBackstoryAliasQuery() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query SecretBackstoryAliasQuery {\n" +
                     "    mainHero: hero {\n" +
                     "        name\n" +
@@ -434,24 +505,29 @@ class StarWarsQueryTests : XCTestCase {
             ]
         ]
 
-        let result = try starWarsSchema.execute(request: query)
+        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testNonNullableFieldsQuery() throws {
-        let schema = try Schema<NoRoot, NoContext> { schema in
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
+        let schema = try Schema<NoRoot, NoContext, MultiThreadedEventLoopGroup> { schema in
             struct A : OutputType {}
 
             try schema.object(type: A.self) { a in
-                try a.field(name: "nullableA", type: (TypeReference<A>?).self) { (_, _, _, _) -> A?
-                    in A()
+                try a.field(name: "nullableA", type: (TypeReference<A>?).self) { (_, _, _, eventLoopGroup, _) in
+                    eventLoopGroup.next().newSucceededFuture(result: A())
                 }
                 
-                try a.field(name: "nonNullA", type: TypeReference<A>.self) { (_, _, _, _) -> A
-                    in A()
+                try a.field(name: "nonNullA", type: TypeReference<A>.self) { (_, _, _, eventLoopGroup, _) in
+                    eventLoopGroup.next().newSucceededFuture(result: A())
                 }
                 
-                try a.field(name: "throws", type: String.self) { (_, _, _, _) -> String in
+                try a.field(name: "throws", type: String.self) { (_, _, _, _, _) in
                     struct 🏃 : Error, CustomStringConvertible {
                         let description: String
                     }
@@ -461,8 +537,8 @@ class StarWarsQueryTests : XCTestCase {
             }
 
             try schema.query { query in
-                try query.field(name: "nullableA", type: (A?).self) { (_, _, _, _) -> A? in
-                    A()
+                try query.field(name: "nullableA", type: (A?).self) { (_, _, _, eventLoopGroup, _) in
+                    eventLoopGroup.next().newSucceededFuture(result: A())
                 }
             }
         }
@@ -495,11 +571,16 @@ class StarWarsQueryTests : XCTestCase {
             ],
         ]
 
-        let result = try schema.execute(request: query)
+        let result = try schema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 
     func testSearchQuery() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+
         let query = "query {" +
             "    search(query: \"o\") {" +
             "        ... on Planet {" +
@@ -527,7 +608,7 @@ class StarWarsQueryTests : XCTestCase {
             ],
             ]
 
-        let result = try starWarsSchema.execute(request: query)
+        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
     }
 }

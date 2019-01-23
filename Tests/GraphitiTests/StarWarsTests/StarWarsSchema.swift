@@ -1,4 +1,5 @@
 import Graphiti
+import NIO
 
 /**
  * This is designed to be an end-to-end test, demonstrating
@@ -73,7 +74,7 @@ extension Planet: OutputType {}
 
 import GraphQL
 
-let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
+let starWarsSchema = try! Schema<NoRoot, NoContext, MultiThreadedEventLoopGroup> { schema in
     /**
      * The original trilogy consists of three movies.
      *
@@ -199,8 +200,8 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
             name: "friends",
             type: [Character].self,
             description: "The friends of the human, or an empty list if they have none.",
-            resolve: { human, _, _, _ in
-                getFriends(character: human)
+            resolve: { human, _, _, eventLoopGroup, _ in
+                return eventLoopGroup.next().newSucceededFuture(result: getFriends(character: human))
             }
         )
 
@@ -208,8 +209,8 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
             name: "secretBackstory",
             type: (String?).self,
             description: "Where are they from and how they came to be who they are.",
-            resolve: { _, _, _, _ in
-                try getSecretBackStory()
+            resolve: { _, _, _, eventLoopGroup, _ in
+                return eventLoopGroup.next().newSucceededFuture(result: try getSecretBackStory())
             }
         )
     }
@@ -237,8 +238,9 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
             name: "friends",
             type: [Character].self,
             description: "The friends of the droid, or an empty list if they have none.",
-            resolve: { droid, _, _, _ in
-                getFriends(character: droid)
+            resolve: { droid, _, _, eventLoopGroup, _ in
+                return eventLoopGroup.next().newSucceededFuture(result: getFriends(character: droid))
+
             }
         )
 
@@ -246,8 +248,8 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
             name: "secretBackstory",
             type: (String?).self,
             description: "Where are they from and how they came to be who they are.",
-            resolve: { _, _, _, _ in
-                try getSecretBackStory()
+            resolve: { _, _, _, eventLoopGroup, _ in
+                return eventLoopGroup.next().newSucceededFuture(result: try getSecretBackStory())
             }
         )
     }
@@ -287,8 +289,9 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
             ]
         }
 
-        try query.field(name: "hero") { (_, arguments: HeroArguments, _, _) in
-            getHero(episode: arguments.episode)
+        try query.field(name: "hero") { (_, arguments: HeroArguments, _, eventLoopGroup, _) in
+            return eventLoopGroup.next().newSucceededFuture(result: getHero(episode: arguments.episode))
+
         }
 
         struct HumanArguments : Arguments {
@@ -296,8 +299,9 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
             static let descriptions = ["id": "id of the human"]
         }
 
-        try query.field(name: "human") { (_, arguments: HumanArguments, _, _) in
-            getHuman(id: arguments.id)
+        try query.field(name: "human") { (_, arguments: HumanArguments, _, eventLoopGroup, _) in
+            return eventLoopGroup.next().newSucceededFuture(result: getHuman(id: arguments.id))
+
         }
 
         struct DroidArguments : Arguments {
@@ -305,8 +309,9 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
             static let descriptions = ["id": "id of the droid"]
         }
 
-        try query.field(name: "droid") { (_, arguments: DroidArguments, _, _) in
-            getDroid(id: arguments.id)
+        try query.field(name: "droid") { (_, arguments: DroidArguments, _, eventLoopGroup, _) in
+            return eventLoopGroup.next().newSucceededFuture(result: getDroid(id: arguments.id))
+
         }
 
         struct SearchArguments : Arguments {
@@ -314,8 +319,9 @@ let starWarsSchema = try! Schema<NoRoot, NoContext> { schema in
             static let descriptions = ["query": "text to find"]
         }
 
-        try query.field(name: "search") { (_, arguments: SearchArguments, _, _) in
-            search(for: arguments.query)
+        try query.field(name: "search") { (_, arguments: SearchArguments, _, eventLoopGroup, _) in
+            return eventLoopGroup.next().newSucceededFuture(result: search(for: arguments.query))
+
         }
 
     }
