@@ -23,8 +23,8 @@
         "package": "GraphQL",
         "repositoryURL": "https://github.com/SportlabsTechnology/GraphQL.git",
         "state": {
-          "branch": null,
-          "revision": "0fb10c111e7593884084ed9d7e3c7ea1012260d9",
+          "branch": "master",
+          "revision": "2920ee6cc3098390f55a671e805432a77ca2ebbf",
           "version": null
         }
       },
