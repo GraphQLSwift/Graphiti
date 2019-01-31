@@ -601,14 +601,15 @@ class StarWarsQueryTests : XCTestCase {
             "data": [
                 "search": [
                     [ "name": "Tatooine", "diameter": 10465 ],
-                    [ "name": "Leia Organa" ],
                     [ "name": "Han Solo" ],
+                    [ "name": "Leia Organa" ],
                     [ "name": "C-3PO", "primaryFunction": "Protocol" ],
                 ],
             ],
             ]
 
         let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+        
         XCTAssertEqual(result, expected)
     }
 }

@@ -210,23 +210,26 @@ func search(for value: String) -> [SearchResult] {
     let value = value.lowercased()
     var result: [SearchResult] = []
 
-    result.append(contentsOf: 
-        planetData.filter({
-            return $1.name.lowercased().range(of:value) != nil
-        }).map({ $1 })
-    )
-
-    result.append(contentsOf:
-        humanData.filter({
-            return $1.name.lowercased().range(of:value) != nil
-        }).map({ $1 })
-    )
-
-    result.append(contentsOf:
-        droidData.filter({
-            return $1.name.lowercased().range(of:value) != nil
-        }).map({ $1 })
-    )
+    // Due to randomness of hash values introduced by https://github.com/apple/swift-evolution/blob/master/proposals/0206-hashable-enhancements.md
+    // we should iterate over sorted keys here otherwise the order of output is random and the tests sometimes fails.
+    
+    planetData.keys.sorted().forEach {
+        if planetData[$0]?.name.lowercased().range(of:value) != nil {
+            result.append(planetData[$0]!)
+        }
+    }
+    
+    humanData.keys.sorted().forEach {
+        if humanData[$0]?.name.lowercased().range(of:value) != nil {
+           result.append(humanData[$0]!)
+        }
+    }
+    
+    droidData.keys.sorted().forEach {
+        if droidData[$0]?.name.lowercased().range(of:value) != nil {
+            result.append(droidData[$0]!)
+        }
+    }
 
     return result
 }
