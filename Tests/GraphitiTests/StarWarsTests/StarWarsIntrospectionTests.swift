@@ -18,7 +18,6 @@ class StarWarsIntrospectionTests : XCTestCase {
                     "    }" +
                     "}"
 
-        #if os(macOS)
         let expected: Map = [
             "data": [
                 "__schema": [
@@ -81,70 +80,6 @@ class StarWarsIntrospectionTests : XCTestCase {
                 ],
             ],
         ]
-        #else
-        let expected: Map = [
-            "data": [
-                "__schema": [
-                    "types": [
-                        [
-                            "name": "__Directive",
-                        ],
-                        [
-                            "name": "__DirectiveLocation",
-                        ],
-                        [
-                            "name": "__EnumValue",
-                        ],
-                        [
-                            "name": "__Field",
-                        ],
-                        [
-                            "name": "__InputValue",
-                        ],
-                        [
-                            "name": "__Schema",
-                        ],
-                        [
-                            "name": "__Type",
-                        ],
-                        [
-                            "name": "__TypeKind",
-                        ],
-                        [
-                            "name": "Boolean",
-                        ],
-                        [
-                            "name": "Character",
-                        ],
-                        [
-                            "name": "Droid",
-                        ],
-                        [
-                            "name": "Episode",
-                        ],
-                        [
-                            "name": "Human",
-                        ],
-                        [
-                            "name": "Int",
-                        ],
-                        [
-                            "name": "Planet",
-                        ],
-                        [
-                            "name": "Query",
-                        ],
-                        [
-                            "name": "SearchResult",
-                        ],
-                        [
-                            "name": "String",
-                        ],
-                    ],
-                ],
-            ],
-        ]
-        #endif
 
         let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
         XCTAssertEqual(result, expected)
