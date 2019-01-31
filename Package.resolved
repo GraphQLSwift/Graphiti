@@ -21,10 +21,10 @@
       },
       {
         "package": "GraphQL",
-        "repositoryURL": "https://github.com/SportlabsTechnology/GraphQL.git",
+        "repositoryURL": "https://github.com/GraphQLSwift/GraphQL.git",
         "state": {
           "branch": "master",
-          "revision": "2920ee6cc3098390f55a671e805432a77ca2ebbf",
+          "revision": "2ba73c3691dbcdeb6e09ad4f6df46536ba692c83",
           "version": null
         }
       },

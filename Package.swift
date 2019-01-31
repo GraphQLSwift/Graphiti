@@ -1,4 +1,4 @@
-// swift-tools-version:4.0
+// swift-tools-version:4.2
 import PackageDescription
 
 let package = Package(
@@ -9,7 +9,7 @@ let package = Package(
     ],
 
     dependencies: [
-    .package(url: "https://github.com/SportlabsTechnology/GraphQL.git", .branch("master")),
+    .package(url: "https://github.com/GraphQLSwift/GraphQL.git", .branch("master")),
     ],
 
     targets: [

@@ -601,8 +601,8 @@ class StarWarsQueryTests : XCTestCase {
             "data": [
                 "search": [
                     [ "name": "Tatooine", "diameter": 10465 ],
-                    [ "name": "Han Solo" ],
                     [ "name": "Leia Organa" ],
+                    [ "name": "Han Solo" ],
                     [ "name": "C-3PO", "primaryFunction": "Protocol" ],
                 ],
             ],
