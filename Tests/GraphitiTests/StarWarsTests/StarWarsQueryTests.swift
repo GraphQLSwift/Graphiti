@@ -609,6 +609,7 @@ class StarWarsQueryTests : XCTestCase {
             ]
 
         let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+        
         XCTAssertEqual(result, expected)
     }
 }
