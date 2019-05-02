@@ -9,8 +9,8 @@ final class AnyType : Hashable {
         self.type = type
     }
 
-    var hashValue: Int {
-        return String(describing: type).hashValue
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(String(describing: type))
     }
 
     static func == (lhs: AnyType, rhs: AnyType) -> Bool {
