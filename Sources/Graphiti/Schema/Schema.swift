@@ -492,7 +492,7 @@ public typealias NoRoot = Void
 public typealias NoContext = Void
 
 public struct Schema<Root, Context, EventLoop: EventLoopGroup> {
-    let schema: GraphQLSchema
+    public let schema: GraphQLSchema
 
     public init(_ build: (SchemaBuilder<Root, Context, EventLoop>) throws -> Void) throws {
         let builder = SchemaBuilder<Root, Context, EventLoop>()
