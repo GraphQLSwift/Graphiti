@@ -348,7 +348,7 @@ public extension SchemaBuilder {
         return outputType
     }
 
-    public func getInputType(from type: Any.Type, field: String) throws -> GraphQLInputType {
+    func getInputType(from type: Any.Type, field: String) throws -> GraphQLInputType {
         guard let graphQLType = getGraphQLType(from: type) else {
             throw GraphQLError(
                 message:
