@@ -44,7 +44,7 @@ func fixName(_ name: String) -> String {
 }
 
 
-func isMapFallibleRepresentable(type: Any.Type) -> Bool {
+func isEncodable(type: Any.Type) -> Bool {
     if isProtocol(type: type) {
         return true
     }
