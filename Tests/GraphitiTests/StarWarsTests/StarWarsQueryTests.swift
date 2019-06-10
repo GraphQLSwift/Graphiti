@@ -14,11 +14,13 @@ class StarWarsQueryTests : XCTestCase {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
         
-        let query = "query HeroNameQuery {" +
-                    "    hero {" +
-                    "        name" +
-                    "    }" +
-                    "}"
+        let query = """
+        query HeroNameQuery {
+            hero {
+                name
+            }
+        }
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -34,6 +36,8 @@ class StarWarsQueryTests : XCTestCase {
             context: self.starWarsStore,
             eventLoopGroup: eventLoopGroup
         ).wait()
+        
+        print(result)
         
         XCTAssertEqual(result, expected)
     }
@@ -632,7 +636,7 @@ class StarWarsQueryTests : XCTestCase {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
         
-        struct A : OutputType, FieldKeyProvider {
+        struct A : Codable, FieldKeyProvider {
             typealias FieldKey = FieldKeys
             
             enum FieldKeys : String {

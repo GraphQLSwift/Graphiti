@@ -2,25 +2,11 @@ import GraphQL
 import NIO
 import Runtime
 
-public protocol InputType  : Decodable {}
-public protocol OutputType : Encodable {}
+//public protocol InputType  : Decodable {}
+//public protocol OutputType : Encodable {}
+//public protocol ArgumentType : InputType {}
 
-public protocol ArgumentType : InputType {
-    static var descriptions: [String: String] { get }
-    static var defaultValues: [String: OutputType] { get }
-}
-
-extension ArgumentType {
-    public static var descriptions: [String: String] {
-        return [:]
-    }
-    
-    public static var defaultValues: [String: OutputType] {
-        return [:]
-    }
-}
-
-public struct NoArguments : ArgumentType {
+public struct NoArguments : Decodable {
     init() {}
 }
 
@@ -43,7 +29,7 @@ public typealias AsyncResolve<ObjectType, Context, Arguments, ResolveType> = (
     _ eventLoopGroup: EventLoopGroup
 ) throws -> EventLoopFuture<ResolveType>
 
-public class Field<ObjectType, FieldKey : RawRepresentable, Context, Arguments : ArgumentType, FieldType, ResolveType> : ObjectTypeComponent<ObjectType, FieldKey, Context>, Descriptable where FieldKey.RawValue == String {
+public class Field<ObjectType, FieldKey : RawRepresentable, Context, Arguments : Decodable, FieldType, ResolveType> : ObjectTypeComponent<ObjectType, FieldKey, Context>, Descriptable where FieldKey.RawValue == String {
     let name: String
     let resolve: GraphQLFieldResolve
     var description: String? = nil

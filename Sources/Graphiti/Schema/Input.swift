@@ -37,7 +37,7 @@ public struct InputObjectTypeBuilder<InputObjectType, FieldKey : RawRepresentabl
     }
 }
 
-public final class Input<RootType : FieldKeyProvider, Context, InputObjectType : InputType & FieldKeyProvider> : SchemaComponent<RootType, Context> {
+public final class Input<RootType : FieldKeyProvider, Context, InputObjectType : Decodable & FieldKeyProvider> : SchemaComponent<RootType, Context> {
     let name: String?
     let component: InputObjectTypeComponent<InputObjectType, InputObjectType.FieldKey, Context>
     

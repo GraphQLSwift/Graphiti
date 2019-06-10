@@ -41,7 +41,7 @@ public struct ObjectTypeBuilder<ObjectType, FieldKey : RawRepresentable, Context
     }
 }
 
-public final class Type<RootType : FieldKeyProvider, Context, ObjectType : OutputType & FieldKeyProvider> : SchemaComponent<RootType, Context> {
+public final class Type<RootType : FieldKeyProvider, Context, ObjectType : Encodable & FieldKeyProvider> : SchemaComponent<RootType, Context> {
     let name: String?
     let interfaces: [Any.Type]
     let component: ObjectTypeComponent<ObjectType, ObjectType.FieldKey, Context>

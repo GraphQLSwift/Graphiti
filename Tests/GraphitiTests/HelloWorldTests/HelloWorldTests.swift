@@ -3,29 +3,34 @@ import XCTest
 import GraphQL
 import NIO
 
-extension Float : InputType, OutputType {}
-
 class HelloWorldTests : XCTestCase {
-    struct MyContext {
-        
+    final class APIContext {
+        func hello() -> String {
+            "world"
+        }
     }
     
-    struct MyRoot : FieldKeyProvider {
+    struct API : FieldKeyProvider {
         typealias FieldKey = FieldKeys
         
         enum FieldKeys : String {
             case hello
+            case asyncHello
         }
         
+        func hello(context: APIContext, arguments: NoArguments) -> String {
+            context.hello()
+        }
         
-        func hello(context: MyContext, arguments: NoArguments) -> String {
-            return "world"
+        func asyncHello(context: APIContext, arguments: NoArguments, eventLoopGroup: EventLoopGroup) -> EventLoopFuture<String> {
+            eventLoopGroup.next().newSucceededFuture(result: context.hello())
         }
     }
     
-    let schema = Schema<MyRoot, MyContext> {
+    let schema = Schema<API, APIContext> {
         Query {
-            Field(.hello, at: MyRoot.hello)
+            Field(.hello, at: API.hello)
+            Field(.asyncHello, at: API.asyncHello)
         }
     }
 
@@ -46,8 +51,33 @@ class HelloWorldTests : XCTestCase {
         
         let result = try schema.execute(
             request: query,
-            root: MyRoot(),
-            context: MyContext(),
+            root: API(),
+            context: APIContext(),
+            eventLoopGroup: eventLoopGroup
+        ).wait()
+        
+        XCTAssertEqual(result, expected)
+    }
+    
+    func testHelloAsync() throws {
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
+        defer {
+            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        }
+        
+        let query = "{ asyncHello }"
+        
+        let expected = GraphQLResult(
+            data: [
+                "asyncHello": "world"
+            ]
+        )
+        
+        let result = try schema.execute(
+            request: query,
+            root: API(),
+            context: APIContext(),
             eventLoopGroup: eventLoopGroup
         ).wait()
         
@@ -56,6 +86,7 @@ class HelloWorldTests : XCTestCase {
 
     func testBoyhowdy() throws {
         let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -73,15 +104,15 @@ class HelloWorldTests : XCTestCase {
 
         let result = try schema.execute(
             request: query,
-            root: MyRoot(),
-            context: MyContext(),
+            root: API(),
+            context: APIContext(),
             eventLoopGroup: eventLoopGroup
         ).wait()
         
         XCTAssertEqual(result, expectedErrors)
     }
     
-    struct ID : Codable, InputType, OutputType {
+    struct ID : Codable {
         let id: String
         
         init(from decoder: Decoder) throws {
@@ -109,7 +140,7 @@ class HelloWorldTests : XCTestCase {
                 case id
             }
             
-            struct FloatArguments : ArgumentType {
+            struct FloatArguments : Codable {
                 let float: Float
             }
             
@@ -117,7 +148,7 @@ class HelloWorldTests : XCTestCase {
                 return arguments.float
             }
             
-            struct DateArguments : ArgumentType {
+            struct DateArguments : Codable {
                 let id: ID
             }
             
@@ -197,7 +228,7 @@ class HelloWorldTests : XCTestCase {
             XCTAssertNoThrow(try group.syncShutdownGracefully())
         }
 
-        struct Foo : OutputType, FieldKeyProvider {
+        struct Foo : Codable, FieldKeyProvider {
             typealias FieldKey = FieldKeys
             
             enum FieldKeys : String {
@@ -213,7 +244,7 @@ class HelloWorldTests : XCTestCase {
             }
         }
 
-        struct FooInput : InputType, OutputType, FieldKeyProvider {
+        struct FooInput : Codable, FieldKeyProvider {
             typealias FieldKey = FieldKeys
             
             enum FieldKeys : String {
@@ -237,7 +268,7 @@ class HelloWorldTests : XCTestCase {
                 return Foo(id: "123", name: "bar")
             }
             
-            struct AddFooArguments : ArgumentType {
+            struct AddFooArguments : Codable {
                 let input: FooInput
             }
             

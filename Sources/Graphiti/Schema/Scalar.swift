@@ -49,7 +49,7 @@ extension GraphQL.Value {
     }
 }
 
-public final class Scalar<RootType : FieldKeyProvider, Context, ScalarType : InputType & OutputType> : SchemaComponent<RootType, Context> {
+public final class Scalar<RootType : FieldKeyProvider, Context, ScalarType : Codable> : SchemaComponent<RootType, Context> {
     let name: String?
     let serialize: ((ScalarType) throws -> Map)?
     let parse: ((Map) throws -> ScalarType)?

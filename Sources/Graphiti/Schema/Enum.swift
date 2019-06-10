@@ -1,6 +1,6 @@
 import GraphQL
 
-public class ValueComponent<EnumType : OutputType & RawRepresentable> : Descriptable, Deprecatable where EnumType.RawValue == String {
+public class ValueComponent<EnumType : Encodable & RawRepresentable> : Descriptable, Deprecatable where EnumType.RawValue == String {
     var description: String?
     var deprecationReason: String?
     
@@ -17,7 +17,7 @@ public class ValueComponent<EnumType : OutputType & RawRepresentable> : Descript
     }
 }
 
-public class Value<EnumType : OutputType & RawRepresentable> : ValueComponent<EnumType> where EnumType.RawValue == String {
+public class Value<EnumType : Encodable & RawRepresentable> : ValueComponent<EnumType> where EnumType.RawValue == String {
     let value: EnumType
 
     override func update(enum: EnumThingy) {
@@ -39,7 +39,7 @@ final class EnumThingy {
     var values: GraphQLEnumValueMap = [:]
 }
 
-private final class MergerValue<EnumType : OutputType & RawRepresentable> : ValueComponent<EnumType> where EnumType.RawValue == String {
+private final class MergerValue<EnumType : Encodable & RawRepresentable> : ValueComponent<EnumType> where EnumType.RawValue == String {
     let components: [ValueComponent<EnumType>]
     
     init(components: [ValueComponent<EnumType>]) {
@@ -54,13 +54,13 @@ private final class MergerValue<EnumType : OutputType & RawRepresentable> : Valu
 }
 
 @_functionBuilder
-public struct EnumTypeBuilder<EnumType : OutputType & RawRepresentable> where EnumType.RawValue == String {
+public struct EnumTypeBuilder<EnumType : Encodable & RawRepresentable> where EnumType.RawValue == String {
     public static func buildBlock(_ components: ValueComponent<EnumType>...) -> ValueComponent<EnumType> {
         return MergerValue(components: components)
     }
 }
 
-public final class Enum<RootType : FieldKeyProvider, Context, EnumType : OutputType & RawRepresentable> : SchemaComponent<RootType, Context> where EnumType.RawValue == String {
+public final class Enum<RootType : FieldKeyProvider, Context, EnumType : Encodable & RawRepresentable> : SchemaComponent<RootType, Context> where EnumType.RawValue == String {
     private let name: String?
     private let values: GraphQLEnumValueMap
     
