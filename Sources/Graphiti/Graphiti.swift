@@ -1,4 +1,3 @@
-import protocol GraphQL.MapFallibleRepresentable
 @_exported import enum GraphQL.Map
 @_exported import enum GraphQL.MapError
 
@@ -51,9 +50,9 @@ func isMapFallibleRepresentable(type: Any.Type) -> Bool {
     }
 
     if let type = type as? Wrapper.Type {
-        return isMapFallibleRepresentable(type: type.wrappedType)
+        return isEncodable(type: type.wrappedType)
     }
 
-    return type is MapFallibleRepresentable.Type
+    return type is Encodable.Type
 }
 

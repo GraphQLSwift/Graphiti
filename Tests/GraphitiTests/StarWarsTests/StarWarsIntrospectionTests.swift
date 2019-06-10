@@ -1,11 +1,16 @@
 import XCTest
 import NIO
+import GraphQL
 
 @testable import Graphiti
 
 class StarWarsIntrospectionTests : XCTestCase {
+    private let starWarsAPI = StarWarsAPI()
+    private let starWarsStore = StarWarsStore()
+    
     func testIntrospectionTypeQuery() throws {
         let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -18,8 +23,8 @@ class StarWarsIntrospectionTests : XCTestCase {
                     "    }" +
                     "}"
 
-        let expected: Map = [
-            "data": [
+        let expected = GraphQLResult(
+            data: [
                 "__schema": [
                     "types": [
                         [
@@ -75,18 +80,25 @@ class StarWarsIntrospectionTests : XCTestCase {
                         ],
                         [
                             "name": "__TypeKind",
-                        ],
-                    ],
-                ],
-            ],
-        ]
+                        ]
+                    ]
+                ]
+            ]
+        )
 
-        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+        let result = try starWarsSchema.execute(
+            request: query,
+            root: self.starWarsAPI,
+            context: self.starWarsStore,
+            eventLoopGroup: eventLoopGroup
+        ).wait()
+        
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionQueryTypeQuery() throws {
         let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -99,22 +111,29 @@ class StarWarsIntrospectionTests : XCTestCase {
                     "    }" +
                     "}"
 
-        let expected: Map = [
-            "data": [
+        let expected = GraphQLResult(
+            data: [
                 "__schema": [
                     "queryType": [
                         "name": "Query",
-                    ],
-                ],
-            ],
-        ]
+                    ]
+                ]
+            ]
+        )
 
-        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+        let result = try starWarsSchema.execute(
+            request: query,
+            root: self.starWarsAPI,
+            context: self.starWarsStore,
+            eventLoopGroup: eventLoopGroup
+        ).wait()
+        
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionDroidTypeQuery() throws {
         let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -125,20 +144,27 @@ class StarWarsIntrospectionTests : XCTestCase {
                     "    }" +
                     "}"
 
-        let expected: Map = [
-            "data": [
+        let expected = GraphQLResult(
+            data: [
                 "__type": [
                     "name": "Droid",
-                ],
-            ],
-        ]
+                ]
+            ]
+        )
 
-        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+        let result = try starWarsSchema.execute(
+            request: query,
+            root: self.starWarsAPI,
+            context: self.starWarsStore,
+            eventLoopGroup: eventLoopGroup
+        ).wait()
+        
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionDroidKindQuery() throws {
         let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -150,21 +176,28 @@ class StarWarsIntrospectionTests : XCTestCase {
                     "    }" +
                     "}"
 
-        let expected: Map = [
-            "data": [
+        let expected = GraphQLResult(
+            data: [
                 "__type": [
                     "name": "Droid",
                     "kind": "OBJECT",
-                ],
-            ],
-        ]
+                ]
+            ]
+        )
 
-        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+        let result = try starWarsSchema.execute(
+            request: query,
+            root: self.starWarsAPI,
+            context: self.starWarsStore,
+            eventLoopGroup: eventLoopGroup
+        ).wait()
+        
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionCharacterKindQuery() throws {
         let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -176,21 +209,28 @@ class StarWarsIntrospectionTests : XCTestCase {
                     "    }" +
                     "}"
 
-        let expected: Map = [
-            "data": [
+        let expected = GraphQLResult(
+            data: [
                 "__type": [
                     "name": "Character",
                     "kind": "INTERFACE",
-                ],
-            ],
-        ]
+                ]
+            ]
+        )
 
-        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+        let result = try starWarsSchema.execute(
+            request: query,
+            root: self.starWarsAPI,
+            context: self.starWarsStore,
+            eventLoopGroup: eventLoopGroup
+        ).wait()
+        
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionDroidFieldsQuery() throws {
         let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -208,8 +248,8 @@ class StarWarsIntrospectionTests : XCTestCase {
                     "    }" +
                     "}"
 
-        let expected: Map = [
-            "data": [
+        let expected = GraphQLResult(
+            data: [
                 "__type": [
                     "name": "Droid",
                     "fields": [
@@ -218,54 +258,61 @@ class StarWarsIntrospectionTests : XCTestCase {
                             "type": [
                                 "name": nil,
                                 "kind": "NON_NULL",
-                            ],
+                            ]
                         ],
                         [
                             "name": "friends",
                             "type": [
                                 "name": nil,
                                 "kind": "NON_NULL",
-                            ],
+                            ]
                         ],
                         [
                             "name": "id",
                             "type": [
                                 "name": nil,
                                 "kind": "NON_NULL",
-                            ],
+                            ]
                         ],
                         [
                             "name": "name",
                             "type": [
                                 "name": nil,
                                 "kind": "NON_NULL",
-                            ],
+                            ]
                         ],
                         [
                             "name": "primaryFunction",
                             "type": [
                                 "name": nil,
                                 "kind": "NON_NULL",
-                            ],
+                            ]
                         ],
                         [
                             "name": "secretBackstory",
                             "type": [
                                 "name": "String",
                                 "kind": "SCALAR",
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        )
 
-        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+        let result = try starWarsSchema.execute(
+            request: query,
+            root: self.starWarsAPI,
+            context: self.starWarsStore,
+            eventLoopGroup: eventLoopGroup
+        ).wait()
+        
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionDroidNestedFieldsQuery() throws {
         let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -287,8 +334,8 @@ class StarWarsIntrospectionTests : XCTestCase {
                     "    }" +
                     "}"
 
-        let expected: Map = [
-            "data": [
+        let expected = GraphQLResult(
+            data: [
                 "__type": [
                     "name": "Droid",
                     "fields": [
@@ -301,7 +348,7 @@ class StarWarsIntrospectionTests : XCTestCase {
                                     "kind": "LIST",
                                     "name": nil
                                 ]
-                            ],
+                            ]
                         ],
                         [
                             "name": "friends",
@@ -312,7 +359,7 @@ class StarWarsIntrospectionTests : XCTestCase {
                                     "kind": "LIST",
                                     "name": nil
                                 ]
-                            ],
+                            ]
                         ],
                         [
                             "name": "id",
@@ -322,8 +369,8 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "ofType": [
                                     "name": "String",
                                     "kind": "SCALAR",
-                                ],
-                            ],
+                                ]
+                            ]
                         ],
                         [
                             "name": "name",
@@ -333,8 +380,8 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "ofType": [
                                     "name": "String",
                                     "kind": "SCALAR",
-                                ],
-                            ],
+                                ]
+                            ]
                         ],
                         [
                             "name": "primaryFunction",
@@ -344,8 +391,8 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "ofType": [
                                     "name": "String",
                                     "kind": "SCALAR",
-                                ],
-                            ],
+                                ]
+                            ]
                         ],
                         [
                             "name": "secretBackstory",
@@ -353,19 +400,26 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "name": "String",
                                 "kind": "SCALAR",
                                 "ofType": nil,
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        )
 
-        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+        let result = try starWarsSchema.execute(
+            request: query,
+            root: self.starWarsAPI,
+            context: self.starWarsStore,
+            eventLoopGroup: eventLoopGroup
+        ).wait()
+        
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionFieldArgsQuery() throws {
         let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -393,8 +447,8 @@ class StarWarsIntrospectionTests : XCTestCase {
                     "    }" +
                     "}"
 
-        let expected: Map = [
-            "data": [
+        let expected = GraphQLResult(
+            data: [
                 "__schema": [
                     "queryType": [
                         "fields": [
@@ -403,7 +457,7 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "args": [
                                     [
                                         "name": "id",
-                                        "description": "id of the droid",
+                                        "description": "Id of the droid.",
                                         "type": [
                                             "name": nil,
                                             "kind": "NON_NULL",
@@ -413,8 +467,8 @@ class StarWarsIntrospectionTests : XCTestCase {
                                             ]
                                         ],
                                         "defaultValue": nil,
-                                        ],
-                                ],
+                                    ]
+                                ]
                             ],
                             [
                                 "name": "hero",
@@ -428,15 +482,15 @@ class StarWarsIntrospectionTests : XCTestCase {
                                             "ofType": nil
                                         ],
                                         "defaultValue": nil,
-                                    ],
-                                ],
+                                    ]
+                                ]
                             ],
                             [
                                 "name": "human",
                                 "args": [
                                     [
                                         "name": "id",
-                                        "description": "id of the human",
+                                        "description": "Id of the human.",
                                         "type": [
                                             "name": nil,
                                             "kind": "NON_NULL",
@@ -446,15 +500,15 @@ class StarWarsIntrospectionTests : XCTestCase {
                                             ]
                                         ],
                                         "defaultValue": nil,
-                                    ],
-                                ],
+                                    ]
+                                ]
                             ],
                             [
                                 "name": "search",
                                 "args": [
                                     [
                                         "name": "query",
-                                        "description": "text to find",
+                                        "description": nil, 
                                         "type": [
                                             "name": nil,
                                             "kind": "NON_NULL",
@@ -463,22 +517,29 @@ class StarWarsIntrospectionTests : XCTestCase {
                                                 "kind": "SCALAR",
                                             ]
                                         ],
-                                        "defaultValue": nil,
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ]
+                                        "defaultValue": "R2-D2",
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        )
 
-        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+        let result = try starWarsSchema.execute(
+            request: query,
+            root: self.starWarsAPI,
+            context: self.starWarsStore,
+            eventLoopGroup: eventLoopGroup
+        ).wait()
+        
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionDroidDescriptionQuery() throws {
         let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
@@ -490,16 +551,22 @@ class StarWarsIntrospectionTests : XCTestCase {
                     "    }" +
                     "}"
 
-        let expected: Map = [
-            "data": [
+        let expected = GraphQLResult(
+            data: [
                 "__type": [
                     "name": "Droid",
                     "description": "A mechanical creature in the Star Wars universe.",
                 ],
-            ],
-        ]
+            ]
+        )
 
-        let result = try starWarsSchema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+        let result = try starWarsSchema.execute(
+            request: query,
+            root: self.starWarsAPI,
+            context: self.starWarsStore,
+            eventLoopGroup: eventLoopGroup
+        ).wait()
+        
         XCTAssertEqual(result, expected)
     }
 }

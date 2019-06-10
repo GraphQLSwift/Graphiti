@@ -3,39 +3,54 @@ import XCTest
 import GraphQL
 import NIO
 
-extension Float : InputType, OutputType {
-    public init(map: Map) throws {
-        self.init(try map.asDouble())
-    }
-
-    public func asMap() throws -> Map {
-        return .double(Double(self))
-    }
-}
+extension Float : InputType, OutputType {}
 
 class HelloWorldTests : XCTestCase {
-    let schema = try! Schema<NoRoot, NoContext, MultiThreadedEventLoopGroup> { schema in
-        try schema.query { query in
-
-            try query.field(name: "hello", type: String.self) { (_, _, _, eventLoopGroup, _) in
-                return eventLoopGroup.next().newSucceededFuture(result: "world")
-            }
+    struct MyContext {
+        
+    }
+    
+    struct MyRoot : FieldKeyProvider {
+        typealias FieldKey = FieldKeys
+        
+        enum FieldKeys : String {
+            case hello
+        }
+        
+        
+        func hello(context: MyContext, arguments: NoArguments) -> String {
+            return "world"
+        }
+    }
+    
+    let schema = Schema<MyRoot, MyContext> {
+        Query {
+            Field(.hello, at: MyRoot.hello)
         }
     }
 
     func testHello() throws {
         let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
 
         let query = "{ hello }"
-        let expected: Map = [
-            "data": [
+        
+        let expected = GraphQLResult(
+            data: [
                 "hello": "world"
             ]
-        ]
-        let result = try schema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+        )
+        
+        let result = try schema.execute(
+            request: query,
+            root: MyRoot(),
+            context: MyContext(),
+            eventLoopGroup: eventLoopGroup
+        ).wait()
+        
         XCTAssertEqual(result, expected)
     }
 
@@ -47,17 +62,37 @@ class HelloWorldTests : XCTestCase {
 
         let query = "{ boyhowdy }"
 
-        let expectedErrors: Map = [
-            "errors": [
-                [
-                    "message": "Cannot query field \"boyhowdy\" on type \"Query\".",
-                    "locations": [["line": 1, "column": 3]]
-                ]
+        let expectedErrors = GraphQLResult(
+            errors: [
+                GraphQLError(
+                    message: "Cannot query field \"boyhowdy\" on type \"Query\".",
+                    locations: [SourceLocation(line: 1, column: 3)]
+                )
             ]
-        ]
+        )
 
-        let result = try schema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+        let result = try schema.execute(
+            request: query,
+            root: MyRoot(),
+            context: MyContext(),
+            eventLoopGroup: eventLoopGroup
+        ).wait()
+        
         XCTAssertEqual(result, expectedErrors)
+    }
+    
+    struct ID : Codable, InputType, OutputType {
+        let id: String
+        
+        init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            self.id = try container.decode(String.self)
+        }
+        
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            try container.encode(self.id)
+        }
     }
 
     func testScalar() throws {
@@ -65,127 +100,193 @@ class HelloWorldTests : XCTestCase {
         defer {
             XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
         }
-
-        let schema = try Schema<NoRoot, NoContext, MultiThreadedEventLoopGroup> { schema in
-            try schema.scalar(type: Float.self) { scalar in
-                scalar.description = "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point)."
-
-                scalar.parseValue { value in
-                    if case .double = value {
-                        return value
-                    }
-
-                    if case .int(let int) = value {
-                        return .double(Double(int))
-                    }
-
-                    return .null
-                }
-
-                scalar.parseLiteral { ast in
-                    if let ast = ast as? FloatValue, let double = Double(ast.value) {
-                        return .double(double)
-                    }
-
-                    if let ast = ast as? IntValue, let double = Double(ast.value) {
-                        return .double(double)
-                    }
-
-                    return .null
-                }
+        
+        struct ScalarRoot : FieldKeyProvider {
+            typealias FieldKey = FieldKeys
+            
+            enum FieldKeys : String {
+                case float
+                case id
             }
+            
+            struct FloatArguments : ArgumentType {
+                let float: Float
+            }
+            
+            func float(context: NoContext, arguments: FloatArguments) -> Float {
+                return arguments.float
+            }
+            
+            struct DateArguments : ArgumentType {
+                let id: ID
+            }
+            
+            func id(context: NoContext, arguments: DateArguments) -> ID {
+                return arguments.id
+            }
+        }
 
-            try schema.query { query in
-                struct FloatArguments : Arguments {
-                    let float: Float
-                }
+        let schema = Schema<ScalarRoot, NoContext> {
+            Scalar(Float.self)
+            .description("The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).")
+            
+            Scalar(ID.self)
 
-                try query.field(name: "float", type: Float.self) { (_, arguments: FloatArguments, _, eventLoopGroup, _) in
-                    return eventLoopGroup.next().newSucceededFuture(result: arguments.float)
-                }
+            Query {
+                Field(.float, at: ScalarRoot.float)
+                Field(.id, at: ScalarRoot.id)
             }
         }
 
         var query: String
-        let expected: Map = ["data": ["float": 4.0]]
-        var result: Map
+        var expected = GraphQLResult(data: ["float": 4.0])
+        var result: GraphQLResult
 
         query = "query Query($float: Float!) { float(float: $float) }"
-        result = try schema.execute(request: query, eventLoopGroup: eventLoopGroup, variables: ["float": 4]).wait()
+        
+        result = try schema.execute(
+            request: query,
+            root: ScalarRoot(),
+            context: NoContext(),
+            eventLoopGroup: eventLoopGroup,
+            variables: ["float": 4]
+        ).wait()
+
         XCTAssertEqual(result, expected)
 
         query = "query Query { float(float: 4) }"
-        result = try schema.execute(request: query, eventLoopGroup: eventLoopGroup).wait()
+        
+        result = try schema.execute(
+            request: query,
+            root: ScalarRoot(),
+            context: NoContext(),
+            eventLoopGroup: eventLoopGroup
+        ).wait()
+        
+        XCTAssertEqual(result, expected)
+        
+        query = "query Query($id: String!) { id(id: $id) }"
+        expected = GraphQLResult(data: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"])
+        
+        result = try schema.execute(
+            request: query,
+            root: ScalarRoot(),
+            context: NoContext(),
+            eventLoopGroup: eventLoopGroup,
+            variables: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"]
+        ).wait()
+        
+        XCTAssertEqual(result, expected)
+        
+        query = #"query Query { id(id: "85b8d502-8190-40ab-b18f-88edd297d8b6") }"#
+        
+        result = try schema.execute(
+            request: query,
+            root: ScalarRoot(),
+            context: NoContext(),
+            eventLoopGroup: eventLoopGroup
+        ).wait()
+        
         XCTAssertEqual(result, expected)
     }
 
     func testInput() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
         defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+            XCTAssertNoThrow(try group.syncShutdownGracefully())
         }
 
-        struct Foo : OutputType {
+        struct Foo : OutputType, FieldKeyProvider {
+            typealias FieldKey = FieldKeys
+            
+            enum FieldKeys : String {
+                case id
+                case name
+            }
+            
             let id: String
-            let name : String?
+            let name: String?
 
             static func fromInput(_ input: FooInput) -> Foo {
                 return Foo(id: input.id, name: input.name)
             }
         }
 
-        struct FooInput : InputType {
+        struct FooInput : InputType, OutputType, FieldKeyProvider {
+            typealias FieldKey = FieldKeys
+            
+            enum FieldKeys : String {
+                case id
+                case name
+            }
+            
             let id: String
-            let name : String?
+            let name: String?
         }
-
-        let schema = try Schema<NoRoot, NoContext, MultiThreadedEventLoopGroup> { schema in
-
-            try schema.object(type: Foo.self) { builder in
-
-                try builder.exportFields()
+        
+        struct FooRoot : FieldKeyProvider {
+            typealias FieldKey = FieldKeys
+            
+            enum FieldKeys : String {
+                case foo
+                case addFoo
             }
-
-            try schema.query { query in
-
-                try query.field(name: "foo", type: (Foo?).self) { (_, _, _, eventLoopGroup, _) in
-                    return eventLoopGroup.next().newSucceededFuture(result: Foo(id: "123", name: "bar"))
-                }
+            
+            func foo(context: NoContext, arguments: NoArguments) -> Foo {
+                return Foo(id: "123", name: "bar")
             }
-
-            try schema.inputObject(type: FooInput.self) { builder in
-
-                try builder.exportFields()
-            }
-
-            struct AddFooArguments : Arguments {
-
+            
+            struct AddFooArguments : ArgumentType {
                 let input: FooInput
             }
+            
+            func addFoo(context: NoContext, arguments: AddFooArguments) -> Foo {
+                return Foo.fromInput(arguments.input)
+            }
+        }
 
-            try schema.mutation { mutation in
-
-                try mutation.field(name: "addFoo", type: Foo.self) { (_, arguments: AddFooArguments, _, eventLoopgroup, _) in
-
-                    debugPrint(arguments)
-                    return eventLoopGroup.next().newSucceededFuture(result: Foo.fromInput(arguments.input))
-                }
+        let schema = Schema<FooRoot, NoContext> {
+            Type(Foo.self) {
+                Field(.id, at: \.id)
+                Field(.name, at: \.name)
             }
 
+            Query {
+                Field(.foo, at: FooRoot.foo)
+            }
+
+            Input(FooInput.self) {
+                InputField(.id, at: \.id)
+                InputField(.name, at: \.name)
+            }
+            
+            Mutation {
+                Field(.addFoo, at: FooRoot.addFoo)
+            }
         }
 
         let mutation = "mutation addFoo($input: FooInput!) { addFoo(input:$input) { id, name } }"
-        let variables: [String:Map] = ["input" : [ "id" : "123", "name" : "bob" ]]
-        let expected: Map = ["data": ["addFoo" : [ "id" : "123", "name" : "bob" ]]]
+        let variables: [String: Map] = ["input" : [ "id" : "123", "name" : "bob" ]]
+        
+        let expected = GraphQLResult(
+            data: ["addFoo" : [ "id" : "123", "name" : "bob" ]]
+        )
+        
         do {
-            let result = try schema.execute(request: mutation, eventLoopGroup: eventLoopGroup, variables: variables).wait()
+            let result = try schema.execute(
+                request: mutation,
+                root: FooRoot(),
+                context: NoContext(),
+                eventLoopGroup: group,
+                variables: variables
+            ).wait()
+            
             XCTAssertEqual(result, expected)
             debugPrint(result)
+        } catch {
+            debugPrint(error)
         }
-            catch {
-                debugPrint(error)
-            }
-
     }
 }
 

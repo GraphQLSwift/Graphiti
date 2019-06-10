@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "GraphQLSchema.getType(name:):Schema.swift">
+      </ContextState>
+      <ContextState
+         contextName = "typeFromAST(schema:inputTypeAST:):TypeFromAST.swift">
+      </ContextState>
+      <ContextState
+         contextName = "SchemaBuilder.map(_:to:):Schema.swift">
+      </ContextState>
+      <ContextState
+         contextName = "InputObjectTypeBuilder.exportFields(excluding:):InputObjectType.swift">
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>
