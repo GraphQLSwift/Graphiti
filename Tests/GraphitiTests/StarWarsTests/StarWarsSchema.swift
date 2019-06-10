@@ -1,303 +1,209 @@
-//import GraphQL
-//import Graphiti
-//import NIO
-//
-///**
-// * This is designed to be an end-to-end test, demonstrating
-// * the full GraphQL stack.
-// *
-// * We will create a GraphQL schema that describes the major
-// * characters in the original Star Wars trilogy.
-// *
-// * NOTE: This may contain spoilers for the original Star
-// * Wars trilogy.
-// */
-//
-///**
-// * Using our shorthand to describe type systems, the type system for our
-// * Star Wars example is:
-// *
-// *     enum Episode { NEWHOPE, EMPIRE, JEDI }
-// *
-// *     interface Character {
-// *         id: String!
-// *         name: String!
-// *         friends: [Character!]!
-// *         appearsIn: [Episode!]!
-// *         secretBackstory: String
-// *     }
-// *
-// *     type Human : Character {
-// *         id: String!
-// *         name: String!
-// *         friends: [Character!]!
-// *         appearsIn: [Episode!]!
-// *         secretBackstory: String
-// *         homePlanet: String!
-// *     }
-// *
-// *     type Droid : Character {
-// *         id: String!
-// *         name: String!
-// *         friends: [Character!]!
-// *         appearsIn: [Episode!]!
-// *         secretBackstory: String
-// *         primaryFunction: String!
-// *     }
-// *
-// *     type Query {
-// *         hero(episode: Episode): Character
-// *         human(id: String!): Human
-// *         droid(id: String!): Droid
-// *     }
-// */
-//
-//let starWarsSchema = try! Schema<NoRoot, StarWarsStore, MultiThreadedEventLoopGroup> { schema in
-//    /**
-//     * The original trilogy consists of three movies.
-//     *
-//     * This implements the following type system shorthand:
-//     *
-//     *     enum Episode { NEWHOPE, EMPIRE, JEDI }
-//     */
-//    try schema.enum(type: Episode.self) { episode in
-//        episode.description = "One of the films in the Star Wars Trilogy"
-//
-//        try episode.value(
-//            name: "NEWHOPE",
-//            value: .newHope,
-//            description: "Released in 1977."
-//        )
-//
-//        try episode.value(
-//            name: "EMPIRE",
-//            value: .empire,
-//            description: "Released in 1980."
-//        )
-//
-//        try episode.value(
-//            name: "JEDI",
-//            value: .jedi,
-//            description: "Released in 1983."
-//        )
-//    }
-//
-//    /**
-//     * Characters in the Star Wars trilogy are either humans or droids.
-//     *
-//     * This implements the following type system shorthand:
-//     *
-//     *     interface Character {
-//     *         id: String!
-//     *         name: String!
-//     *         friends: [Character!]!
-//     *         appearsIn: [Episode!]!
-//     *         secretBackstory: String
-//     *     }
-//     */
-//    try schema.interface(type: Character.self) { character in
-//        character.description = "A character in the Star Wars Trilogy"
-//
-//        try character.field(
-//            name: "id",
-//            type: String.self,
-//            description: "The id of the character."
-//        )
-//
-//        try character.field(
-//            name: "name",
-//            type: String.self,
-//            description: "The name of the character."
-//        )
-//
-//        try character.field(
-//            name: "friends",
-//            type: [TypeReference<Character>].self,
-//            description: "The friends of the character, or an empty list if they have none."
-//        )
-//
-//        try character.field(
-//            name: "appearsIn",
-//            type: [Episode].self,
-//            description: "Which movies they appear in."
-//        )
-//
-//        try character.field(
-//            name: "secretBackstory",
-//            type: (String?).self,
-//            description: "All secrets about their past."
-//        )
-//    }
-//
-//    /**
-//     * Planet in the Star Warts trilogy.
-//     *
-//     * This implements the following type system shorthand:
-//     *
-//     *     interface Planet {
-//     *         id: String!
-//     *         name: String!
-//     *         diameter: Int!
-//     *         rotationPeriod: Int!
-//     *         orbitalPeriod: Int!
-//     *         residents: [Human!]!
-//     *     }
-//     */
-//    try schema.object(type: Planet.self) { planet in
-//        planet.description = "A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY."
-//
-//        try planet.exportFields(excluding:"residents")
-//
-//        try planet.field(
-//            name: "residents",
-//            type: [TypeReference<Human>].self,
-//            description: ""
-//        )
-//    }
-//
-//    /**
-//     * We define our human type, which implements the character interface.
-//     *
-//     * This implements the following type system shorthand:
-//     *
-//     *     type Human : Character {
-//     *         id: String!
-//     *         name: String!
-//     *         friends: [Character!]!
-//     *         appearsIn: [Episode!]!
-//     *         secretBackstory: String
-//     *         homePlanet: Planet!
-//     *     }
-//     */
-//    try schema.object(type: Human.self, interfaces: Character.self) { human in
-//        human.description = "A humanoid creature in the Star Wars universe."
-//
-//        try human.exportFields()
-//
-//        try human.field(
-//            name: "friends",
-//            type: [Character].self,
-//            description: "The friends of the human, or an empty list if they have none.",
-//            resolve: { human, _, context, eventLoopGroup, _ in
-//                return eventLoopGroup.next().newSucceededFuture(result: context.getFriends(character: human))
-//            }
-//        )
-//
-//        try human.field(
-//            name: "secretBackstory",
-//            type: (String?).self,
-//            description: "Where are they from and how they came to be who they are.",
-//            resolve: { _, _, context, eventLoopGroup, _ in
-//                return eventLoopGroup.next().newSucceededFuture(result: try context.getSecretBackStory())
-//            }
-//        )
-//    }
-//
-//    /**
-//     * The other type of character in Star Wars is a droid.
-//     *
-//     * This implements the following type system shorthand:
-//     *
-//     *     type Droid : Character {
-//     *         id: String!
-//     *         name: String!
-//     *         friends: [Character!]!
-//     *         appearsIn: [Episode!]!
-//     *         secretBackstory: String
-//     *         primaryFunction: String!
-//     *     }
-//     */
-//    try schema.object(type: Droid.self, interfaces: Character.self) { droid in
-//        droid.description = "A mechanical creature in the Star Wars universe."
-//
-//        try droid.exportFields()
-//
-//        try droid.field(
-//            name: "friends",
-//            type: [Character].self,
-//            description: "The friends of the droid, or an empty list if they have none.",
-//            resolve: { droid, _, context, eventLoopGroup, _ in
-//                return eventLoopGroup.next().newSucceededFuture(result: context.getFriends(character: droid))
-//
-//            }
-//        )
-//
-//        try droid.field(
-//            name: "secretBackstory",
-//            type: (String?).self,
-//            description: "Where are they from and how they came to be who they are.",
-//            resolve: { _, _, context, eventLoopGroup, _ in
-//                return eventLoopGroup.next().newSucceededFuture(result: try context.getSecretBackStory())
-//            }
-//        )
-//    }
-//
-//    /**
-//     * A search result can be a include a number of different types.
-//     *
-//     * This implements the following type system shorthand:
-//     *
-//     * union SearchResult = Planet | Human | Droid
-//     */
-//    try schema.union(type: SearchResult.self, members: [Planet.self, Human.self, Droid.self])
-//
-//    /**
-//     * This is the type that will be the root of our query, and the
-//     * entry point into our schema. It gives us the ability to fetch
-//     * objects by their IDs, as well as to fetch the undisputed hero
-//     * of the Star Wars trilogy, R2-D2, directly.
-//     *
-//     * This implements the following type system shorthand:
-//     *
-//     *     type Query {
-//     *         hero(episode: Episode): Character
-//     *         human(id: String!): Human
-//     *         droid(id: String!): Droid
-//     *         search(query: String!): SearchResult
-//     *     }
-//     */
-//    try schema.query { query in
-//        struct HeroArguments : ArgumentType {
-//            let episode: Episode?
-//
-//            static let descriptions = [
-//                "episode":
-//                    "If omitted, returns the hero of the whole saga. If " +
-//                    "provided, returns the hero of that particular episode."
-//            ]
-//        }
-//
-//        try query.field(name: "hero") { (_, arguments: HeroArguments, context, eventLoopGroup, _) in
-//            return eventLoopGroup.next().newSucceededFuture(result: context.getHero(episode: arguments.episode))
-//        }
-//
-//        struct HumanArguments : ArgumentType {
-//            let id: String
-//            static let descriptions = ["id": "id of the human"]
-//        }
-//
-//        try query.field(name: "human") { (_, arguments: HumanArguments, context, eventLoopGroup, _) in
-//            return eventLoopGroup.next().newSucceededFuture(result: context.getHuman(id: arguments.id))
-//        }
-//
-//        struct DroidArguments : ArgumentType {
-//            let id: String
-//            static let descriptions = ["id": "id of the droid"]
-//        }
-//
-//        try query.field(name: "droid") { (_, arguments: DroidArguments, context, eventLoopGroup, _) in
-//            return eventLoopGroup.next().newSucceededFuture(result: context.getDroid(id: arguments.id))
-//        }
-//
-//        struct SearchArguments : ArgumentType {
-//            let query: String
-//            static let descriptions = ["query": "text to find"]
-//        }
-//
-//        try query.field(name: "search") { (_, arguments: SearchArguments, context, eventLoopGroup, _) in
-//            return eventLoopGroup.next().newSucceededFuture(result: context.search(for: arguments.query))
-//        }
-//    }
-//
-//    schema.types = [Human.self, Droid.self]
-//}
+import GraphQL
+import Graphiti
+import NIO
+
+extension Episode : InputType, OutputType {}
+
+extension Character {
+    var secretBackstory: String? {
+        return nil
+    }
+}
+
+enum CharacterFieldKeys : String {
+    case id
+    case name
+    case friends
+    case appearsIn
+    case secretBackstory
+}
+
+extension Planet : OutputType, FieldKeyProvider {
+    typealias FieldKey = FieldKeys
+    
+    enum FieldKeys : String {
+        case id
+        case name
+        case diameter
+        case rotationPeriod
+        case orbitalPeriod
+        case residents
+    }
+}
+
+extension Human : OutputType, FieldKeyProvider {
+    typealias FieldKey = FieldKeys
+    
+    enum FieldKeys : String {
+        case id
+        case name
+        case appearsIn
+        case homePlanet
+        case friends
+        case secretBackstory
+    }
+    
+    func getFriends(store: StarWarsStore, arguments: NoArguments) -> [Character] {
+        return store.getFriends(character: self)
+    }
+    
+    func getSecretBackstory(store: StarWarsStore, arguments: NoArguments) throws -> String? {
+        return try store.getSecretBackStory()
+    }
+}
+
+extension Droid : OutputType, FieldKeyProvider {
+    typealias FieldKey = FieldKeys
+    
+    enum FieldKeys : String {
+        case id
+        case name
+        case appearsIn
+        case primaryFunction
+        case friends
+        case secretBackstory
+    }
+    
+    func getFriends(store: StarWarsStore, arguments: NoArguments) -> [Character] {
+        return store.getFriends(character: self)
+    }
+    
+    func getSecretBackstory(store: StarWarsStore, arguments: NoArguments) throws -> String? {
+        return try store.getSecretBackStory()
+    }
+}
+
+struct StarWarsAPI : FieldKeyProvider {
+    typealias FieldKey = FieldKeys
+    
+    enum FieldKeys : String {
+        case id
+        case episode
+        case hero
+        case human
+        case droid
+        case search
+        case query
+    }
+    
+    struct HeroArguments : ArgumentType {
+        let episode: Episode?
+    }
+
+    func getHero(store: StarWarsStore, arguments: HeroArguments) -> Character {
+        return store.getHero(episode: arguments.episode)
+    }
+
+    struct HumanArguments : ArgumentType {
+        let id: String
+    }
+    
+    func getHuman(store: StarWarsStore, arguments: HumanArguments) -> Human? {
+        return store.getHuman(id: arguments.id)
+    }
+
+    struct DroidArguments : ArgumentType {
+        let id: String
+    }
+
+    func getDroid(store: StarWarsStore, arguments: DroidArguments) -> Droid? {
+        return store.getDroid(id: arguments.id)
+    }
+    
+    struct SearchArguments : ArgumentType {
+        let query: String
+    }
+    
+    func search(store: StarWarsStore, arguments: SearchArguments) -> [SearchResult] {
+        return store.search(for: arguments.query)
+    }
+}
+
+let starWarsSchema = Schema<StarWarsAPI, StarWarsStore> {
+    Enum(Episode.self) {
+        Value(.newHope)
+        .description("Released in 1977.")
+
+        Value(.empire)
+        .description("Released in 1980.")
+
+        Value(.jedi)
+        .description("Released in 1983.")
+    }
+    .description("One of the films in the Star Wars Trilogy.")
+
+    Interface(Character.self, fieldKeys: CharacterFieldKeys.self) {
+        Field(.id, at: \.id)
+        .description("The id of the character.")
+
+        Field(.name, at: \.name)
+        .description("The name of the character.")
+
+        Field(.friends, at: \.friends, overridingType: [TypeReference<Character>].self)
+        .description("The friends of the character, or an empty list if they have none.")
+
+        Field(.appearsIn, at: \.appearsIn)
+        .description("Which movies they appear in.")
+
+        Field(.secretBackstory, at: \.secretBackstory)
+        .description("All secrets about their past.")
+    }
+    .description("A character in the Star Wars Trilogy.")
+
+    Type(Planet.self) {
+        Field(.id, at: \.id)
+        Field(.name, at: \.name)
+        Field(.diameter, at: \.diameter)
+        Field(.rotationPeriod, at: \.rotationPeriod)
+        Field(.orbitalPeriod, at: \.orbitalPeriod)
+        Field(.residents, at: \.residents, overridingType: [TypeReference<Human>].self)
+    }
+    .description("A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY.")
+
+    Type(Human.self, interfaces: Character.self) {
+        Field(.id, at: \.id)
+        Field(.name, at: \.name)
+        Field(.appearsIn, at: \.appearsIn)
+        Field(.homePlanet, at: \.homePlanet)
+
+        Field(.friends, at: Human.getFriends)
+        .description("The friends of the human, or an empty list if they have none.")
+
+        Field(.secretBackstory, at: Human.getSecretBackstory)
+        .description("Where are they from and how they came to be who they are.")
+    }
+    .description("A humanoid creature in the Star Wars universe.")
+
+    Type(Droid.self, interfaces: Character.self) {
+        Field(.id, at: \.id)
+        Field(.name, at: \.name)
+        Field(.appearsIn, at: \.appearsIn)
+        Field(.primaryFunction, at: \.primaryFunction)
+
+        Field(.friends, at: Droid.getFriends)
+        .description("The friends of the droid, or an empty list if they have none.")
+
+        Field(.secretBackstory, at: Droid.getSecretBackstory)
+        .description("Where are they from and how they came to be who they are.")
+    }
+    .description("A mechanical creature in the Star Wars universe.")
+
+    Union(SearchResult.self, members: Planet.self, Human.self, Droid.self)
+
+    Query {
+        Field(.hero, at: StarWarsAPI.getHero)
+        .description("Returns a hero based on the given episode.")
+        .argument(.episode, at: \.episode, description: "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode.")
+
+        Field(.human, at: StarWarsAPI.getHuman)
+        .argument(.id, at: \.id, description: "Id of the human.")
+
+        Field(.droid, at: StarWarsAPI.getDroid)
+        .argument(.id, at: \.id, description: "Id of the droid.")
+
+        Field(.search, at: StarWarsAPI.search)
+        .argument(.query, at: \.query, defaultValue: "R2-D2")
+    }
+
+    Types(Human.self, Droid.self)
+}
