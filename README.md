@@ -538,7 +538,7 @@ import NIO
 let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         
 defer {
-	try? eventLoopGroup.syncShutdownGracefully()
+    try? eventLoopGroup.syncShutdownGracefully()
 }
     
 let query = """
