@@ -397,8 +397,8 @@ struct StarWarsAPI : FieldKeyProvider {
         let episode: Episode?
     }
 
-	 // Here we're simplin defining `HeroArguments` as the arguments for the
-	 // getHero function.
+    // Here we're simplin defining `HeroArguments` as the arguments for the
+    // getHero function.
     func getHero(store: StarWarsStore, arguments: HeroArguments) -> Character {
         store.getHero(of: arguments.episode)
     }
