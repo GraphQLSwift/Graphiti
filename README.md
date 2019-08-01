@@ -82,9 +82,9 @@ struct Droid : Character {
 }
 
 protocol SearchResult {}
-extension Planet: SearchResult {}
-extension Human: SearchResult {}
-extension Droid: SearchResult {}
+extension Planet : SearchResult {}
+extension Human : SearchResult {}
+extension Droid : SearchResult {}
 ```
 
 One of the main design decisions behing Graphiti is **not** to polute your entities declarations. This way you can bring your entities to any other solution with ease.
