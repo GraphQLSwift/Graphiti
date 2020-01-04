@@ -51,7 +51,7 @@ public struct SchemaBuilder<RootType : FieldKeyProvider, Context> {
 }
 
 public final class Schema<RootType : FieldKeyProvider, Context> {
-    private let schema: GraphQLSchema
+    public let schema: GraphQLSchema
 
     public init(@SchemaBuilder<RootType, Context> component: () -> SchemaComponent<RootType, Context>) {
         let component = component()
