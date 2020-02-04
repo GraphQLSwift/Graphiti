@@ -569,7 +569,7 @@ The output will be:
 
 #### Async resolvers
 
-To use async resolvers, just add one more parameter with type `EventLoopGroup` to the resolver function and chage the return type to `EventLoopFuture<YouReturnType>`. Don't forget to import NIO.
+To use async resolvers, just add one more parameter with type `EventLoopGroup` to the resolver function and change the return type to `EventLoopFuture<YouReturnType>`. Don't forget to import NIO.
 
 ```swift
 import NIO
