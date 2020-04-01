@@ -87,7 +87,7 @@ extension Human : SearchResult {}
 extension Droid : SearchResult {}
 ```
 
-One of the main design decisions behing Graphiti is **not** to polute your entities declarations. This way you can bring your entities to any other solution with ease.
+One of the main design decisions behind Graphiti is **not** to polute your entities declarations. This way you can bring your entities to any other solution with ease.
 
 #### Defining the context
 
