@@ -17,7 +17,7 @@ final class SchemaBuilder : TypeProvider {
 }
 
 public final class Schema<RootType : Keyable, Context> {
-    private let schema: GraphQLSchema
+    public let schema: GraphQLSchema
 
     private init(components: [Component<RootType, Context>]) throws {
         let builder = SchemaBuilder()
