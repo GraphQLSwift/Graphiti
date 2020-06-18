@@ -57,7 +57,7 @@ Second step is to create your application's **context**. The context will be pas
 ```swift
 /**
  * This data is hard coded for the sake of the demo, but you could imagine
- * fetching this data from a backend service rather than from hardcoded
+ * fetching this data from a database or a backend service rather than from hardcoded
  * values in a more complex demo.
  */
 final class MessageStore {
@@ -92,14 +92,14 @@ struct MessageAPI : Keyable {
 Now we can finally define the Schema using the builder pattern.
 
 ```swift
-public struct MessageService : Service {
-    public let root: MessageAPI
-    public let context: MessageStore
-    public let schema: Schema<MessageAPI, MessageStore>
+struct MessageService : Service {
+    let root: MessageAPI
+    let context: MessageStore
+    let schema: Schema<MessageAPI, MessageStore>
     
     // Notice that `Service` allows dependency injection.
     // You could pass mocked subtypes of `root` and `context` when testing, for example.
-    public init(root: MessageAPI, context: MessageStore) throws {
+    init(root: MessageAPI, context: MessageStore) throws {
         self.root = root
         self.context = context
 
