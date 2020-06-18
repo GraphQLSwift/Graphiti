@@ -67,9 +67,7 @@ final class MessageStore {
         content: "Hello, world!
     )
     
-    /**
-     * Helper function to get messages.
-     */
+    // Helper function to get messages.
     func getMessage() -> Message {
         helloWorld
     }
