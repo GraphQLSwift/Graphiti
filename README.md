@@ -56,8 +56,6 @@ Second step is to create your application's **context**. The context will be pas
 
 ```swift
 /**
- * This defines a basic set of data for our example
- *
  * This data is hard coded for the sake of the demo, but you could imagine
  * fetching this data from a backend service rather than from hardcoded
  * values in a more complex demo.
