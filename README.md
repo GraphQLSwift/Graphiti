@@ -135,7 +135,6 @@ import NIO
 let root = MessageAPI()
 let context = MessageStore()
 let service = try MessageService(root: root, context: context)
-
 let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         
 defer {
