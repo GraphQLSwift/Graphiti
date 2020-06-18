@@ -304,8 +304,8 @@ extension Character {
 }
 
 // In aligment with our guidelines we have to define the keys for protocols
-// in a global enum, because we can't adopt FieldKeyProvider in protocol
-// extensions. The role of FieldKeyProvider will become clearer in the
+// in a global enum, because we can't adopt Keyable in protocol
+// extensions. The role of Keyable will become clearer in the
 // next extension.
 enum CharacterFieldKeys : String {
     case id
@@ -315,12 +315,10 @@ enum CharacterFieldKeys : String {
     case secretBackstory
 }
 
-// FieldKeyProvider is a protocol that allows us to define the keys which
+// Keyable is a protocol that allows us to define the keys which
 // will be used to map properties and functions to GraphQL fields.
-extension Planet : FieldKeyProvider {
-    typealias FieldKey = FieldKeys
-    
-    enum FieldKeys : String {
+extension Planet : Keyable {
+    enum Keys : String {
         case id
         case name
         case diameter
@@ -330,10 +328,8 @@ extension Planet : FieldKeyProvider {
     }
 }
 
-extension Human : FieldKeyProvider {
-    typealias FieldKey = FieldKeys
-    
-    enum FieldKeys : String {
+extension Human : Keyable {
+    enum Keys : String {
         case id
         case name
         case appearsIn
@@ -357,10 +353,8 @@ extension Human : FieldKeyProvider {
     }
 }
 
-extension Droid : FieldKeyProvider {
-    typealias FieldKey = FieldKeys
-    
-    enum FieldKeys : String {
+extension Droid : Keyable {
+    enum Keys : String {
         case id
         case name
         case appearsIn
@@ -378,10 +372,8 @@ extension Droid : FieldKeyProvider {
     }
 }
 
-struct StarWarsAPI : FieldKeyProvider {
-    typealias FieldKey = FieldKeys
-    
-    enum FieldKeys : String {
+struct StarWarsAPI : Keyable {
+    enum Keys : String {
         case id
         case episode
         case hero
@@ -574,10 +566,8 @@ To use async resolvers, just add one more parameter with type `EventLoopGroup` t
 ```swift
 import NIO
 
-struct API : FieldKeyProvider {
-    typealias FieldKey = FieldKeys
-    
-    enum FieldKeys : String {
+struct API : Keyable {
+    enum Keys : String {
         case hello
     }
     

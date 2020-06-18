@@ -1,0 +1,1 @@
+public typealias NoContext = Void

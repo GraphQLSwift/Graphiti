@@ -2,18 +2,19 @@ import XCTest
 import NIO
 @testable import Graphiti
 import GraphQL
+import StarWarsAPI
+import Combine
 
+@available(OSX 10.15, *)
 class StarWarsQueryTests : XCTestCase {
-    private let starWarsAPI = StarWarsAPI()
-    private let starWarsStore = StarWarsStore()
+    private let service = StarWarsService()
+    private var group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+    
+    deinit {
+        try? self.group.syncShutdownGracefully()
+    }
     
     func testHeroNameQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
-        }
-        
         let query = """
         query HeroNameQuery {
             hero {
@@ -21,43 +22,29 @@ class StarWarsQueryTests : XCTestCase {
             }
         }
         """
-
-        let expected = GraphQLResult(
-            data: [
-                "hero": [
-                    "name": "R2-D2",
-                ],
-            ]
-        )
         
-        let result = try starWarsSchema.execute(
+        let expected = GraphQLResult(data: ["hero": ["name": "R2-D2"]])
+        
+        let result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
-        
-        print(result)
         
         XCTAssertEqual(result, expected)
     }
 
     func testHeroNameAndFriendsQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        let query = """
+        query HeroNameAndFriendsQuery {
+            hero {
+                id
+                name
+                friends {
+                    name
+                }
+            }
         }
-
-        let query = "query HeroNameAndFriendsQuery {" +
-                    "    hero {" +
-                    "        id" +
-                    "        name" +
-                    "        friends {" +
-                    "            name" +
-                    "        }" +
-                    "    }" +
-                    "}"
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -73,35 +60,29 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testNestedQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        let query = """
+        query NestedQuery {
+            hero {
+                name
+                friends {
+                    name
+                    appearsIn
+                    friends {
+                        name
+                    }
+                }
+            }
         }
-
-        let query = "query NestedQuery {" +
-                    "    hero {" +
-                    "        name" +
-                    "        friends {" +
-                    "            name" +
-                    "            appearsIn" +
-                    "            friends {" +
-                    "                name" +
-                    "            }" +
-                    "        }" +
-                    "    }" +
-                    "}"
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -142,28 +123,22 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testFetchLukeQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        let query = """
+        query FetchLukeQuery {
+            human(id: "1000") {
+                name
+            }
         }
-
-        let query = "query FetchLukeQuery {" +
-                    "    human(id: \"1000\") {" +
-                    "        name" +
-                    "    }" +
-                    "}"
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -173,36 +148,28 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testFetchSomeIDQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        let query = """
+        query FetchSomeIDQuery($someId: String!) {
+            human(id: $someId) {
+                name
+            }
         }
-
-        let query = "query FetchSomeIDQuery($someId: String!) {" +
-                    "    human(id: $someId) {" +
-                    "        name" +
-                    "    }" +
-                    "}"
+        """
 
         var params: [String: Map]
         var expected: GraphQLResult
         var result: GraphQLResult
 
-        params = [
-            "someId": "1000",
-        ]
+        params = ["someId": "1000"]
 
         expected = GraphQLResult(
             data: [
@@ -212,19 +179,15 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        result = try starWarsSchema.execute(
+        result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup,
+            on: group,
             variables: params
         ).wait()
         
         XCTAssertEqual(result, expected)
 
-        params = [
-            "someId": "1002",
-        ]
+        params = ["someId": "1002"]
 
         expected = GraphQLResult(
             data: [
@@ -234,19 +197,15 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        result = try starWarsSchema.execute(
+        result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup,
+            on: group,
             variables: params
         ).wait()
         
         XCTAssertEqual(result, expected)
 
-        params = [
-            "someId": "not a valid id",
-        ]
+        params = ["someId": "not a valid id"]
 
         expected = GraphQLResult(
             data: [
@@ -254,11 +213,9 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        result = try starWarsSchema.execute(
+        result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup,
+            on: group,
             variables: params
         ).wait()
         
@@ -266,17 +223,13 @@ class StarWarsQueryTests : XCTestCase {
     }
 
     func testFetchLukeAliasedQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        let query = """
+        query FetchLukeAliasedQuery {
+            luke: human(id: "1000") {
+                name
+            }
         }
-
-        let query = "query FetchLukeAliasedQuery {" +
-                    "    luke: human(id: \"1000\") {" +
-                    "        name" +
-                    "    }" +
-                    "}"
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -286,31 +239,25 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testFetchLukeAndLeiaAliasedQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        let query = """
+        query FetchLukeAndLeiaAliasedQuery {
+            luke: human(id: "1000") {
+                name
+            }
+            leia: human(id: "1003") {
+                name
+            }
         }
-
-        let query = "query FetchLukeAndLeiaAliasedQuery {" +
-                    "    luke: human(id: \"1000\") {" +
-                    "        name" +
-                    "    }" +
-                    "    leia: human(id: \"1003\") {" +
-                    "        name" +
-                    "    }" +
-                    "}"
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -323,76 +270,64 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testDuplicateFieldsQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        let query = """
+        query DuplicateFieldsQuery {
+            luke: human(id: "1000") {
+                name
+                homePlanet { name }
+            }
+            leia: human(id: "1003") {
+                name
+                homePlanet  { name }
+            }
         }
-
-        let query = "query DuplicateFieldsQuery {" +
-                    "    luke: human(id: \"1000\") {" +
-                    "        name" +
-                    "        homePlanet { name }" +
-                    "    }" +
-                    "    leia: human(id: \"1003\") {" +
-                    "        name" +
-                    "        homePlanet  { name }" +
-                    "    }" +
-                    "}"
+        """
 
         let expected = GraphQLResult(
             data: [
                 "luke": [
                     "name": "Luke Skywalker",
-                    "homePlanet": ["name":"Tatooine"],
+                    "homePlanet": ["name": "Tatooine"],
                 ],
                 "leia": [
                     "name": "Leia Organa",
-                    "homePlanet": ["name":"Alderaan"],
+                    "homePlanet": ["name": "Alderaan"],
                 ],
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testUseFragmentQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        let query = """
+        query UseFragmentQuery {
+            luke: human(id: "1000") {
+                ...HumanFragment
+            }
+            leia: human(id: "1003") {
+                ...HumanFragment
+            }
         }
-
-        let query = "query UseFragmentQuery {" +
-                    "    luke: human(id: \"1000\") {" +
-                    "        ...HumanFragment" +
-                    "    }" +
-                    "    leia: human(id: \"1003\") {" +
-                    "        ...HumanFragment" +
-                    "    }" +
-                    "}" +
-                    "fragment HumanFragment on Human {" +
-                    "    name" +
-                    "    homePlanet { name }" +
-                    "}"
+        fragment HumanFragment on Human {
+            name
+            homePlanet { name }
+        }
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -407,29 +342,23 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testCheckTypeOfR2Query() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        let query = """
+        query CheckTypeOfR2Query {
+            hero {
+                __typename
+                name
+            }
         }
-
-        let query = "query CheckTypeOfR2Query {" +
-                    "    hero {" +
-                    "        __typename" +
-                    "        name" +
-                    "    }" +
-                    "}"
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -440,30 +369,24 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testCheckTypeOfLukeQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        let query = """
+        query CheckTypeOfLukeQuery {
+            hero(episode: EMPIRE) {
+                __typename
+                name
+            }
         }
-
-        let query = "query CheckTypeOfLukeQuery {" +
-                    "    hero(episode: EMPIRE) {" +
-                    "        __typename" +
-                    "        name" +
-                    "    }" +
-                    "}"
-
+        """
+        
         let expected = GraphQLResult(
             data: [
                 "hero": [
@@ -473,29 +396,23 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testSecretBackstoryQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        let query = """
+        query SecretBackstoryQuery {
+            hero {
+                name
+                secretBackstory
+            }
         }
-
-        let query = "query SecretBackstoryQuery {\n" +
-                    "    hero {\n" +
-                    "        name\n" +
-                    "        secretBackstory\n" +
-                    "    }\n" +
-                    "}\n"
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -513,33 +430,27 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testSecretBackstoryListQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        let query = """
+        query SecretBackstoryListQuery {
+            hero {
+                name
+                friends {
+                    name
+                    secretBackstory
+                }
+            }
         }
-
-        let query = "query SecretBackstoryListQuery {\n" +
-                    "    hero {\n" +
-                    "        name\n" +
-                    "        friends {\n" +
-                    "            name\n" +
-                    "            secretBackstory\n" +
-                    "        }\n" +
-                    "    }\n" +
-                    "}\n"
-
+        """
+        
         let expected = GraphQLResult(
             data: [
                 "hero": [
@@ -579,29 +490,23 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
-        
+
         XCTAssertEqual(result, expected)
     }
 
     func testSecretBackstoryAliasQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        let query = """
+        query SecretBackstoryAliasQuery {
+            mainHero: hero {
+                name
+                story: secretBackstory
+            }
         }
-
-        let query = "query SecretBackstoryAliasQuery {\n" +
-                    "    mainHero: hero {\n" +
-                    "        name\n" +
-                    "        story: secretBackstory\n" +
-                    "    }\n" +
-                    "}\n"
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -619,84 +524,79 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
-        
+
         XCTAssertEqual(result, expected)
     }
 
     func testNonNullableFieldsQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
-        }
-        
-        struct A : Codable, FieldKeyProvider {
-            typealias FieldKey = FieldKeys
-            
-            enum FieldKeys : String {
+        struct A : Codable, Keyable {
+            enum Keys : String {
                 case nullableA
                 case nonNullA
                 case `throws`
             }
-        
+
             func nullableA(context: NoContext, arguments: NoArguments) -> A? {
                 return A()
             }
-            
+
             func nonNullA(context: NoContext, arguments: NoArguments) -> A {
                 return A()
             }
-            
+
             func `throws`(context: NoContext, arguments: NoArguments) throws -> String {
                 struct 🏃 : Error, CustomStringConvertible {
                     let description: String
                 }
-                
+
                 throw 🏃(description: "catch me if you can.")
             }
         }
-        
-        struct Root : FieldKeyProvider {
-            typealias FieldKey = FieldKeys
-            
-            enum FieldKeys : String {
+
+        struct Root : Keyable {
+            enum Keys : String {
                 case nullableA
             }
-            
+
             func nullableA(context: NoContext, arguments: NoArguments) -> A? {
                 return A()
             }
         }
+        
+        struct MyService : Service {
+            var root: Root = Root()
+            var context: NoContext = NoContext()
+            
+            let schema = try! Schema<Root, NoContext> { schema in
+                schema.type(A.self) { type in
+                    type.field(.nullableA, at: A.nullableA, overridingType: (TypeReference<A>?).self)
+                    type.field(.nonNullA, at: A.nonNullA, overridingType: TypeReference<A>.self)
+                    type.field(.throws, at: A.throws)
+                }
 
-        let schema = Schema<Root, NoContext> {
-            Type(A.self) {
-                Field(.nullableA, at: A.nullableA,  overridingType: (TypeReference<A>?).self)
-                Field(.nonNullA, at: A.nonNullA, overridingType: TypeReference<A>.self)
-                Field(.throws, at: A.throws)
-            }
-
-            Query {
-                Field(.nullableA, at: Root.nullableA)
+                schema.query { query in
+                    query.field(.nullableA, at: Root.nullableA)
+                }
             }
         }
 
-        let query = "query {\n" +
-                    "    nullableA {\n" +
-                    "        nullableA {\n" +
-                    "            nonNullA {\n" +
-                    "                nonNullA {\n" +
-                    "                    throws\n" +
-                    "                }\n" +
-                    "            }\n" +
-                    "        }\n" +
-                    "    }\n" +
-                    "}\n"
+        let query = """
+        query {
+            nullableA {
+                nullableA {
+                    nonNullA {
+                        nonNullA {
+                            throws
+                        }
+                    }
+                }
+            }
+        }
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -712,39 +612,35 @@ class StarWarsQueryTests : XCTestCase {
                 ),
             ]
         )
-
-        let result = try schema.execute(
-            request: query,
-            root: Root(),
-            context: NoContext(),
-            eventLoopGroup: eventLoopGroup
-        ).wait()
         
+        let service = MyService()
+
+        let result = try service.execute(
+            request: query,
+            on: group
+        ).wait()
+
         XCTAssertEqual(result, expected)
     }
 
     func testSearchQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+        let query = """
+        query {
+            search(query: "o") {
+                ... on Planet {
+                    name
+                    diameter
+                }
+                ... on Human {
+                    name
+                }
+                ... on Droid {
+                    name
+                    primaryFunction
+                }
+            }
         }
-
-        let query = "query {" +
-            "    search(query: \"o\") {" +
-            "        ... on Planet {" +
-            "            name " +
-            "            diameter " +
-            "        }" +
-            "        ... on Human {" +
-            "            name " +
-            "        }" +
-            "        ... on Droid {" +
-            "            name " +
-            "            primaryFunction " +
-            "        }" +
-            "    }" +
-            "}"
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -757,17 +653,85 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
+
+    func testDirective() throws {
+        struct HeroQueryVariables : Encodable, Keyable {
+            enum Keys : String {
+                case episode
+                case includeFriends
+            }
+
+            let episode: Episode
+            let includeFriends: Bool
+        }
+
+        let query = """
+        query Hero($episode: Episode, $includeFriends: Boolean!) {
+            hero {
+                name
+
+                friends @include(if: $includeFriends) {
+                    name
+                }
+            }
+        }
+        """
+
+        var variables: [String: Map]
+        var result: GraphQLResult
+        var expected: GraphQLResult
+
+        expected = GraphQLResult(
+            data: [
+                "hero": [
+                    "name": "R2-D2",
+                ],
+            ]
+        )
+
+        variables = ["episode": "JEDI", "includeFriends": false]
+
+        result = try service.execute(
+            request: query,
+            on: group,
+            variables: variables
+        ).wait()
+        
+        XCTAssertEqual(result, expected)
+
+        variables = ["episode": "JEDI", "includeFriends": true]
+
+        expected = GraphQLResult(
+            data: [
+                "hero": [
+                    "name": "R2-D2",
+                    "friends": [
+                        ["name": "Luke Skywalker"],
+                        ["name": "Han Solo"],
+                        ["name": "Leia Organa"],
+                    ],
+                ],
+            ]
+        )
+        
+        result = try service.execute(
+            request: query,
+            on: group,
+            variables: variables
+        ).wait()
+
+        XCTAssertEqual(result, expected)
+    }
 }
 
+@available(OSX 10.15, *)
 extension StarWarsQueryTests {
     static var allTests: [(String, (StarWarsQueryTests) -> () throws -> Void)] {
         return [
@@ -785,6 +749,8 @@ extension StarWarsQueryTests {
             ("testSecretBackstoryQuery", testSecretBackstoryQuery),
             ("testSecretBackstoryListQuery", testSecretBackstoryListQuery),
             ("testNonNullableFieldsQuery", testNonNullableFieldsQuery),
+            ("testSearchQuery", testSearchQuery),
+            ("testDirective", testDirective),
         ]
     }
 }

@@ -1,18 +1,18 @@
 import XCTest
 import NIO
 import GraphQL
+import StarWarsAPI
 
 @testable import Graphiti
 
 class StarWarsIntrospectionTests : XCTestCase {
-    private let starWarsAPI = StarWarsAPI()
-    private let starWarsStore = StarWarsStore()
+    private let service = StarWarsService()
     
     func testIntrospectionTypeQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         
         defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+            XCTAssertNoThrow(try group.syncShutdownGracefully())
         }
 
         let query = "query IntrospectionTypeQuery {" +
@@ -86,21 +86,19 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try self.service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionQueryTypeQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         
         defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+            XCTAssertNoThrow(try group.syncShutdownGracefully())
         }
 
         let query = "query IntrospectionQueryTypeQuery {" +
@@ -121,21 +119,19 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try self.service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionDroidTypeQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         
         defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+            XCTAssertNoThrow(try group.syncShutdownGracefully())
         }
 
         let query = "query IntrospectionDroidTypeQuery {" +
@@ -152,21 +148,19 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try self.service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionDroidKindQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         
         defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+            XCTAssertNoThrow(try group.syncShutdownGracefully())
         }
 
         let query = "query IntrospectionDroidKindQuery {" +
@@ -185,21 +179,19 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try self.service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionCharacterKindQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         
         defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+            XCTAssertNoThrow(try group.syncShutdownGracefully())
         }
 
         let query = "query IntrospectionCharacterKindQuery {" +
@@ -218,21 +210,19 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try self.service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionDroidFieldsQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         
         defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+            XCTAssertNoThrow(try group.syncShutdownGracefully())
         }
 
         let query = "query IntrospectionDroidFieldsQuery {" +
@@ -300,21 +290,19 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try self.service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionDroidNestedFieldsQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         
         defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+            XCTAssertNoThrow(try group.syncShutdownGracefully())
         }
 
         let query = "query IntrospectionDroidNestedFieldsQuery {" +
@@ -407,21 +395,19 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try self.service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionFieldArgsQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         
         defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+            XCTAssertNoThrow(try group.syncShutdownGracefully())
         }
 
         let query = "query IntrospectionFieldArgsQuery {" +
@@ -527,21 +513,19 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try self.service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
     }
 
     func testIntrospectionDroidDescriptionQuery() throws {
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         
         defer {
-            XCTAssertNoThrow(try eventLoopGroup.syncShutdownGracefully())
+            XCTAssertNoThrow(try group.syncShutdownGracefully())
         }
         
         let query = "query IntrospectionDroidDescriptionQuery {" +
@@ -560,11 +544,9 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try starWarsSchema.execute(
+        let result = try self.service.execute(
             request: query,
-            root: self.starWarsAPI,
-            context: self.starWarsStore,
-            eventLoopGroup: eventLoopGroup
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
