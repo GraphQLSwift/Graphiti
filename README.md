@@ -61,7 +61,7 @@ Second step is to create your application's **context**. The context will be pas
  */
 final class MessageStore {
     func getMessage() -> Message {
-        Message(content: "Hello, world!)
+        Message(content: "Hello, world!")
     }
 }
 ```
@@ -74,6 +74,16 @@ Now that we have our entities and context we can create the API itself.
 
 ```swift
 import Graphiti
+
+// We make Message adopt Keyable so we can 
+// provide keys to be used in the schema.
+// This allows you to have different names between 
+// your properties and the fields you expose in the schema.
+extension Message : Keyable {
+    enum Keys : String {
+        case content
+    }
+}
 
 struct MessageAPI : Keyable {
     enum Keys : String {
@@ -103,6 +113,10 @@ struct MessageService : Service {
         self.context = context
 
         self.schema = try Schema<MessageAPI, MessageStore> { schema in
+            schema.type(Message.self) { type in
+                type.field(.content, at: \.content)
+            }
+
             schema.query { query in
                 query.field(.getMessage, at: MessageAPI.getMessage)
             }
@@ -120,7 +134,7 @@ import NIO
 
 let root = MessageAPI()
 let context = MessageStore()
-let service = MessageService(root: root, context: context)
+let service = try MessageService(root: root, context: context)
 
 let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         
@@ -129,7 +143,7 @@ defer {
 }
 
 let result = try service.execute(
-    request: "{ getMessage }",
+    request: "{ getMessage { content } }",
     on: group
 ).wait()
 
@@ -139,7 +153,7 @@ print(result)
 The output will be:
 
 ```json
-{"data":{"content": "Hello, world!"}}
+{"data":{"getMessage":{"content":"Hello, world!"}}}
 ```
 
 `Service.execute` returns a `GraphQLResult` which adopts `Encodable`. You can use it with a `JSONEncoder` to send the response back to the client using JSON.
