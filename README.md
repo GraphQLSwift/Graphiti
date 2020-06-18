@@ -57,8 +57,7 @@ Second step is to create your application's **context**. The context will be pas
 ```swift
 /**
  * This data is hard coded for the sake of the demo, but you could imagine
- * fetching this data from a database or a backend service rather than from hardcoded
- * values in a more complex demo.
+ * fetching this data from a database or a backend service instead.
  */
 final class MessageStore {
     func getMessage() -> Message {
