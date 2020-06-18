@@ -2,7 +2,6 @@ import XCTest
 import NIO
 @testable import Graphiti
 import GraphQL
-import StarWarsAPI
 import Combine
 
 @available(OSX 10.15, *)

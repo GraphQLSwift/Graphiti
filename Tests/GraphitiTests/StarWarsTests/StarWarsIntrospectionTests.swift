@@ -1,7 +1,6 @@
 import XCTest
 import NIO
 import GraphQL
-import StarWarsAPI
 
 @testable import Graphiti
 
