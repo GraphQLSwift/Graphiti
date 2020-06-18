@@ -82,12 +82,12 @@ struct Droid : Character {
 }
 
 protocol SearchResult {}
-extension Planet: SearchResult {}
-extension Human: SearchResult {}
-extension Droid: SearchResult {}
+extension Planet : SearchResult {}
+extension Human : SearchResult {}
+extension Droid : SearchResult {}
 ```
 
-One of the main design decisions behing Graphiti is **not** to polute your entities declarations. This way you can bring your entities to any other solution with ease.
+One of the main design decisions behind Graphiti is **not** to polute your entities declarations. This way you can bring your entities to any other solution with ease.
 
 #### Defining the context
 
@@ -389,8 +389,8 @@ struct StarWarsAPI : Keyable {
         let episode: Episode?
     }
 
-	 // Here we're simplin defining `HeroArguments` as the arguments for the
-	 // getHero function.
+    // Here we're simplin defining `HeroArguments` as the arguments for the
+    // getHero function.
     func getHero(store: StarWarsStore, arguments: HeroArguments) -> Character {
         store.getHero(of: arguments.episode)
     }
@@ -530,7 +530,7 @@ import NIO
 let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         
 defer {
-	try? eventLoopGroup.syncShutdownGracefully()
+    try? eventLoopGroup.syncShutdownGracefully()
 }
     
 let query = """
@@ -561,7 +561,7 @@ The output will be:
 
 #### Async resolvers
 
-To use async resolvers, just add one more parameter with type `EventLoopGroup` to the resolver function and chage the return type to `EventLoopFuture<YouReturnType>`. Don't forget to import NIO.
+To use async resolvers, just add one more parameter with type `EventLoopGroup` to the resolver function and change the return type to `EventLoopFuture<YouReturnType>`. Don't forget to import NIO.
 
 ```swift
 import NIO
