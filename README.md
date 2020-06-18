@@ -63,12 +63,8 @@ Second step is to create your application's **context**. The context will be pas
  * values in a more complex demo.
  */
 final class MessageStore {
-    lazy var helloWorld = Message(
-        content: "Hello, world!
-    )
-    
     func getMessage() -> Message {
-        helloWorld
+        Message(content: "Hello, world!)
     }
 }
 ```
