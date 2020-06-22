@@ -661,31 +661,21 @@ class StarWarsQueryTests : XCTestCase {
     }
 
     func testDirective() throws {
-        struct HeroQueryVariables : Encodable, Keyable {
-            enum Keys : String {
-                case episode
-                case includeFriends
-            }
-
-            let episode: Episode
-            let includeFriends: Bool
-        }
-
-        let query = """
-        query Hero($episode: Episode, $includeFriends: Boolean!) {
+        var query: String
+        var result: GraphQLResult
+        var expected: GraphQLResult
+        
+        query = """
+        query Hero {
             hero {
                 name
 
-                friends @include(if: $includeFriends) {
+                friends @include(if: false) {
                     name
                 }
             }
         }
         """
-
-        var variables: [String: Map]
-        var result: GraphQLResult
-        var expected: GraphQLResult
 
         expected = GraphQLResult(
             data: [
@@ -695,17 +685,24 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        variables = ["episode": "JEDI", "includeFriends": false]
-
         result = try service.execute(
             request: query,
-            on: group,
-            variables: variables
+            on: group
         ).wait()
         
         XCTAssertEqual(result, expected)
+        
+        query = """
+        query Hero {
+            hero {
+                name
 
-        variables = ["episode": "JEDI", "includeFriends": true]
+                friends @include(if: true) {
+                    name
+                }
+            }
+        }
+        """
 
         expected = GraphQLResult(
             data: [
@@ -722,8 +719,7 @@ class StarWarsQueryTests : XCTestCase {
         
         result = try service.execute(
             request: query,
-            on: group,
-            variables: variables
+            on: group
         ).wait()
 
         XCTAssertEqual(result, expected)

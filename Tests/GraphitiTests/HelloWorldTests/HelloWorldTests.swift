@@ -75,9 +75,9 @@ struct Root : Keyable {
     func asyncHello(
         context: Context,
         arguments: NoArguments,
-        eventLoopGroup: EventLoopGroup
+        group: EventLoopGroup
     ) -> EventLoopFuture<String> {
-        eventLoopGroup.next().newSucceededFuture(result: context.hello())
+        group.next().makeSucceededFuture(context.hello())
     }
     
     struct FloatArguments : Codable {

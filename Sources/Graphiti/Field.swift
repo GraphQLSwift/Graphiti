@@ -73,9 +73,9 @@ public class Field<ObjectType, Keys : RawRepresentable, Context, Arguments : Dec
     ) {
         let name = name
         let function: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
-            return { context, arguments, eventLoopGroup in
+            return { context, arguments, group in
                 let result = try function(type)(context, arguments)
-                return eventLoopGroup.next().newSucceededFuture(result: result)
+                return group.next().makeSucceededFuture(result)
             }
         }
         

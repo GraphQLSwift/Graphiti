@@ -66,7 +66,7 @@ public final class Schema<RootType : Keyable, Context> {
                 operationName: operationName
             )
         } catch {
-            return eventLoopGroup.next().newFailedFuture(error: error)
+            return eventLoopGroup.next().makeFailedFuture(error)
         }
     }
 }

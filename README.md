@@ -170,11 +170,11 @@ struct API : Keyable {
     }
     
     func getMessage(
-    	context: NoContext,
+    	store: MessageStore,
     	arguments: NoArguments,
-    	eventLoopGroup: EventLoopGroup
+    	group: EventLoopGroup
     ) -> EventLoopFuture<Message> {
-        eventLoopGroup.next().newSucceededFuture(result: "world")
+        group.next().makeSucceededFuture(store.getMessage())
     }
 }
 ```
