@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/GraphQLSwift/GraphQL.git",
         "state": {
           "branch": null,
-          "revision": "01784d0955bc807399f22c24737a8b16ba94c5ae",
-          "version": "1.0.0"
+          "revision": "1042554762a380d2696d37e3ebab3ed0fa4f5a92",
+          "version": "1.0.1"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/wickwirew/Runtime.git",
         "state": {
           "branch": null,
-          "revision": "c167476b07fe8cc65fdf064076a4081c3269d14a",
-          "version": "2.1.0"
+          "revision": "61c9776f47d2951bdc562486ad348e5e1ca2e180",
+          "version": "2.1.1"
         }
       },
       {
