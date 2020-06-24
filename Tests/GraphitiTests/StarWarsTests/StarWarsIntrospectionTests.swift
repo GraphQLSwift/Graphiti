@@ -502,7 +502,7 @@ class StarWarsIntrospectionTests : XCTestCase {
                                                 "kind": "SCALAR",
                                             ]
                                         ],
-                                        "defaultValue": "R2-D2",
+                                        "defaultValue": "\"R2-D2\"",
                                     ]
                                 ]
                             ]
