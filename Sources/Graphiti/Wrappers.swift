@@ -28,3 +28,13 @@ extension Array : Wrapper {
         return .list
     }
 }
+
+extension Set : Wrapper {
+    static var wrappedType: Any.Type {
+        return Element.self
+    }
+
+    static var modifier: WrapperModifier {
+        return .list
+    }
+}
