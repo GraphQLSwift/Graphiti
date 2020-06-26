@@ -5,13 +5,13 @@ public protocol Service {
     associatedtype RootType : Keyable
     associatedtype ContextType
     var root: RootType { get }
-    var context: ContextType { get }
     var schema: Schema<RootType, ContextType> { get }
 }
 
 extension Service {
     public func execute(
         request: String,
+        context: ContextType,
         on eventLoopGroup: EventLoopGroup,
         variables: [String: Map] = [:],
         operationName: String? = nil
@@ -19,7 +19,7 @@ extension Service {
         return schema.execute(
             request: request,
             root: root,
-            context: self.context,
+            context: context,
             eventLoopGroup: eventLoopGroup,
             variables: variables,
             operationName: operationName

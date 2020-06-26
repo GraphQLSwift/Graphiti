@@ -25,6 +25,7 @@ class StarWarsQueryTests : XCTestCase {
         
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -60,6 +61,7 @@ class StarWarsQueryTests : XCTestCase {
 
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -123,6 +125,7 @@ class StarWarsQueryTests : XCTestCase {
 
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -148,6 +151,7 @@ class StarWarsQueryTests : XCTestCase {
 
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -179,6 +183,7 @@ class StarWarsQueryTests : XCTestCase {
 
         result = try service.execute(
             request: query,
+            context: service.context,
             on: group,
             variables: params
         ).wait()
@@ -197,6 +202,7 @@ class StarWarsQueryTests : XCTestCase {
 
         result = try service.execute(
             request: query,
+            context: service.context,
             on: group,
             variables: params
         ).wait()
@@ -213,6 +219,7 @@ class StarWarsQueryTests : XCTestCase {
 
         result = try service.execute(
             request: query,
+            context: service.context,
             on: group,
             variables: params
         ).wait()
@@ -239,6 +246,7 @@ class StarWarsQueryTests : XCTestCase {
 
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -270,6 +278,7 @@ class StarWarsQueryTests : XCTestCase {
 
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -305,6 +314,7 @@ class StarWarsQueryTests : XCTestCase {
 
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -342,6 +352,7 @@ class StarWarsQueryTests : XCTestCase {
 
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -369,6 +380,7 @@ class StarWarsQueryTests : XCTestCase {
 
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -396,6 +408,7 @@ class StarWarsQueryTests : XCTestCase {
 
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -430,6 +443,7 @@ class StarWarsQueryTests : XCTestCase {
 
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -490,6 +504,7 @@ class StarWarsQueryTests : XCTestCase {
 
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
 
@@ -524,6 +539,7 @@ class StarWarsQueryTests : XCTestCase {
 
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
 
@@ -615,6 +631,7 @@ class StarWarsQueryTests : XCTestCase {
 
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
 
@@ -653,6 +670,7 @@ class StarWarsQueryTests : XCTestCase {
 
         let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -686,6 +704,7 @@ class StarWarsQueryTests : XCTestCase {
 
         result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -718,6 +737,7 @@ class StarWarsQueryTests : XCTestCase {
         
         result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
 

@@ -85,8 +85,9 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try self.service.execute(
+        let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -118,8 +119,9 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try self.service.execute(
+        let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -147,8 +149,9 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try self.service.execute(
+        let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -178,8 +181,9 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try self.service.execute(
+        let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -209,8 +213,9 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try self.service.execute(
+        let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -289,8 +294,9 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try self.service.execute(
+        let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -394,8 +400,9 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try self.service.execute(
+        let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -512,8 +519,9 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try self.service.execute(
+        let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -543,8 +551,9 @@ class StarWarsIntrospectionTests : XCTestCase {
             ]
         )
 
-        let result = try self.service.execute(
+        let result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         

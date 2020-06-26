@@ -103,14 +103,12 @@ Now we can finally define the Schema using the builder pattern.
 ```swift
 struct MessageService : Service {
     let root: MessageAPI
-    let context: MessageStore
     let schema: Schema<MessageAPI, MessageStore>
     
     // Notice that `Service` allows dependency injection.
     // You could pass mocked subtypes of `root` and `context` when testing, for example.
-    init(root: MessageAPI, context: MessageStore) throws {
+    init(root: MessageAPI) throws {
         self.root = root
-        self.context = context
 
         self.schema = try Schema<MessageAPI, MessageStore> { schema in
             schema.type(Message.self) { type in
@@ -134,7 +132,7 @@ import NIO
 
 let root = MessageAPI()
 let context = MessageStore()
-let service = try MessageService(root: root, context: context)
+let service = try MessageService(root: root)
 let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         
 defer {
@@ -143,6 +141,7 @@ defer {
 
 let result = try service.execute(
     request: "{ getMessage { content } }",
+    context: context,
     on: group
 ).wait()
 

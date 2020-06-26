@@ -155,14 +155,26 @@ class HelloWorldTests : XCTestCase {
     func testHello() throws {
         let query = "{ hello }"
         let expected = GraphQLResult(data: ["hello": "world"])
-        let result = try service.execute(request: query, on: group).wait()
+        
+        let result = try service.execute(
+            request: query,
+            context: service.context,
+            on: group
+        ).wait()
+        
         XCTAssertEqual(result, expected)
     }
     
     func testHelloAsync() throws {
         let query = "{ asyncHello }"
         let expected = GraphQLResult(data: ["asyncHello": "world"])
-        let result = try service.execute(request: query, on: group).wait()
+        
+        let result = try service.execute(
+            request: query,
+            context: service.context,
+            on: group
+        ).wait()
+        
         XCTAssertEqual(result, expected)
     }
 
@@ -178,7 +190,12 @@ class HelloWorldTests : XCTestCase {
             ]
         )
 
-        let result = try service.execute(request: query, on: group).wait()
+        let result = try service.execute(
+            request: query,
+            context: service.context,
+            on: group
+        ).wait()
+        
         XCTAssertEqual(result, expectedErrors)
     }
     
@@ -195,6 +212,7 @@ class HelloWorldTests : XCTestCase {
 
         result = try service.execute(
             request: query,
+            context: service.context,
             on: group,
             variables: ["float": 4]
         ).wait()
@@ -209,6 +227,7 @@ class HelloWorldTests : XCTestCase {
         
         result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -224,6 +243,7 @@ class HelloWorldTests : XCTestCase {
         
         result = try service.execute(
             request: query,
+            context: service.context,
             on: group,
             variables: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"]
         ).wait()
@@ -238,6 +258,7 @@ class HelloWorldTests : XCTestCase {
         
         result = try service.execute(
             request: query,
+            context: service.context,
             on: group
         ).wait()
         
@@ -262,6 +283,7 @@ class HelloWorldTests : XCTestCase {
         
         let result = try service.execute(
             request: mutation,
+            context: service.context,
             on: group,
             variables: variables
         ).wait()
