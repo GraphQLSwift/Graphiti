@@ -6,7 +6,7 @@ import GraphQL
 @available(OSX 10.15, *)
 class StarWarsQueryTests : XCTestCase {
     private let service = StarWarsService()
-    private var group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+    private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
     
     deinit {
         try? self.group.syncShutdownGracefully()

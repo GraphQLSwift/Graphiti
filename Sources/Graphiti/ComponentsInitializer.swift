@@ -1,3 +1,6 @@
+import Foundation
+import GraphQL
+
 public final class ComponentsInitializer<RootType : Keyable, Context> {
     var components: [Component<RootType, Context>] = []
     
@@ -167,5 +170,60 @@ public final class ComponentsInitializer<RootType : Keyable, Context> {
         
         components.append(component)
         return ComponentInitializer(component)
+    }
+    
+    @discardableResult
+    public func dateScalar(
+        formatter: Formatter
+    ) -> ComponentInitializer<RootType, Context> {
+        scalar(
+            Date.self,
+            serialize: { date in
+                guard let string = formatter.string(for: date) else {
+                    throw GraphQLError(message: "Invalid value for Date scalar. Cannot convert \"\(date)\" to string.")
+                }
+                
+                return .string(string)
+            },
+            parse: { map in
+                guard let string = map.string else {
+                    throw GraphQLError(message: "Invalid type for Date scalar. Expected string, but got \(map.typeDescription)")
+                }
+                
+                var date = Date()
+                let datePointer = AutoreleasingUnsafeMutablePointer<AnyObject?>(&date)
+                
+                guard formatter.getObjectValue(datePointer, for: string, errorDescription: nil) else {
+                    throw GraphQLError(message: "Invalid date string for Date scalar.")
+                }
+                
+                guard let formattedDate = datePointer.pointee as? Date else {
+                    throw GraphQLError(message: "Invalid date string for Date scalar.")
+                }
+                
+                return formattedDate
+            }
+        )
+    }
+    
+    @discardableResult
+    public func urlScalar() -> ComponentInitializer<RootType, Context> {
+        scalar(
+            URL.self,
+            serialize: { url in
+                .string(url.absoluteString)
+            },
+            parse: { map in
+                guard let string = map.string else {
+                    throw GraphQLError(message: "Invalid type for URL scalar.")
+                }
+                
+                guard let url = URL(string: string) else {
+                    throw GraphQLError(message: "Invalid url string for URL scalar.")
+                }
+                
+                return url
+            }
+        )
     }
 }

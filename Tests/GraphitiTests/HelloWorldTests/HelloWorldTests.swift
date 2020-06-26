@@ -146,7 +146,7 @@ struct HelloService : Service {
 
 class HelloWorldTests : XCTestCase {
     private let service = HelloService()
-    private var group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+    private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
     
     deinit {
         try? self.group.syncShutdownGracefully()

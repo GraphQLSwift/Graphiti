@@ -6,14 +6,13 @@ import GraphQL
 
 class StarWarsIntrospectionTests : XCTestCase {
     private let service = StarWarsService()
+    private let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+    
+    deinit {
+        try? group.syncShutdownGracefully()
+    }
     
     func testIntrospectionTypeQuery() throws {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try group.syncShutdownGracefully())
-        }
-
         let query = "query IntrospectionTypeQuery {" +
                     "    __schema {" +
                     "        types {" +
@@ -95,12 +94,6 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionQueryTypeQuery() throws {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try group.syncShutdownGracefully())
-        }
-
         let query = "query IntrospectionQueryTypeQuery {" +
                     "    __schema {" +
                     "        queryType {" +
@@ -129,12 +122,6 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionDroidTypeQuery() throws {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try group.syncShutdownGracefully())
-        }
-
         let query = "query IntrospectionDroidTypeQuery {" +
                     "    __type(name: \"Droid\") {" +
                     "        name" +
@@ -159,12 +146,6 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionDroidKindQuery() throws {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try group.syncShutdownGracefully())
-        }
-
         let query = "query IntrospectionDroidKindQuery {" +
                     "    __type(name: \"Droid\") {" +
                     "        name" +
@@ -191,12 +172,6 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionCharacterKindQuery() throws {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try group.syncShutdownGracefully())
-        }
-
         let query = "query IntrospectionCharacterKindQuery {" +
                     "    __type(name: \"Character\") {" +
                     "        name" +
@@ -223,12 +198,6 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionDroidFieldsQuery() throws {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try group.syncShutdownGracefully())
-        }
-
         let query = "query IntrospectionDroidFieldsQuery {" +
                     "    __type(name: \"Droid\") {" +
                     "        name" +
@@ -304,12 +273,6 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionDroidNestedFieldsQuery() throws {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try group.syncShutdownGracefully())
-        }
-
         let query = "query IntrospectionDroidNestedFieldsQuery {" +
                     "    __type(name: \"Droid\") {" +
                     "        name" +
@@ -410,12 +373,6 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionFieldArgsQuery() throws {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try group.syncShutdownGracefully())
-        }
-
         let query = "query IntrospectionFieldArgsQuery {" +
                     "    __schema {" +
                     "        queryType {" +
@@ -529,12 +486,6 @@ class StarWarsIntrospectionTests : XCTestCase {
     }
 
     func testIntrospectionDroidDescriptionQuery() throws {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        defer {
-            XCTAssertNoThrow(try group.syncShutdownGracefully())
-        }
-        
         let query = "query IntrospectionDroidDescriptionQuery {" +
                     "    __type(name: \"Droid\") {" +
                     "        name" +

@@ -1,3 +1,5 @@
+import NIO
+
 public final class FieldsInitializer<ObjectType, Keys : RawRepresentable, Context> where Keys.RawValue == String {
     var fields: [FieldComponent<ObjectType, Keys, Context>] = []
     
@@ -95,5 +97,38 @@ public final class FieldsInitializer<ObjectType, Keys : RawRepresentable, Contex
         
         fields.append(field)
         return FieldInitializer(field)
+    }
+    
+    @discardableResult
+    public func field<FieldType, ResolveType>(
+        _ name: Keys,
+        at function: @escaping SimpleAsyncResolve<ObjectType, Context, NoArguments, ResolveType>,
+        overridingType: FieldType.Type = FieldType.self
+    ) -> FieldInitializer<ObjectType, Keys, Context, NoArguments> {
+        let asyncResolve: AsyncResolve<ObjectType, Context, NoArguments, ResolveType> = { type in
+            return { context, arguments, group in
+                // We hop to guarantee that the future will
+                // return in the same event loop group of the execution.
+                try function(type)(context, arguments).hop(to: group.next())
+            }
+        }
+        
+        return field(name, at: asyncResolve, overridingType: overridingType)
+    }
+    
+    @discardableResult
+    public func field<Arguments : Decodable, ResolveType>(
+        _ name: Keys,
+        at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, ResolveType>
+    ) -> FieldInitializer<ObjectType, Keys, Context, Arguments> {
+        let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+            return { context, arguments, group in
+                // We hop to guarantee that the future will
+                // return in the same event loop group of the execution.
+                try function(type)(context, arguments).hop(to: group.next())
+            }
+        }
+        
+        return field(name, at: asyncResolve)
     }
 }

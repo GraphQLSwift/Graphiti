@@ -133,7 +133,7 @@ import NIO
 let root = MessageAPI()
 let context = MessageStore()
 let service = try MessageService(root: root)
-let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         
 defer {
     try? group.syncShutdownGracefully()
