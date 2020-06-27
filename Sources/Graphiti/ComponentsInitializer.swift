@@ -215,7 +215,7 @@ public final class ComponentsInitializer<RootType : Keyable, Context> {
             },
             parse: { map in
                 guard let string = map.string else {
-                    throw GraphQLError(message: "Invalid type for URL scalar.")
+                    throw GraphQLError(message: "Invalid type for URL scalar. Expected string, but got \(map.typeDescription)")
                 }
                 
                 guard let url = URL(string: string) else {
@@ -223,6 +223,27 @@ public final class ComponentsInitializer<RootType : Keyable, Context> {
                 }
                 
                 return url
+            }
+        )
+    }
+    
+    @discardableResult
+    public func uuidScalar() -> ComponentInitializer<RootType, Context> {
+        scalar(
+            UUID.self,
+            serialize: { uuid in
+                .string(uuid.uuidString)
+            },
+            parse: { map in
+                guard let string = map.string else {
+                    throw GraphQLError(message: "Invalid type for UUID scalar. Expected string, but got \(map.typeDescription)")
+                }
+                
+                guard let uuid = UUID(uuidString: string) else {
+                    throw GraphQLError(message: "Invalid uuid string for UUID scalar.")
+                }
+                
+                return uuid
             }
         )
     }
