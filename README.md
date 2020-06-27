@@ -85,38 +85,40 @@ extension Message : Keyable {
     }
 }
 
-struct MessageAPI : Keyable {
+struct MessageRoot : Keyable {
     enum Keys : String {
         case getMessage
     }
     
+    // The first parameter is the context, you can name it anything you want.
+    // We're calling it `store` here because the context type is `MessageStore`.
     func getMessage(store: MessageStore, arguments: NoArguments) -> Message {
         store.getMessage()
     }
 }
 ```
 
-#### Defining the service
+#### Defining the API
 
 Now we can finally define the Schema using the builder pattern.
 
 ```swift
-struct MessageService : Service {
-    let root: MessageAPI
-    let schema: Schema<MessageAPI, MessageStore>
+struct MessageAPI : API {
+    let root: MessageRoot
+    let schema: Schema<MessageRoot, MessageStore>
     
-    // Notice that `Service` allows dependency injection.
+    // Notice that `API` allows dependency injection.
     // You could pass mocked subtypes of `root` and `context` when testing, for example.
-    init(root: MessageAPI) throws {
+    init(root: MessageRoot) throws {
         self.root = root
 
-        self.schema = try Schema<MessageAPI, MessageStore> { schema in
+        self.schema = try Schema<MessageRoot, MessageStore> { schema in
             schema.type(Message.self) { type in
                 type.field(.content, at: \.content)
             }
 
             schema.query { query in
-                query.field(.getMessage, at: MessageAPI.getMessage)
+                query.field(.getMessage, at: MessageRoot.getMessage)
             }
         }
     }
@@ -125,27 +127,27 @@ struct MessageService : Service {
 
 #### Querying
 
-To query the schema we need to instantiate the service and pass in an EventLoopGroup to feed the execute function alongside the query itself.
+To query the schema we need to instantiate the api and pass in an EventLoopGroup to feed the execute function alongside the query itself.
 
 ```swift
 import NIO
 
-let root = MessageAPI()
+let root = MessageRoot()
 let context = MessageStore()
-let service = try MessageService(root: root)
+let api = try MessageAPI(root: root)
 let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         
 defer {
     try? group.syncShutdownGracefully()
 }
 
-let result = try service.execute(
+api.execute(
     request: "{ getMessage { content } }",
     context: context,
     on: group
-).wait()
-
-print(result)
+).whenSuccess { result in
+    print(result)
+}
 ```
 
 The output will be:
@@ -154,7 +156,7 @@ The output will be:
 {"data":{"getMessage":{"content":"Hello, world!"}}}
 ```
 
-`Service.execute` returns a `GraphQLResult` which adopts `Encodable`. You can use it with a `JSONEncoder` to send the response back to the client using JSON.
+`API.execute` returns a `GraphQLResult` which adopts `Encodable`. You can use it with a `JSONEncoder` to send the response back to the client using JSON.
 
 #### Async resolvers
 

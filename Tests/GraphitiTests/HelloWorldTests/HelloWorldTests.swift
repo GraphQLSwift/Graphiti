@@ -58,7 +58,7 @@ final class Context {
     }
 }
 
-struct Root : Keyable {
+struct HelloRoot : Keyable {
     enum Keys : String {
         case hello
         case asyncHello
@@ -109,11 +109,11 @@ struct Root : Keyable {
     }
 }
 
-struct HelloService : Service {
-    let root = Root()
+struct HelloAPI : API {
+    let root = HelloRoot()
     let context = Context()
     
-    let schema = try! Schema<Root, Context> { schema in
+    let schema = try! Schema<HelloRoot, Context> { schema in
         schema.scalar(Float.self)
             .description("The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).")
 
@@ -131,21 +131,21 @@ struct HelloService : Service {
         }
         
         schema.query { query in
-            query.field(.hello, at: Root.hello)
-            query.field(.asyncHello, at: Root.asyncHello)
-            query.field(.float, at: Root.getFloat)
-            query.field(.id, at: Root.getId)
-            query.field(.user, at: Root.getUser)
+            query.field(.hello, at: HelloRoot.hello)
+            query.field(.asyncHello, at: HelloRoot.asyncHello)
+            query.field(.float, at: HelloRoot.getFloat)
+            query.field(.id, at: HelloRoot.getId)
+            query.field(.user, at: HelloRoot.getUser)
         }
         
         schema.mutation { mutation in
-            mutation.field(.addUser, at: Root.addUser)
+            mutation.field(.addUser, at: HelloRoot.addUser)
         }
     }
 }
 
 class HelloWorldTests : XCTestCase {
-    private let service = HelloService()
+    private let api = HelloAPI()
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
     
     deinit {
@@ -156,32 +156,42 @@ class HelloWorldTests : XCTestCase {
         let query = "{ hello }"
         let expected = GraphQLResult(data: ["hello": "world"])
         
-        let result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
+        let expectation = XCTestExpectation()
         
-        XCTAssertEqual(result, expected)
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
     
     func testHelloAsync() throws {
         let query = "{ asyncHello }"
         let expected = GraphQLResult(data: ["asyncHello": "world"])
         
-        let result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
+        let expectation = XCTestExpectation()
         
-        XCTAssertEqual(result, expected)
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testBoyhowdy() throws {
         let query = "{ boyhowdy }"
 
-        let expectedErrors = GraphQLResult(
+        let expected = GraphQLResult(
             errors: [
                 GraphQLError(
                     message: "Cannot query field \"boyhowdy\" on type \"Query\".",
@@ -189,20 +199,24 @@ class HelloWorldTests : XCTestCase {
                 )
             ]
         )
-
-        let result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
         
-        XCTAssertEqual(result, expectedErrors)
+        let expectation = XCTestExpectation()
+
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
     
     func testScalar() throws {
         var query: String
         var expected = GraphQLResult(data: ["float": 4.0])
-        var result: GraphQLResult
 
         query = """
         query Query($float: Float!) {
@@ -210,14 +224,19 @@ class HelloWorldTests : XCTestCase {
         }
         """
 
-        result = try service.execute(
+        let expectationA = XCTestExpectation()
+        
+        api.execute(
             request: query,
-            context: service.context,
+            context: api.context,
             on: group,
             variables: ["float": 4]
-        ).wait()
-
-        XCTAssertEqual(result, expected)
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectationA.fulfill()
+        }
+        
+        wait(for: [expectationA], timeout: 10)
 
         query = """
         query Query {
@@ -225,13 +244,18 @@ class HelloWorldTests : XCTestCase {
         }
         """
         
-        result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
+        let expectationB = XCTestExpectation()
         
-        XCTAssertEqual(result, expected)
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectationB.fulfill()
+        }
+        
+        wait(for: [expectationB], timeout: 10)
         
         query = """
         query Query($id: String!) {
@@ -241,14 +265,19 @@ class HelloWorldTests : XCTestCase {
         
         expected = GraphQLResult(data: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"])
         
-        result = try service.execute(
+        let expectationC = XCTestExpectation()
+        
+        api.execute(
             request: query,
-            context: service.context,
+            context: api.context,
             on: group,
             variables: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"]
-        ).wait()
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectationC.fulfill()
+        }
         
-        XCTAssertEqual(result, expected)
+        wait(for: [expectationC], timeout: 10)
         
         query = """
         query Query {
@@ -256,13 +285,18 @@ class HelloWorldTests : XCTestCase {
         }
         """
         
-        result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
+        let expectationD = XCTestExpectation()
         
-        XCTAssertEqual(result, expected)
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectationD.fulfill()
+        }
+        
+        wait(for: [expectationD], timeout: 10)
     }
 
     func testInput() throws {
@@ -281,14 +315,19 @@ class HelloWorldTests : XCTestCase {
             data: ["addUser" : [ "id" : "123", "name" : "bob" ]]
         )
         
-        let result = try service.execute(
+        let expectation = XCTestExpectation()
+        
+        api.execute(
             request: mutation,
-            context: service.context,
+            context: api.context,
             on: group,
             variables: variables
-        ).wait()
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
         
-        XCTAssertEqual(result, expected)
+        wait(for: [expectation], timeout: 10)
     }
 }
 

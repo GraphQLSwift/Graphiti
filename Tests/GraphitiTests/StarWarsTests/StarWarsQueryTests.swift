@@ -5,7 +5,7 @@ import GraphQL
 
 @available(OSX 10.15, *)
 class StarWarsQueryTests : XCTestCase {
-    private let service = StarWarsService()
+    private let api = StarWarsAPI()
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
     
     deinit {
@@ -22,14 +22,18 @@ class StarWarsQueryTests : XCTestCase {
         """
         
         let expected = GraphQLResult(data: ["hero": ["name": "R2-D2"]])
+        let expectation = XCTestExpectation()
         
-        let result = try service.execute(
+        api.execute(
             request: query,
-            context: service.context,
+            context: api.context,
             on: group
-        ).wait()
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
         
-        XCTAssertEqual(result, expected)
+        wait(for: [expectation], timeout: 10)
     }
 
     func testHeroNameAndFriendsQuery() throws {
@@ -59,13 +63,18 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
 
-        let result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
+        let expectation = XCTestExpectation()
         
-        XCTAssertEqual(result, expected)
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testNestedQuery() throws {
@@ -122,14 +131,19 @@ class StarWarsQueryTests : XCTestCase {
                 ],
             ]
         )
-
-        let result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
         
-        XCTAssertEqual(result, expected)
+        let expectation = XCTestExpectation()
+
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testFetchLukeQuery() throws {
@@ -148,14 +162,19 @@ class StarWarsQueryTests : XCTestCase {
                 ],
             ]
         )
-
-        let result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
         
-        XCTAssertEqual(result, expected)
+        let expectation = XCTestExpectation()
+
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testFetchSomeIDQuery() throws {
@@ -169,7 +188,7 @@ class StarWarsQueryTests : XCTestCase {
 
         var params: [String: Map]
         var expected: GraphQLResult
-        var result: GraphQLResult
+        var expectation: XCTestExpectation
 
         params = ["someId": "1000"]
 
@@ -180,15 +199,20 @@ class StarWarsQueryTests : XCTestCase {
                 ],
             ]
         )
+        
+        expectation = XCTestExpectation()
 
-        result = try service.execute(
+        api.execute(
             request: query,
-            context: service.context,
+            context: api.context,
             on: group,
             variables: params
-        ).wait()
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
         
-        XCTAssertEqual(result, expected)
+        wait(for: [expectation], timeout: 10)
 
         params = ["someId": "1002"]
 
@@ -199,15 +223,20 @@ class StarWarsQueryTests : XCTestCase {
                 ],
             ]
         )
+        
+        expectation = XCTestExpectation()
 
-        result = try service.execute(
+        api.execute(
             request: query,
-            context: service.context,
+            context: api.context,
             on: group,
             variables: params
-        ).wait()
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
         
-        XCTAssertEqual(result, expected)
+        wait(for: [expectation], timeout: 10)
 
         params = ["someId": "not a valid id"]
 
@@ -216,15 +245,20 @@ class StarWarsQueryTests : XCTestCase {
                 "human": nil,
             ]
         )
+        
+        expectation = XCTestExpectation()
 
-        result = try service.execute(
+        api.execute(
             request: query,
-            context: service.context,
+            context: api.context,
             on: group,
             variables: params
-        ).wait()
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
         
-        XCTAssertEqual(result, expected)
+        wait(for: [expectation], timeout: 10)
     }
 
     func testFetchLukeAliasedQuery() throws {
@@ -243,14 +277,19 @@ class StarWarsQueryTests : XCTestCase {
                 ],
             ]
         )
-
-        let result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
         
-        XCTAssertEqual(result, expected)
+        let expectation = XCTestExpectation()
+
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testFetchLukeAndLeiaAliasedQuery() throws {
@@ -275,14 +314,19 @@ class StarWarsQueryTests : XCTestCase {
                 ],
             ]
         )
-
-        let result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
         
-        XCTAssertEqual(result, expected)
+        let expectation = XCTestExpectation()
+
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testDuplicateFieldsQuery() throws {
@@ -311,14 +355,19 @@ class StarWarsQueryTests : XCTestCase {
                 ],
             ]
         )
-
-        let result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
         
-        XCTAssertEqual(result, expected)
+        let expectation = XCTestExpectation()
+
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testUseFragmentQuery() throws {
@@ -349,14 +398,19 @@ class StarWarsQueryTests : XCTestCase {
                 ],
             ]
         )
-
-        let result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
         
-        XCTAssertEqual(result, expected)
+        let expectation = XCTestExpectation()
+
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testCheckTypeOfR2Query() throws {
@@ -377,14 +431,19 @@ class StarWarsQueryTests : XCTestCase {
                 ],
             ]
         )
-
-        let result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
         
-        XCTAssertEqual(result, expected)
+        let expectation = XCTestExpectation()
+
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testCheckTypeOfLukeQuery() throws {
@@ -405,14 +464,19 @@ class StarWarsQueryTests : XCTestCase {
                 ],
             ]
         )
-
-        let result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
         
-        XCTAssertEqual(result, expected)
+        let expectation = XCTestExpectation()
+
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testSecretBackstoryQuery() throws {
@@ -440,14 +504,19 @@ class StarWarsQueryTests : XCTestCase {
                 )
             ]
         )
-
-        let result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
         
-        XCTAssertEqual(result, expected)
+        let expectation = XCTestExpectation()
+
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testSecretBackstoryListQuery() throws {
@@ -501,14 +570,19 @@ class StarWarsQueryTests : XCTestCase {
                 )
             ]
         )
+        
+        let expectation = XCTestExpectation()
 
-        let result = try service.execute(
+        api.execute(
             request: query,
-            context: service.context,
+            context: api.context,
             on: group
-        ).wait()
-
-        XCTAssertEqual(result, expected)
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testSecretBackstoryAliasQuery() throws {
@@ -536,14 +610,19 @@ class StarWarsQueryTests : XCTestCase {
                 )
             ]
         )
+        
+        let expectation = XCTestExpectation()
 
-        let result = try service.execute(
+        api.execute(
             request: query,
-            context: service.context,
+            context: api.context,
             on: group
-        ).wait()
-
-        XCTAssertEqual(result, expected)
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testNonNullableFieldsQuery() throws {
@@ -581,7 +660,7 @@ class StarWarsQueryTests : XCTestCase {
             }
         }
         
-        struct MyService : Service {
+        struct MyAPI : API {
             var root: Root = Root()
             var context: NoContext = NoContext()
             
@@ -627,15 +706,19 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
         
-        let service = MyService()
+        let expectation = XCTestExpectation()
+        let api = MyAPI()
 
-        let result = try service.execute(
+        api.execute(
             request: query,
-            context: service.context,
+            context: api.context,
             on: group
-        ).wait()
-
-        XCTAssertEqual(result, expected)
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testSearchQuery() throws {
@@ -667,20 +750,25 @@ class StarWarsQueryTests : XCTestCase {
                 ],
             ]
         )
-
-        let result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
         
-        XCTAssertEqual(result, expected)
+        let expectation = XCTestExpectation()
+
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 
     func testDirective() throws {
         var query: String
-        var result: GraphQLResult
         var expected: GraphQLResult
+        var expectation: XCTestExpectation
         
         query = """
         query Hero {
@@ -701,14 +789,19 @@ class StarWarsQueryTests : XCTestCase {
                 ],
             ]
         )
-
-        result = try service.execute(
-            request: query,
-            context: service.context,
-            on: group
-        ).wait()
         
-        XCTAssertEqual(result, expected)
+        expectation = XCTestExpectation()
+
+        api.execute(
+            request: query,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
         
         query = """
         query Hero {
@@ -735,13 +828,18 @@ class StarWarsQueryTests : XCTestCase {
             ]
         )
         
-        result = try service.execute(
+        expectation = XCTestExpectation()
+        
+        api.execute(
             request: query,
-            context: service.context,
+            context: api.context,
             on: group
-        ).wait()
-
-        XCTAssertEqual(result, expected)
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
     }
 }
 

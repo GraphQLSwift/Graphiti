@@ -1,14 +1,14 @@
 import GraphQL
 import NIO
 
-public protocol Service {
+public protocol API {
     associatedtype RootType : Keyable
     associatedtype ContextType
     var root: RootType { get }
     var schema: Schema<RootType, ContextType> { get }
 }
 
-extension Service {
+extension API {
     public func execute(
         request: String,
         context: ContextType,
