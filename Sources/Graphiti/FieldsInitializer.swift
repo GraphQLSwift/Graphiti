@@ -18,6 +18,22 @@ public final class FieldsInitializer<ObjectType, Keys : RawRepresentable, Contex
         return FieldInitializer(field)
     }
     
+    // Adds native support for Set by converting resolve type to Array.
+    @discardableResult
+    public func field<ResolveType>(
+        _ name: Keys,
+        at keyPath: KeyPath<ObjectType, Set<ResolveType>>
+    ) -> FieldInitializer<ObjectType, Keys, Context, NoArguments> {
+        let field = Field<ObjectType, Keys, Context, NoArguments, Set<ResolveType>, Array<ResolveType>>(name: name.rawValue) { (type: ObjectType) in
+            return { (context: Context, arguments: NoArguments) in
+                return Array(type[keyPath: keyPath])
+            }
+        }
+        
+        fields.append(field)
+        return FieldInitializer(field)
+    }
+    
     @discardableResult
     public func field<FieldType, ResolveType>(
         _ name: Keys,
