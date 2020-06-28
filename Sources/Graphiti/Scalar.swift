@@ -57,6 +57,7 @@ public final class Scalar<RootType : Keyable, Context, ScalarType : Codable> : C
     override func update(builder: SchemaBuilder) throws {
         let scalarType = try GraphQLScalarType(
             name: name ?? Reflection.name(for: ScalarType.self),
+            description: description,
             serialize: { value in
                 guard let scalarValue = value as? ScalarType else {
                     throw GraphQLError(message: "Serialize expected type \(ScalarType.self) but got \(type(of: value))")
