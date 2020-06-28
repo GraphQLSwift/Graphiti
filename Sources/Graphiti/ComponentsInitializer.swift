@@ -174,34 +174,23 @@ public final class ComponentsInitializer<RootType : Keyable, Context> {
     
     @discardableResult
     public func dateScalar(
-        formatter: Formatter
+        formatter: DateFormatter
     ) -> ComponentInitializer<RootType, Context> {
         scalar(
             Date.self,
             serialize: { date in
-                guard let string = formatter.string(for: date) else {
-                    throw GraphQLError(message: "Invalid value for Date scalar. Cannot convert \"\(date)\" to string.")
-                }
-                
-                return .string(string)
+                .string(formatter.string(from: date))
             },
             parse: { map in
                 guard let string = map.string else {
                     throw GraphQLError(message: "Invalid type for Date scalar. Expected string, but got \(map.typeDescription)")
                 }
                 
-                var date = Date()
-                let datePointer = AutoreleasingUnsafeMutablePointer<AnyObject?>(&date)
-                
-                guard formatter.getObjectValue(datePointer, for: string, errorDescription: nil) else {
+                guard let date = formatter.date(from: string) else {
                     throw GraphQLError(message: "Invalid date string for Date scalar.")
                 }
                 
-                guard let formattedDate = datePointer.pointee as? Date else {
-                    throw GraphQLError(message: "Invalid date string for Date scalar.")
-                }
-                
-                return formattedDate
+                return date
             }
         )
     }
@@ -248,3 +237,12 @@ public final class ComponentsInitializer<RootType : Keyable, Context> {
         )
     }
 }
+
+public protocol DateFormatter {
+    func date(from string: String) -> Date?
+    func string(from date: Date) -> String
+}
+
+extension Foundation.DateFormatter : DateFormatter {}
+@available(OSX 10.12, *)
+extension Foundation.ISO8601DateFormatter : DateFormatter {}
