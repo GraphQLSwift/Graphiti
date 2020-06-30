@@ -1,12 +1,11 @@
 import GraphQL
 
 public final class Interface<RootType : Keyable, Context, Reference : InterfaceReference> : Component<RootType, Context> {
-    let name: String?
     let fields: [FieldComponent<Reference.InterfaceType, Reference.Keys, Context>]
     
     override func update(builder: SchemaBuilder) throws {
         let interfaceType = try GraphQLInterfaceType(
-            name: name ?? Reflection.name(for: Reference.InterfaceType.self),
+            name: name,
             description: description,
             fields: fields(provider: builder),
             resolveType: nil
@@ -31,7 +30,7 @@ public final class Interface<RootType : Keyable, Context, Reference : InterfaceR
         name: String? = nil,
         fields: [FieldComponent<Reference.InterfaceType, Reference.Keys, Context>]
     )  {
-        self.name = name
         self.fields = fields
+        super.init(name: name ?? Reflection.name(for: Reference.InterfaceType.self))
     }
 }

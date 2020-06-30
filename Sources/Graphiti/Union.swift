@@ -1,12 +1,11 @@
 import GraphQL
 
 public final class Union<Root : Keyable, Context, UnionType> : Component<Root, Context> {
-    private let name: String?
     private let members: [Any.Type]
     
     override func update(builder: SchemaBuilder) throws {
         let unionType = try GraphQLUnionType(
-            name: name ?? Reflection.name(for: UnionType.self),
+            name: name,
             description: description,
             resolveType: nil,
             types: members.map {
@@ -22,7 +21,8 @@ public final class Union<Root : Keyable, Context, UnionType> : Component<Root, C
         name: String? = nil,
         members: [Any.Type]
     ) {
-        self.name = name
         self.members = members
+        super.init(name: name ?? Reflection.name(for: UnionType.self))
+        
     }
 }

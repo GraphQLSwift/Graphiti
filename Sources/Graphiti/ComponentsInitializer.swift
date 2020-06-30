@@ -172,12 +172,40 @@ public final class ComponentsInitializer<RootType : Keyable, Context> {
         return ComponentInitializer(component)
     }
     
+    // MARK: Extensions
+    
+    public func connection<ObjectType : Encodable & Keyable>(
+        _ type: ObjectType.Type,
+        name: String? = nil
+    ) {
+        if !components.contains(where: { $0.name == "PageInfo" }) {
+            self.type(PageInfo.self) { type in
+                type.field(.hasPreviousPage, at: \.hasPreviousPage)
+                type.field(.hasNextPage, at: \.hasNextPage)
+                type.field(.startCursor, at: \.startCursor)
+                type.field(.endCursor, at: \.endCursor)
+            }
+        }
+        
+        self.type(Edge<ObjectType>.self) { type in
+            type.field(.node, at: \.node)
+            type.field(.cursor, at: \.cursor)
+        }
+        
+        self.type(Connection<ObjectType>.self) { type in
+            type.field(.edges, at: \.edges)
+            type.field(.pageInfo, at: \.pageInfo)
+        }
+    }
+    
     @discardableResult
     public func dateScalar(
-        formatter: DateFormatter
+        formatter: DateFormatter,
+        name: String? = nil
     ) -> ComponentInitializer<RootType, Context> {
         scalar(
             Date.self,
+            name: name,
             serialize: { date in
                 .string(formatter.string(from: date))
             },
@@ -196,9 +224,12 @@ public final class ComponentsInitializer<RootType : Keyable, Context> {
     }
     
     @discardableResult
-    public func urlScalar() -> ComponentInitializer<RootType, Context> {
+    public func urlScalar(
+        name: String? = nil
+    ) -> ComponentInitializer<RootType, Context> {
         scalar(
             URL.self,
+            name: name,
             serialize: { url in
                 .string(url.absoluteString)
             },
@@ -217,9 +248,12 @@ public final class ComponentsInitializer<RootType : Keyable, Context> {
     }
     
     @discardableResult
-    public func uuidScalar() -> ComponentInitializer<RootType, Context> {
+    public func uuidScalar(
+        name: String? = nil
+    ) -> ComponentInitializer<RootType, Context> {
         scalar(
             UUID.self,
+            name: name,
             serialize: { uuid in
                 .string(uuid.uuidString)
             },

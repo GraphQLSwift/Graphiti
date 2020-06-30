@@ -21,20 +21,20 @@ public final class FieldInitializer<ObjectType, Keys : RawRepresentable, Context
     
     @discardableResult
     public func argument<Argument>(
-        _ name: Keys,
+        _ name: Arguments.Keys,
         at keyPath: KeyPath<Arguments, Argument>,
         description: String
-    ) -> Self {
+    ) -> Self where Arguments : Keyable {
         field.argumentsDescriptions[name.rawValue] = description
         return self
     }
     
     @discardableResult
     public func argument<Argument : Encodable>(
-        _ name: Keys,
+        _ name: Arguments.Keys,
         at keyPath: KeyPath<Arguments, Argument>,
         defaultValue: Argument
-    ) -> Self {
+    ) -> Self where Arguments : Keyable {
        field.argumentsDefaultValues[name.rawValue] = AnyEncodable(defaultValue)
        return self
     }

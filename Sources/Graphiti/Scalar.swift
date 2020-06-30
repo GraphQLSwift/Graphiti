@@ -50,13 +50,12 @@ extension GraphQL.Value {
 }
 
 public final class Scalar<RootType : Keyable, Context, ScalarType : Codable> : Component<RootType, Context> {
-    let name: String?
     let serialize: ((ScalarType) throws -> Map)?
     let parse: ((Map) throws -> ScalarType)?
     
     override func update(builder: SchemaBuilder) throws {
         let scalarType = try GraphQLScalarType(
-            name: name ?? Reflection.name(for: ScalarType.self),
+            name: name,
             description: description,
             serialize: { value in
                 guard let scalarValue = value as? ScalarType else {
@@ -84,8 +83,8 @@ public final class Scalar<RootType : Keyable, Context, ScalarType : Codable> : C
         serialize: ((ScalarType) throws -> Map)?,
         parse: ((Map) throws -> ScalarType)?
     ) {
-        self.name = name
         self.serialize = serialize
         self.parse = parse
+        super.init(name: name ?? Reflection.name(for: ScalarType.self))
     }
 }

@@ -2,7 +2,6 @@ import XCTest
 @testable import Graphiti
 import GraphQL
 import NIO
-import Runtime
 
 struct ID : Codable {
     let id: String

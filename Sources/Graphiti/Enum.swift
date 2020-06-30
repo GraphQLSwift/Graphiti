@@ -1,12 +1,11 @@
 import GraphQL
 
 public final class Enum<RootType : Keyable, Context, EnumType : Enumerable> : Component<RootType, Context> {
-    private let name: String?
     private let values: [Value<EnumType>]
     
     override func update(builder: SchemaBuilder) throws {
         let enumType = try GraphQLEnumType(
-            name: name ?? Reflection.name(for: EnumType.self),
+            name: name,
             description: description,
             values: values.reduce(into: [:]) { result, value in
                 result[value.value.rawValue] = GraphQLEnumValue(
@@ -25,7 +24,7 @@ public final class Enum<RootType : Keyable, Context, EnumType : Enumerable> : Co
         name: String?,
         values: [Value<EnumType>]
     ) {
-        self.name = name
         self.values = values
+        super.init(name: name ?? Reflection.name(for: EnumType.self))
     }
 }

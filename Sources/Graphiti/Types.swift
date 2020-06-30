@@ -9,5 +9,6 @@ public final class Types<Root : Keyable, Context> : Component<Root, Context> {
     
     init(_ types: [Any.Type]) {
         self.types = types
+        super.init(name: "")
     }
 }

@@ -78,14 +78,14 @@ public struct StarWarsAPI : API {
         schema.union(SearchResult.self, members: Planet.self, Human.self, Droid.self)
 
         schema.query { query in
-            query.field(.hero, at: Root.getHero)
+            query.field(.hero, at: Root.hero)
                 .description("Returns a hero based on the given episode.")
                 .argument(.episode, at: \.episode, description: "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode.")
 
-            query.field(.human, at: Root.getHuman)
+            query.field(.human, at: Root.human)
                 .argument(.id, at: \.id, description: "Id of the human.")
 
-            query.field(.droid, at: Root.getDroid)
+            query.field(.droid, at: Root.droid)
                 .argument(.id, at: \.id, description: "Id of the droid.")
 
             query.field(.search, at: Root.search)

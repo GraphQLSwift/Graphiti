@@ -1,7 +1,6 @@
 import GraphQL
 
 public final class Type<RootType : Keyable, Context, ObjectType : Encodable & Keyable> : Component<RootType, Context> {
-    let name: String?
     let interfaces: [Any.Type]
     let fields: [FieldComponent<ObjectType, ObjectType.Keys, Context>]
     
@@ -11,7 +10,7 @@ public final class Type<RootType : Keyable, Context, ObjectType : Encodable & Ke
     
     override func update(builder: SchemaBuilder) throws {
         let objectType = try GraphQLObjectType(
-            name: name ?? Reflection.name(for: ObjectType.self),
+            name: name,
             description: description,
             fields: fields(provider: builder),
             interfaces: interfaces.map {
@@ -40,8 +39,8 @@ public final class Type<RootType : Keyable, Context, ObjectType : Encodable & Ke
         interfaces: [Any.Type],
         fields: [FieldComponent<ObjectType, ObjectType.Keys, Context>]
     ) {
-        self.name = name
         self.interfaces = interfaces
         self.fields = fields
+        super.init(name: name ?? Reflection.name(for: ObjectType.self))
     }
 }

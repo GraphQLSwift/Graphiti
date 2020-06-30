@@ -97,42 +97,55 @@ extension Droid : Keyable {
 
 public struct Root : Keyable {
     public enum Keys : String {
-        case id
-        case episode
         case hero
         case human
         case droid
         case search
-        case query
     }
     
     public init() {}
     
-    public struct HeroArguments : Codable {
+    public struct HeroArguments : Codable, Keyable {
+        public enum Keys : String {
+            case episode
+        }
+        
         public let episode: Episode?
     }
 
-    public func getHero(store: Store, arguments: HeroArguments) -> Character {
+    public func hero(store: Store, arguments: HeroArguments) -> Character {
         store.getHero(of: arguments.episode)
     }
 
-    public struct HumanArguments : Codable {
+    public struct HumanArguments : Codable, Keyable {
+        public enum Keys : String {
+            case id
+        }
+        
         public let id: String
     }
     
-    public func getHuman(store: Store, arguments: HumanArguments) -> Human? {
+    public func human(store: Store, arguments: HumanArguments) -> Human? {
         store.getHuman(id: arguments.id)
     }
 
-    public struct DroidArguments : Codable {
+    public struct DroidArguments : Codable, Keyable {
+        public enum Keys : String {
+            case id
+        }
+        
         public let id: String
     }
 
-    public func getDroid(store: Store, arguments: DroidArguments) -> Droid? {
+    public func droid(store: Store, arguments: DroidArguments) -> Droid? {
         store.getDroid(id: arguments.id)
     }
     
-    public struct SearchArguments : Codable {
+    public struct SearchArguments : Codable, Keyable {
+        public enum Keys : String {
+            case query
+        }
+        
         public let query: String
     }
     
