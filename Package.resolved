@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/GraphQLSwift/GraphQL.git",
         "state": {
           "branch": null,
-          "revision": "5b3fc0a49b476277e2e2c429315be6b120872fb5",
-          "version": "1.1.2"
+          "revision": "fb5c39e776d628899b454697e6b13c56cddc199b",
+          "version": "1.1.4"
         }
       },
       {
