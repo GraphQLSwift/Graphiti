@@ -4,14 +4,14 @@ public enum Episode : String, Codable, CaseIterable {
     case jedi = "JEDI"
 }
 
-public protocol Character {
+public protocol Character : Codable {
     var id: String { get }
     var name: String { get }
     var friends: [String] { get }
     var appearsIn: [Episode] { get }
 }
 
-public protocol SearchResult {}
+public protocol SearchResult : Codable {}
 
 public struct Planet : SearchResult, Codable {
     public let id: String

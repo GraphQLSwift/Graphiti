@@ -656,8 +656,8 @@ class StarWarsQueryTests : XCTestCase {
             
             let schema = try! Schema<Root, NoContext>(
                 Type(A.self,
-                    Field("nullableA", at: A.nullableA, overridingType: (TypeReference<A>?).self),
-                    Field("nonNullA", at: A.nonNullA, overridingType: TypeReference<A>.self),
+                    Field("nullableA", at: A.nullableA, as: (TypeReference<A>?).self),
+                    Field("nonNullA", at: A.nonNullA, as: TypeReference<A>.self),
                     Field("throws", at: A.throws)
                 ),
 
