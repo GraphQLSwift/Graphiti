@@ -1,7 +1,5 @@
 import Graphiti
 
-extension Episode : Enumerable {}
-
 extension Character {
     public var secretBackstory: String? {
         nil

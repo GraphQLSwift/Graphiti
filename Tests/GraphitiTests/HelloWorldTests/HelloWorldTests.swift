@@ -79,7 +79,11 @@ struct HelloRoot : Keyable {
         group.next().makeSucceededFuture(context.hello())
     }
     
-    struct FloatArguments : Codable {
+    struct FloatArguments : Codable, Keyable {
+        enum Keys : String {
+            case float
+        }
+        
         let float: Float
     }
     
@@ -87,7 +91,11 @@ struct HelloRoot : Keyable {
         arguments.float
     }
     
-    struct IDArguments : Codable {
+    struct IDArguments : Codable, Keyable {
+        enum Keys : String {
+            case id
+        }
+        
         let id: ID
     }
     
@@ -99,7 +107,11 @@ struct HelloRoot : Keyable {
         User(id: "123", name: "John Doe")
     }
     
-    struct AddUserArguments : Codable {
+    struct AddUserArguments : Codable, Keyable {
+        enum Keys : String {
+            case user
+        }
+        
         let user: UserInput
     }
     
@@ -112,35 +124,44 @@ struct HelloAPI : API {
     let root = HelloRoot()
     let context = Context()
     
-    let schema = try! Schema<HelloRoot, Context> { schema in
-        schema.scalar(Float.self)
-            .description("The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).")
+    let schema = try! Schema<HelloRoot, Context>(
+        Scalar(Float.self)
+            .description("The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point)."),
 
-        schema.scalar(ID.self)
-            .description("The `ID` scalar type represents a unique identifier.")
+        Scalar(ID.self)
+            .description("The `ID` scalar type represents a unique identifier."),
         
-        schema.type(User.self) { type in
-            type.field(.id, at: \.id)
-            type.field(.name, at: \.name)
-        }
+        Type(User.self,
+            Field(\.id, as: .id),
+            Field(\.name, as: .name)
+        ),
+
+        Input(UserInput.self,
+            InputField(\.id, as: .id),
+            InputField(\.name, as: .name)
+        ),
         
-        schema.input(UserInput.self) { input in
-            input.field(.id, at: \.id)
-            input.field(.name, at: \.name)
-        }
-        
-        schema.query { query in
-            query.field(.hello, at: HelloRoot.hello)
-            query.field(.asyncHello, at: HelloRoot.asyncHello)
-            query.field(.float, at: HelloRoot.getFloat)
-            query.field(.id, at: HelloRoot.getId)
-            query.field(.user, at: HelloRoot.getUser)
-        }
-        
-        schema.mutation { mutation in
-            mutation.field(.addUser, at: HelloRoot.addUser)
-        }
-    }
+        Query(
+            Field(HelloRoot.hello, as: .hello),
+            Field(HelloRoot.asyncHello, as: .asyncHello),
+            
+            Field(HelloRoot.getFloat, as: .float,
+                Argument(\.float, as: .float)
+            ),
+            
+            Field(HelloRoot.getId, as: .id,
+                Argument(\.id, as: .id)
+            ),
+            
+            Field(HelloRoot.getUser, as: .user)
+        ),
+
+        Mutation(
+            Field(HelloRoot.addUser, as: .addUser,
+                Argument(\.user, as: .user)
+            )
+        )
+    )
 }
 
 class HelloWorldTests : XCTestCase {
