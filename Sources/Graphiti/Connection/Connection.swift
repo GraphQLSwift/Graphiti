@@ -60,8 +60,8 @@ func connect<T : Codable & Identifiable>(
         pageInfo: PageInfo(
             hasPreviousPage: hasPreviousPage(edges: cursorEdges, arguments: arguments),
             hasNextPage: hasNextPage(edges: cursorEdges, arguments: arguments),
-            startCursor: countEdges.first.map(\.cursor),
-            endCursor: countEdges.last.map(\.cursor)
+            startCursor: countEdges.first.map({ $0.cursor }),
+            endCursor: countEdges.last.map({ $0.cursor })
         )
     )
 }
