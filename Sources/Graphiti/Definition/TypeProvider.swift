@@ -6,7 +6,7 @@ protocol TypeProvider : class {
 
 extension TypeProvider {
     func contains(type: Any.Type) -> Bool {
-        graphQLTypeMap[AnyType(type)] == nil
+        graphQLTypeMap[AnyType(type)] != nil
     }
     
     func map(_ type: Any.Type, to graphQLType: GraphQLType) throws {

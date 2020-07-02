@@ -1,4 +1,4 @@
-public enum Episode : String, Codable {
+public enum Episode : String, Codable, CaseIterable {
     case newHope = "NEWHOPE"
     case empire = "EMPIRE"
     case jedi = "JEDI"

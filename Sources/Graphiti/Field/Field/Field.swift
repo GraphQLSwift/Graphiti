@@ -1,7 +1,7 @@
 import GraphQL
 import Runtime
 
-public class Field<ObjectType, Keys : RawRepresentable, Context, Arguments : Decodable & Keyable, FieldType, ResolveType> : FieldComponent<ObjectType, Keys, Context> where Keys.RawValue == String {
+public class Field<ObjectType, Context, Arguments : Decodable, FieldType, ResolveType> : FieldComponent<ObjectType, Context> {
     let name: String
     let arguments: [ArgumentComponent<Arguments>]
     let resolve: GraphQLFieldResolve
@@ -96,8 +96,8 @@ public class Field<ObjectType, Keys : RawRepresentable, Context, Arguments : Dec
 
 public extension Field where FieldType == ResolveType, Arguments == NoArguments {
     convenience init(
-        _ keyPath: KeyPath<ObjectType, ResolveType>,
-        as name: Keys
+        _ name: String,
+        at keyPath: KeyPath<ObjectType, ResolveType>
     ) {
         let syncResolve: SyncResolve<ObjectType, Context, NoArguments, ResolveType> = { type in
             { context, _ in
@@ -105,14 +105,14 @@ public extension Field where FieldType == ResolveType, Arguments == NoArguments 
             }
         }
         
-        self.init(name: name.rawValue, arguments: [], syncResolve: syncResolve)
+        self.init(name: name, arguments: [], syncResolve: syncResolve)
     }
 }
 
 public extension Field where Arguments == NoArguments {
     convenience init(
-        _ keyPath: KeyPath<ObjectType, ResolveType>,
-        as name: Keys,
+        _ name: String,
+        at keyPath: KeyPath<ObjectType, ResolveType>,
         overridingType: FieldType.Type = FieldType.self
     ) {
         let syncResolve: SyncResolve<ObjectType, Context, NoArguments, ResolveType> = { type in
@@ -121,7 +121,7 @@ public extension Field where Arguments == NoArguments {
             }
         }
         
-        self.init(name: name.rawValue, arguments: [], syncResolve: syncResolve)
+        self.init(name: name, arguments: [], syncResolve: syncResolve)
     }
 }
 
@@ -129,22 +129,22 @@ public extension Field where Arguments == NoArguments {
 
 public extension Field where FieldType == ResolveType {
     convenience init(
-        _ function: @escaping SyncResolve<ObjectType, Context, Arguments, ResolveType>,
-        as name: Keys,
+        _ name: String,
+        at function: @escaping SyncResolve<ObjectType, Context, Arguments, ResolveType>,
         _ arguments: ArgumentComponent<Arguments>...
     ) {
-        self.init(name: name.rawValue, arguments: arguments, syncResolve: function)
+        self.init(name: name, arguments: arguments, syncResolve: function)
     }
 }
 
 public extension Field {
     convenience init(
-        _ function: @escaping SyncResolve<ObjectType, Context, Arguments, ResolveType>,
-        as name: Keys,
+        _ name: String,
+        at function: @escaping SyncResolve<ObjectType, Context, Arguments, ResolveType>,
         overridingType: FieldType.Type = FieldType.self,
         _ arguments: ArgumentComponent<Arguments>...
     ) {
-        self.init(name: name.rawValue, arguments: arguments, syncResolve: function)
+        self.init(name: name, arguments: arguments, syncResolve: function)
     }
 }
 
@@ -152,21 +152,44 @@ public extension Field {
 
 public extension Field where FieldType == ResolveType {
     convenience init(
-        _ function: @escaping AsyncResolve<ObjectType, Context, Arguments, ResolveType>,
-        as name: Keys,
+        _ name: String,
+        at function: @escaping AsyncResolve<ObjectType, Context, Arguments, ResolveType>,
         _ arguments: ArgumentComponent<Arguments>...
     ) {
-        self.init(name: name.rawValue, arguments: arguments, asyncResolve: function)
+        self.init(name: name, arguments: arguments, asyncResolve: function)
     }
 }
 
 public extension Field {
     convenience init(
-        _ function: @escaping AsyncResolve<ObjectType, Context, Arguments, ResolveType>,
-        as name: Keys,
+        _ name: String,
+        at function: @escaping AsyncResolve<ObjectType, Context, Arguments, ResolveType>,
         overridingType: FieldType.Type = FieldType.self,
         _ arguments: ArgumentComponent<Arguments>...
     ) {
-        self.init(name: name.rawValue, arguments: arguments, asyncResolve: function)
+        self.init(name: name, arguments: arguments, asyncResolve: function)
+    }
+}
+
+// MARK: SimpleAsyncResolve Initializers
+
+public extension Field where FieldType == ResolveType {
+    convenience init(
+        _ name: String,
+        at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, ResolveType>,
+        _ arguments: ArgumentComponent<Arguments>...
+    ) {
+        self.init(name: name, arguments: arguments, simpleAsyncResolve: function)
+    }
+}
+
+public extension Field {
+    convenience init(
+        _ name: String,
+        at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, ResolveType>,
+        overridingType: FieldType.Type = FieldType.self,
+        _ arguments: ArgumentComponent<Arguments>...
+    ) {
+        self.init(name: name, arguments: arguments, simpleAsyncResolve: function)
     }
 }

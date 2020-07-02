@@ -1,6 +1,6 @@
 import GraphQL
 
-open class Scalar<RootType : Keyable, Context, ScalarType : Codable> : Component<RootType, Context> {
+open class Scalar<RootType, Context, ScalarType : Codable> : Component<RootType, Context> {
     override func update(builder: SchemaBuilder) throws {
         let scalarType = try GraphQLScalarType(
             name: name,

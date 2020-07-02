@@ -1,7 +1,7 @@
 import GraphQL
 
-public final class Mutation<RootType : Keyable, Context> : Component<RootType, Context> {
-    let fields: [FieldComponent<RootType, RootType.Keys, Context>]
+public final class Mutation<RootType, Context> : Component<RootType, Context> {
+    let fields: [FieldComponent<RootType, Context>]
     
     let isTypeOf: GraphQLIsTypeOf = { source, _, _ in
         return source is RootType
@@ -29,7 +29,7 @@ public final class Mutation<RootType : Keyable, Context> : Component<RootType, C
     
     init(
         name: String,
-        fields: [FieldComponent<RootType, RootType.Keys, Context>]
+        fields: [FieldComponent<RootType, Context>]
     ) {
         self.fields = fields
         super.init(name: name)
@@ -39,7 +39,7 @@ public final class Mutation<RootType : Keyable, Context> : Component<RootType, C
 public extension Mutation {
     convenience init(
         as name: String = "Mutation",
-        _ fields: FieldComponent<RootType, RootType.Keys, Context>...
+        _ fields: FieldComponent<RootType, Context>...
     ) {
         self.init(name: name, fields: fields)
     }

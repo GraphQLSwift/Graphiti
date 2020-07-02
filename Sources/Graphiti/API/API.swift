@@ -2,7 +2,7 @@ import GraphQL
 import NIO
 
 public protocol API {
-    associatedtype RootType : Keyable
+    associatedtype RootType
     associatedtype ContextType
     var root: RootType { get }
     var schema: Schema<RootType, ContextType> { get }

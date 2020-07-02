@@ -4,12 +4,7 @@ protocol Edgeable {
     var cursor: String { get }
 }
 
-struct Edge<T : Encodable> : Edgeable, Encodable, Keyable {
-    enum Keys : String {
-        case node
-        case cursor
-    }
-    
+struct Edge<T : Encodable> : Edgeable, Encodable {
     let node: T
     let cursor: String
 }

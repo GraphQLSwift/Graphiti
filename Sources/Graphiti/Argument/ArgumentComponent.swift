@@ -1,6 +1,6 @@
 import GraphQL
 
-public class ArgumentComponent<ArgumentsType : Decodable & Keyable> {
+public class ArgumentComponent<ArgumentsType : Decodable> {
     var description: String? = nil
     
     func argument(provider: TypeProvider) throws -> (String, GraphQLArgument) {

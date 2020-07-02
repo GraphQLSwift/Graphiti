@@ -1,4 +1,4 @@
-public final class Types<Root : Keyable, Context> : Component<Root, Context> {
+public final class Types<Root, Context> : Component<Root, Context> {
     let types: [Any.Type]
     
     override func update(builder: SchemaBuilder) throws {

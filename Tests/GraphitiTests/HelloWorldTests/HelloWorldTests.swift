@@ -21,12 +21,7 @@ struct ID : Codable {
     }
 }
 
-struct User : Codable, Keyable {
-    enum Keys : String {
-        case id
-        case name
-    }
-    
+struct User : Codable {
     let id: String
     let name: String?
     
@@ -41,12 +36,7 @@ struct User : Codable, Keyable {
     }
 }
 
-struct UserInput : Codable, Keyable {
-    enum Keys : String {
-        case id
-        case name
-    }
-    
+struct UserInput : Codable {
     let id: String
     let name: String?
 }
@@ -57,16 +47,7 @@ final class Context {
     }
 }
 
-struct HelloRoot : Keyable {
-    enum Keys : String {
-        case hello
-        case asyncHello
-        case float
-        case id
-        case user
-        case addUser
-    }
-    
+struct HelloRoot {
     func hello(context: Context, arguments: NoArguments) -> String {
         context.hello()
     }
@@ -79,11 +60,7 @@ struct HelloRoot : Keyable {
         group.next().makeSucceededFuture(context.hello())
     }
     
-    struct FloatArguments : Codable, Keyable {
-        enum Keys : String {
-            case float
-        }
-        
+    struct FloatArguments : Codable {
         let float: Float
     }
     
@@ -91,11 +68,7 @@ struct HelloRoot : Keyable {
         arguments.float
     }
     
-    struct IDArguments : Codable, Keyable {
-        enum Keys : String {
-            case id
-        }
-        
+    struct IDArguments : Codable {
         let id: ID
     }
     
@@ -107,11 +80,7 @@ struct HelloRoot : Keyable {
         User(id: "123", name: "John Doe")
     }
     
-    struct AddUserArguments : Codable, Keyable {
-        enum Keys : String {
-            case user
-        }
-        
+    struct AddUserArguments : Codable {
         let user: UserInput
     }
     
@@ -132,33 +101,33 @@ struct HelloAPI : API {
             .description("The `ID` scalar type represents a unique identifier."),
         
         Type(User.self,
-            Field(\.id, as: .id),
-            Field(\.name, as: .name)
+            Field("id", at: \.id),
+            Field("name", at: \.name)
         ),
 
         Input(UserInput.self,
-            InputField(\.id, as: .id),
-            InputField(\.name, as: .name)
+            InputField("id", at: \.id),
+            InputField("name", at: \.name)
         ),
         
         Query(
-            Field(HelloRoot.hello, as: .hello),
-            Field(HelloRoot.asyncHello, as: .asyncHello),
+            Field("hello", at: HelloRoot.hello),
+            Field("asyncHello", at: HelloRoot.asyncHello),
             
-            Field(HelloRoot.getFloat, as: .float,
-                Argument(\.float, as: .float)
+            Field("float", at: HelloRoot.getFloat,
+                Argument("float", at: \.float)
             ),
             
-            Field(HelloRoot.getId, as: .id,
-                Argument(\.id, as: .id)
+            Field("id", at: HelloRoot.getId,
+                Argument("id", at: \.id)
             ),
             
-            Field(HelloRoot.getUser, as: .user)
+            Field("user", at: HelloRoot.getUser)
         ),
 
         Mutation(
-            Field(HelloRoot.addUser, as: .addUser,
-                Argument(\.user, as: .user)
+            Field("addUser", at: HelloRoot.addUser,
+                Argument("user", at: \.user)
             )
         )
     )

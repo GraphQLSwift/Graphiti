@@ -1,8 +1,8 @@
 import GraphQL
 
-public final class Type<RootType : Keyable, Context, ObjectType : Encodable & Keyable> : Component<RootType, Context> {
+public final class Type<RootType, Context, ObjectType : Encodable> : Component<RootType, Context> {
     let interfaces: [Any.Type]
-    let fields: [FieldComponent<ObjectType, ObjectType.Keys, Context>]
+    let fields: [FieldComponent<ObjectType, Context>]
     
     let isTypeOf: GraphQLIsTypeOf = { source, _, _ in
         return source is ObjectType
@@ -37,7 +37,7 @@ public final class Type<RootType : Keyable, Context, ObjectType : Encodable & Ke
         type: ObjectType.Type,
         name: String?,
         interfaces: [Any.Type],
-        fields: [FieldComponent<ObjectType, ObjectType.Keys, Context>]
+        fields: [FieldComponent<ObjectType, Context>]
     ) {
         self.interfaces = interfaces
         self.fields = fields
@@ -50,7 +50,7 @@ public extension Type {
         _ type: ObjectType.Type,
         as name: String? = nil,
         interfaces: [Any.Type] = [],
-        _ fields: FieldComponent<ObjectType, ObjectType.Keys, Context>...
+        _ fields: FieldComponent<ObjectType, Context>...
     ) {
         self.init(
             type: type,

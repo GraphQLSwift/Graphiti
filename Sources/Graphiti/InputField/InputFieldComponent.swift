@@ -1,6 +1,6 @@
 import GraphQL
 
-public class InputFieldComponent<InputObjectType, Keys : RawRepresentable, Context> where Keys.RawValue == String {
+public class InputFieldComponent<InputObjectType, Context> {
     var description: String? = nil
     
     func field(provider: TypeProvider) throws -> (String, InputObjectField) {

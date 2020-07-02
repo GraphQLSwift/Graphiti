@@ -1,6 +1,6 @@
 import GraphQL
 
-public class InputField<InputObjectType, Keys : RawRepresentable, Context, FieldType> : InputFieldComponent<InputObjectType, Keys, Context> where Keys.RawValue == String {
+public class InputField<InputObjectType, Context, FieldType> : InputFieldComponent<InputObjectType, Context> {
     let name: String
     var defaultValue: AnyEncodable?
     
@@ -25,10 +25,10 @@ public class InputField<InputObjectType, Keys : RawRepresentable, Context, Field
 
 public extension InputField {
     convenience init(
-        _ keyPath: KeyPath<InputObjectType, FieldType>,
-        as name: Keys
+        _ name: String,
+        at keyPath: KeyPath<InputObjectType, FieldType>
     ) {
-        self.init(name: name.rawValue)
+        self.init(name: name)
     }
 }
 

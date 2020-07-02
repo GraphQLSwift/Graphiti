@@ -1,7 +1,7 @@
 import GraphQL
 
-public final class Input<RootType : Keyable, Context, InputObjectType : Decodable & Keyable> : Component<RootType, Context> {
-    let fields: [InputFieldComponent<InputObjectType, InputObjectType.Keys, Context>]
+public final class Input<RootType, Context, InputObjectType : Decodable> : Component<RootType, Context> {
+    let fields: [InputFieldComponent<InputObjectType, Context>]
     
     override func update(builder: SchemaBuilder) throws {
         let inputObjectType = try GraphQLInputObjectType(
@@ -27,7 +27,7 @@ public final class Input<RootType : Keyable, Context, InputObjectType : Decodabl
     init(
         type: InputObjectType.Type,
         name: String?,
-        fields: [InputFieldComponent<InputObjectType, InputObjectType.Keys, Context>]
+        fields: [InputFieldComponent<InputObjectType, Context>]
     ) {
         self.fields = fields
         super.init(name: name  ?? Reflection.name(for: InputObjectType.self))
@@ -38,7 +38,7 @@ public extension Input {
     convenience init(
         _ type: InputObjectType.Type,
         as name: String? = nil,
-        _ fields: InputFieldComponent<InputObjectType, InputObjectType.Keys, Context>...
+        _ fields: InputFieldComponent<InputObjectType, Context>...
     ) {
         self.init(type: type, name: name, fields: fields)
     }

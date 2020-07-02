@@ -10,61 +10,7 @@ extension Character {
     }
 }
 
-public final class AnyCharacter : Character, InterfaceReference {
-    public typealias InterfaceType = Character
-    
-    public enum Keys : String {
-        case id
-        case name
-        case friends
-        case appearsIn
-        case secretBackstory
-    }
-    
-    private let character: Character
-    
-    public init(_ character: Character) {
-        self.character = character
-    }
-    
-    public var id: String {
-        self.character.id
-    }
-    
-    public var name: String {
-        self.character.name
-    }
-    
-    public var friends: [String] {
-        self.character.friends
-    }
-    
-    public var appearsIn: [Episode] {
-        self.character.appearsIn
-    }
-}
-
-extension Planet : Keyable {
-    public enum Keys : String {
-        case id
-        case name
-        case diameter
-        case rotationPeriod
-        case orbitalPeriod
-        case residents
-    }
-}
-
-extension Human : Keyable {
-    public enum Keys : String {
-        case id
-        case name
-        case appearsIn
-        case homePlanet
-        case friends
-        case secretBackstory
-    }
-    
+extension Human {
     public func getFriends(store: Store, arguments: NoArguments) -> [Character] {
         store.getFriends(of: self)
     }
@@ -74,16 +20,7 @@ extension Human : Keyable {
     }
 }
 
-extension Droid : Keyable {
-    public enum Keys : String {
-        case id
-        case name
-        case appearsIn
-        case primaryFunction
-        case friends
-        case secretBackstory
-    }
-    
+extension Droid {
     public func getFriends(store: Store, arguments: NoArguments) -> [Character] {
         store.getFriends(of: self)
     }
@@ -93,21 +30,10 @@ extension Droid : Keyable {
     }
 }
 
-public struct Root : Keyable {
-    public enum Keys : String {
-        case hero
-        case human
-        case droid
-        case search
-    }
-    
+public struct Root {
     public init() {}
     
-    public struct HeroArguments : Codable, Keyable {
-        public enum Keys : String {
-            case episode
-        }
-        
+    public struct HeroArguments : Codable {
         public let episode: Episode?
     }
 
@@ -115,11 +41,7 @@ public struct Root : Keyable {
         store.getHero(of: arguments.episode)
     }
 
-    public struct HumanArguments : Codable, Keyable {
-        public enum Keys : String {
-            case id
-        }
-        
+    public struct HumanArguments : Codable {
         public let id: String
     }
     
@@ -127,11 +49,7 @@ public struct Root : Keyable {
         store.getHuman(id: arguments.id)
     }
 
-    public struct DroidArguments : Codable, Keyable {
-        public enum Keys : String {
-            case id
-        }
-        
+    public struct DroidArguments : Codable {
         public let id: String
     }
 
@@ -139,11 +57,7 @@ public struct Root : Keyable {
         store.getDroid(id: arguments.id)
     }
     
-    public struct SearchArguments : Codable, Keyable {
-        public enum Keys : String {
-            case query
-        }
-        
+    public struct SearchArguments : Codable {
         public let query: String
     }
     

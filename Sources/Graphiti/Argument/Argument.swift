@@ -1,6 +1,6 @@
 import GraphQL
 
-public class Argument<ArgumentsType : Decodable & Keyable, ArgumentType> : ArgumentComponent<ArgumentsType> {
+public class Argument<ArgumentsType : Decodable, ArgumentType> : ArgumentComponent<ArgumentsType> {
     let name: String
     var defaultValue: AnyEncodable? = nil
     
@@ -21,10 +21,10 @@ public class Argument<ArgumentsType : Decodable & Keyable, ArgumentType> : Argum
 
 public extension Argument {
     convenience init(
-        _ keyPath: KeyPath<ArgumentsType, ArgumentType>,
-        as name: ArgumentsType.Keys
+        _ name: String,
+        at keyPath: KeyPath<ArgumentsType, ArgumentType>
     ) {
-        self.init(name:name.rawValue)
+        self.init(name:name)
     }
 }
 

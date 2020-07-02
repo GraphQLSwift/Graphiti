@@ -1,6 +1,6 @@
 import GraphQL
 
-public class FieldComponent<ObjectType, Keys : RawRepresentable, Context> where Keys.RawValue == String {
+public class FieldComponent<ObjectType, Context> {
     var description: String? = nil
     var deprecationReason: String? = nil
     

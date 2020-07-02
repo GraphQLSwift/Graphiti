@@ -1,7 +1,7 @@
 import GraphQL
 
-public final class Interface<RootType : Keyable, Context, Reference : InterfaceReference> : Component<RootType, Context> {
-    let fields: [FieldComponent<Reference.InterfaceType, Reference.Keys, Context>]
+public final class Interface<RootType, Context, InterfaceType> : Component<RootType, Context> {
+    let fields: [FieldComponent<InterfaceType, Context>]
     
     override func update(builder: SchemaBuilder) throws {
         let interfaceType = try GraphQLInterfaceType(
@@ -11,7 +11,7 @@ public final class Interface<RootType : Keyable, Context, Reference : InterfaceR
             resolveType: nil
         )
 
-        try builder.map(Reference.InterfaceType.self, to: interfaceType)
+        try builder.map(InterfaceType.self, to: interfaceType)
     }
     
     func fields(provider: TypeProvider) throws -> GraphQLFieldMap {
@@ -26,20 +26,20 @@ public final class Interface<RootType : Keyable, Context, Reference : InterfaceR
     }
     
     init(
-        type: Reference.Type,
+        type: InterfaceType.Type,
         name: String? = nil,
-        fields: [FieldComponent<Reference.InterfaceType, Reference.Keys, Context>]
+        fields: [FieldComponent<InterfaceType, Context>]
     )  {
         self.fields = fields
-        super.init(name: name ?? Reflection.name(for: Reference.InterfaceType.self))
+        super.init(name: name ?? Reflection.name(for: InterfaceType.self))
     }
 }
 
 public extension Interface {
     convenience init(
-        _ type: Reference.Type,
+        _ type: InterfaceType.Type,
         as name: String? = nil,
-        _ fields: FieldComponent<Reference.InterfaceType, Reference.Keys, Context>...
+        _ fields: FieldComponent<InterfaceType, Context>...
     ) {
         self.init(
             type: type,

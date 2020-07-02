@@ -2,12 +2,7 @@ import Foundation
 import NIO
 import GraphQL
 
-public struct Connection<T : Encodable> : Encodable, Keyable {
-    public enum Keys : String {
-        case edges
-        case pageInfo
-    }
-    
+public struct Connection<T : Encodable> : Encodable {
     let edges: [Edge<T>]
     let pageInfo: PageInfo
 }

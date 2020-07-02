@@ -626,13 +626,7 @@ class StarWarsQueryTests : XCTestCase {
     }
 
     func testNonNullableFieldsQuery() throws {
-        struct A : Codable, Keyable {
-            enum Keys : String {
-                case nullableA
-                case nonNullA
-                case `throws`
-            }
-
+        struct A : Codable {
             func nullableA(context: NoContext, arguments: NoArguments) -> A? {
                 return A()
             }
@@ -650,11 +644,7 @@ class StarWarsQueryTests : XCTestCase {
             }
         }
 
-        struct Root : Keyable {
-            enum Keys : String {
-                case nullableA
-            }
-
+        struct Root {
             func nullableA(context: NoContext, arguments: NoArguments) -> A? {
                 return A()
             }
@@ -666,13 +656,13 @@ class StarWarsQueryTests : XCTestCase {
             
             let schema = try! Schema<Root, NoContext>(
                 Type(A.self,
-                    Field(A.nullableA, as: .nullableA, overridingType: (TypeReference<A>?).self),
-                    Field(A.nonNullA, as: .nonNullA, overridingType: TypeReference<A>.self),
-                    Field(A.throws, as: .throws)
+                    Field("nullableA", at: A.nullableA, overridingType: (TypeReference<A>?).self),
+                    Field("nonNullA", at: A.nonNullA, overridingType: TypeReference<A>.self),
+                    Field("throws", at: A.throws)
                 ),
 
                 Query(
-                    Field(Root.nullableA, as: .nullableA)
+                    Field("nullableA", at: Root.nullableA)
                 )
             )
         }

@@ -1,7 +1,7 @@
 import GraphQL
 import NIO
 
-public final class Schema<RootType : Keyable, Context> {
+public final class Schema<RootType, Context> {
     public let schema: GraphQLSchema
 
     private init(components: [Component<RootType, Context>]) throws {

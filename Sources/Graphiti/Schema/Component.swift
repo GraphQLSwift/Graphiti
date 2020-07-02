@@ -1,4 +1,4 @@
-open class Component<RootType : Keyable, Context> {
+open class Component<RootType, Context> {
     let name: String
     var description: String? = nil
     

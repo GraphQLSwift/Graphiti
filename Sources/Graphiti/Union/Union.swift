@@ -1,6 +1,6 @@
 import GraphQL
 
-public final class Union<Root : Keyable, Context, UnionType> : Component<Root, Context> {
+public final class Union<Root, Context, UnionType> : Component<Root, Context> {
     private let members: [Any.Type]
     
     override func update(builder: SchemaBuilder) throws {
