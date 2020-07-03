@@ -30,7 +30,7 @@ import PackageDescription
 
 let package = Package(
     dependencies: [
-        .Package(url: "https://github.com/GraphQLSwift/Graphiti.git", .upToNextMinor(from: "0.14.0")),
+        .Package(url: "https://github.com/GraphQLSwift/Graphiti.git", .upToNextMinor(from: "0.19.0")),
     ]
 )
 ```
@@ -52,15 +52,15 @@ One of the main design decisions behind Graphiti is **not** to polute your entit
 
 #### Defining the context
 
-Second step is to create your application's **context**. The context will be passed to all of your field resolver functions. This allows you to apply dependency injection to your API. You will usually use the Context as the state holder of your API. Therefore, this will often be a `class`. We're calling it a store here, because that's the only thing that it does, but you should name it in a way that is appropriate to what your context does.
+Second step is to create your application's **context**. The context will be passed to all of your field resolver functions. This allows you to apply dependency injection to your API. You will usually use the Context as the state holder of your API. Therefore, this will often be a `class`.
 
 ```swift
 /**
  * This data is hard coded for the sake of the demo, but you could imagine
  * fetching this data from a database or a backend service instead.
  */
-final class MessageStore {
-    func getMessage() -> Message {
+final class MessageContext {
+    func message() -> Message {
         Message(content: "Hello, world!")
     }
 }
@@ -75,25 +75,9 @@ Now that we have our entities and context we can create the API itself.
 ```swift
 import Graphiti
 
-// We make Message adopt Keyable so we can 
-// provide keys to be used in the schema.
-// This allows you to have different names between 
-// your properties and the fields you expose in the schema.
-extension Message : Keyable {
-    enum Keys : String {
-        case content
-    }
-}
-
-struct MessageRoot : Keyable {
-    enum Keys : String {
-        case getMessage
-    }
-    
-    // The first parameter is the context, you can name it anything you want.
-    // We're calling it `store` here because the context type is `MessageStore`.
-    func getMessage(store: MessageStore, arguments: NoArguments) -> Message {
-        store.getMessage()
+struct MessageRoot {
+    func message(context: MessageContext, arguments: NoArguments) -> Message {
+        context.message()
     }
 }
 ```
@@ -105,22 +89,22 @@ Now we can finally define the Schema using the builder pattern.
 ```swift
 struct MessageAPI : API {
     let root: MessageRoot
-    let schema: Schema<MessageRoot, MessageStore>
+    let schema: Schema<MessageRoot, MessageContext>
     
     // Notice that `API` allows dependency injection.
     // You could pass mocked subtypes of `root` and `context` when testing, for example.
     init(root: MessageRoot) throws {
         self.root = root
 
-        self.schema = try Schema<MessageRoot, MessageStore> { schema in
-            schema.type(Message.self) { type in
-                type.field(.content, at: \.content)
+        self.schema = try Schema<MessageRoot, MessageContext>(
+            Type(Message.self,
+                Field("content", at: \.content)
             }
 
-            schema.query { query in
-                query.field(.getMessage, at: MessageRoot.getMessage)
-            }
-        }
+            Query(
+                Field("message", at: MessageRoot.message)
+            )
+        )
     }
 }
 ```
@@ -133,7 +117,7 @@ To query the schema we need to instantiate the api and pass in an EventLoopGroup
 import NIO
 
 let root = MessageRoot()
-let context = MessageStore()
+let context = MessageContext()
 let api = try MessageAPI(root: root)
 let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         
@@ -142,7 +126,7 @@ defer {
 }
 
 api.execute(
-    request: "{ getMessage { content } }",
+    request: "{ message { content } }",
     context: context,
     on: group
 ).whenSuccess { result in
@@ -153,7 +137,7 @@ api.execute(
 The output will be:
 
 ```json
-{"data":{"getMessage":{"content":"Hello, world!"}}}
+{"data":{"message":{"content":"Hello, world!"}}}
 ```
 
 `API.execute` returns a `GraphQLResult` which adopts `Encodable`. You can use it with a `JSONEncoder` to send the response back to the client using JSON.
@@ -165,17 +149,9 @@ To use async resolvers, just add one more parameter with type `EventLoopGroup` t
 ```swift
 import NIO
 
-struct API : Keyable {
-    enum Keys : String {
-        case getMessage
-    }
-    
-    func getMessage(
-    	store: MessageStore,
-    	arguments: NoArguments,
-    	group: EventLoopGroup
-    ) -> EventLoopFuture<Message> {
-        group.next().makeSucceededFuture(store.getMessage())
+struct MessageRoot {
+    func message(context: MessageContext, arguments: NoArguments, group: EventLoopGroup) -> EventLoopFuture<Message> {
+        group.next().makeSucceededFuture(store.message())
     }
 }
 ```
