@@ -2,13 +2,24 @@ import Foundation
 import NIO
 import GraphQL
 
-public struct Connection<T : Encodable> : Encodable {
-    let edges: [Edge<T>]
+public struct Connection<Node : Encodable> : Encodable {
+    let edges: [Edge<Node>]
     let pageInfo: PageInfo
 }
 
 @available(OSX 10.15, *)
-public extension EventLoopFuture where Value : Sequence, Value.Element : Codable & Identifiable {
+public extension Connection where Node : Identifiable, Node.ID : LosslessStringConvertible {
+    static func id(_ cursor: String) -> Node.ID? {
+        cursor.base64Decoded().flatMap({ Node.ID($0) })
+    }
+    
+    static func cursor(_ id: Node.ID) -> String? {
+        id.description.base64Encoded()
+    }
+}
+
+@available(OSX 10.15, *)
+public extension EventLoopFuture where Value : Sequence, Value.Element : Encodable & Identifiable, Value.Element.ID : LosslessStringConvertible {
     func connection(from arguments: Paginatable) -> EventLoopFuture<Connection<Value.Element>> {
         flatMapThrowing { value in
             try value.connection(from: arguments)
@@ -29,7 +40,7 @@ public extension EventLoopFuture where Value : Sequence, Value.Element : Codable
 }
 
 @available(OSX 10.15, *)
-extension Sequence where Element : Codable & Identifiable {
+public extension Sequence where Element : Encodable & Identifiable, Element.ID : LosslessStringConvertible {
     func connection(from arguments: Paginatable) throws -> Connection<Element> {
         try connect(to: Array(self), arguments: PaginationArguments(arguments))
     }
@@ -44,12 +55,12 @@ extension Sequence where Element : Codable & Identifiable {
 }
 
 @available(OSX 10.15, *)
-func connect<T : Codable & Identifiable>(
-    to elements: [T],
+func connect<Node>(
+    to elements: [Node],
     arguments: PaginationArguments
-) throws -> Connection<T> {
+) throws -> Connection<Node> where Node : Encodable & Identifiable, Node.ID : LosslessStringConvertible {
     let edges = elements.map { element in
-        Edge<T>(node: element, cursor: "\(element.id)".base64Encoded()!)
+        Edge<Node>(node: element, cursor: Connection<Node>.cursor(element.id)!)
     }
     
     let cursorEdges = slicingCursor(edges: edges, arguments: arguments)
@@ -66,10 +77,10 @@ func connect<T : Codable & Identifiable>(
     )
 }
 
-func slicingCursor<T : Codable>(
-    edges: [Edge<T>],
+func slicingCursor<Node : Encodable>(
+    edges: [Edge<Node>],
     arguments: PaginationArguments
-) -> ArraySlice<Edge<T>> {
+) -> ArraySlice<Edge<Node>> {
     var edges = ArraySlice(edges)
     
     if
@@ -92,10 +103,10 @@ func slicingCursor<T : Codable>(
     return edges
 }
 
-func slicingCount<T : Codable>(
-    edges: ArraySlice<Edge<T>>,
+func slicingCount<Node : Encodable>(
+    edges: ArraySlice<Edge<Node>>,
     arguments: PaginationArguments
-) throws -> Array<Edge<T>> {
+) throws -> Array<Edge<Node>> {
     var edges = edges
     
     if let first = arguments.first {
@@ -121,8 +132,8 @@ func slicingCount<T : Codable>(
     return Array(edges)
 }
 
-func hasPreviousPage<T : Codable>(
-    edges: ArraySlice<Edge<T>>,
+func hasPreviousPage<Node : Encodable>(
+    edges: ArraySlice<Edge<Node>>,
     arguments: PaginationArguments
 ) -> Bool {
     if let last = arguments.last {
@@ -132,8 +143,8 @@ func hasPreviousPage<T : Codable>(
     return false
 }
 
-func hasNextPage<T : Codable>(
-    edges: ArraySlice<Edge<T>>,
+func hasNextPage<Node : Encodable>(
+    edges: ArraySlice<Edge<Node>>,
     arguments: PaginationArguments
 ) -> Bool {
     if let first = arguments.first {
