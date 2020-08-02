@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: swift build --build-tests --enable-test-discovery -c release
+      run: swift build --build-tests --enable-test-discovery
     - name: Run tests
-      run: swift test --skip-build --enable-test-discovery --enable-code-coverage -c release
+      run: swift test --skip-build --enable-test-discovery --enable-code-coverage
     - uses: codecov/codecov-action@v1
