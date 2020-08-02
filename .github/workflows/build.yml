@@ -21,7 +21,7 @@ jobs:
     - name: Run tests
       run: |
         swift test --skip-build --enable-test-discovery --enable-code-coverage -c release
-        echo "::set-env name=codecov_path::$(swift test --show-codecov-path)"
+        echo "::set-env name=codecov_path::$(swift test --show-codecov-path -c release)"
     - uses: codecov/codecov-action@v1
       with:
         file: $codecov_path
