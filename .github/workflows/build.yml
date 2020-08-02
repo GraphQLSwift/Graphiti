@@ -1,4 +1,4 @@
-name: Build
+name: Tests
 
 on:
   push:
@@ -16,8 +16,6 @@ jobs:
         os: [macos-10.15, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04]
     steps:
     - uses: actions/checkout@v2
-    - name: Build
-      run: swift build --build-tests --enable-test-discovery
     - name: Run tests
-      run: swift test --skip-build --enable-test-discovery --enable-code-coverage
+      run: swift test --enable-test-discovery --enable-code-coverage
     - uses: codecov/codecov-action@v1
