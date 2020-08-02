@@ -1,0 +1,22 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+    paths-ignore: [ README.md ]
+  pull_request:
+    branches: [ master ]
+    paths-ignore: [ README.md ]
+jobs:
+  build:
+    name: Build and test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-10.15, ubuntu-16.04, ubuntu-18.04, ubuntu-20.04]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      run: swift build --build-tests --enable-test-discovery -c release
+    - name: Run tests
+      run: swift test --skip-build --enable-test-discovery -c release
