@@ -22,4 +22,4 @@ jobs:
         echo ::set-env name=codecov_path::$(swift test --show-codecov-path)
     - uses: codecov/codecov-action@v1
       with:
-        file: ${codecov_path}
+        file: ${{ env.codecov_path}}
