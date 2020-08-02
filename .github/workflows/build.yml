@@ -17,12 +17,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: swift build --enable-test-discovery -c release
+      run: swift build --build-tests --enable-test-discovery -c release
     - name: Run tests
       run: |
-        swift test --enable-test-discovery --enable-code-coverage -c release
-        echo "::set-env name=codecov_path::$(swift test --show-codecov-path -c release)"
+        swift test --skip-build --enable-test-discovery --enable-code-coverage -c release
     - uses: codecov/codecov-action@v1
-      with:
-        file: $codecov_path
-        fail_ci_if_error: true
