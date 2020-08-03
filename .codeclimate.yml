@@ -1,8 +1,8 @@
 exclude_patterns:
   - "**/*.json"
-  - ".**/*.json"
+  - ".*.json"
   - "**/*.yml"
-  - ".**/*.yml"
+  - ".*.yml"
   - "**/*.md"
   - ".gitignore"
   - "LICENSE"
