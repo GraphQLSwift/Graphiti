@@ -1,3 +1,9 @@
 exclude_patterns:
-  - "*"
+  - "*.json"
+  - "*.yml"
+  - ".gitignore"
+  - "LICENSE"
+  - "Package.resolved"
+  - "Package.swift"
+  - "README.md"
   - "!Sources/"
