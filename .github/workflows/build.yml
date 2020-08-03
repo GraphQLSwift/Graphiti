@@ -17,10 +17,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Run tests
-      run: |
-        swift test --enable-test-discovery --enable-code-coverage
-        echo ::set-env name=codecov_path::$(swift test --show-codecov-path)
-    - uses: codecov/codecov-action@v1
-      if: matrix.os == 'ubuntu-20.04'
-      with:
-        file: ${{ env.codecov_path }}
+      run: swift test --enable-test-discovery
