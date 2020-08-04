@@ -169,8 +169,8 @@ This project is released under the MIT license. See [LICENSE](LICENSE) for detai
 [slack-badge]: https://zewo-slackin.herokuapp.com/badge.svg
 [slack-url]: http://slack.zewo.io
 
-[gh-actions-badge]: https://github.com/GraphQLSwift/Graphiti/workflows/Test/badge.svg
-[gh-actions-url]: https://github.com/GraphQLSwift/Graphiti/actions?query=workflow%3ATest
+[gh-actions-badge]: https://github.com/GraphQLSwift/Graphiti/workflows/Tests/badge.svg
+[gh-actions-url]: https://github.com/GraphQLSwift/Graphiti/actions?query=workflow%3ATests
 
 [maintainability-badge]: https://api.codeclimate.com/v1/badges/25559824033fc2caa94e/maintainability
 [maintainability-url]: https://codeclimate.com/github/GraphQLSwift/Graphiti/maintainability
