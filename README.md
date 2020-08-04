@@ -5,9 +5,9 @@ Graphiti is a Swift library for building GraphQL schemas/types fast, safely and 
 [![Swift][swift-badge]][swift-url]
 [![License][mit-badge]][mit-url]
 [![Slack][slack-badge]][slack-url]
-[![Travis][travis-badge]][travis-url]
-[![Codecov][codecov-badge]][codecov-url]
-[![Codebeat][codebeat-badge]][codebeat-url]
+[![GitHub Actions][gh-actions-badge]][gh-actions-url]
+[![Maintainability][maintainability-badge]][maintainability-url]
+[![Coverage][coverage-badge]][coverage-url]
 
 Looking for help? Find resources [from the community](http://graphql.org/community/).
 
@@ -162,14 +162,18 @@ This project is released under the MIT license. See [LICENSE](LICENSE) for detai
 
 [swift-badge]: https://img.shields.io/badge/Swift-5.1-orange.svg?style=flat
 [swift-url]: https://swift.org
+
 [mit-badge]: https://img.shields.io/badge/License-MIT-blue.svg?style=flat
 [mit-url]: https://tldrlegal.com/license/mit-license
-[slack-image]: http://s13.postimg.org/ybwy92ktf/Slack.png
+
 [slack-badge]: https://zewo-slackin.herokuapp.com/badge.svg
 [slack-url]: http://slack.zewo.io
-[travis-badge]: https://travis-ci.org/GraphQLSwift/Graphiti.svg?branch=master
-[travis-url]: https://travis-ci.org/GraphQLSwift/Graphiti
-[codecov-badge]: https://codecov.io/gh/GraphQLSwift/Graphiti/branch/master/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/GraphQLSwift/Graphiti
-[codebeat-badge]: https://codebeat.co/badges/df113480-6e62-43e0-8c9d-4571c4307e19
-[codebeat-url]: https://codebeat.co/projects/github-com-graphqlswift-graphiti
+
+[gh-actions-badge]: https://github.com/GraphQLSwift/Graphiti/workflows/Test/badge.svg
+[gh-actions-url]: https://github.com/GraphQLSwift/Graphiti/actions?query=workflow%3ATest
+
+[maintainability-badge]: https://api.codeclimate.com/v1/badges/25559824033fc2caa94e/maintainability
+[maintainability-url]: https://codeclimate.com/github/GraphQLSwift/Graphiti/maintainability
+
+[coverage-badge]: https://api.codeclimate.com/v1/badges/25559824033fc2caa94e/test_coverage
+[coverage-url]: https://codeclimate.com/github/GraphQLSwift/Graphiti/test_coverage
