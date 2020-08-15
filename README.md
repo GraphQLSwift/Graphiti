@@ -84,7 +84,7 @@ struct MessageRoot {
 
 #### Defining the API
 
-Now we can finally define the Schema using the builder pattern.
+Now we can finally define the Schema.
 
 ```swift
 struct MessageAPI : API {
