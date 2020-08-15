@@ -99,7 +99,7 @@ struct MessageAPI : API {
         self.schema = try Schema<MessageRoot, MessageContext>(
             Type(Message.self,
                 Field("content", at: \.content)
-            )
+            ),
 
             Query(
                 Field("message", at: MessageRoot.message)
