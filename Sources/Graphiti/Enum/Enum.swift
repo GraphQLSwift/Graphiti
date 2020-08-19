@@ -3,7 +3,7 @@ import GraphQL
 public final class Enum<RootType, Context, EnumType : Encodable & RawRepresentable> : Component<RootType, Context> where EnumType.RawValue == String {
     private let values: [Value<EnumType>]
     
-    override func update(builder: SchemaBuilder) throws {
+    override func update(typeProvider: SchemaTypeProvider) throws {
         let enumType = try GraphQLEnumType(
             name: name,
             description: description,
@@ -16,10 +16,10 @@ public final class Enum<RootType, Context, EnumType : Encodable & RawRepresentab
             }
         )
         
-        try builder.map(EnumType.self, to: enumType)
+        try typeProvider.map(EnumType.self, to: enumType)
     }
     
-    init(
+    private init(
         type: EnumType.Type,
         name: String?,
         values: [Value<EnumType>]
@@ -29,12 +29,20 @@ public final class Enum<RootType, Context, EnumType : Encodable & RawRepresentab
     }
 }
 
-extension Enum {
-    public convenience init(
+public extension Enum {
+    convenience init(
         _ type: EnumType.Type,
         as name: String? = nil,
-        _ values: Value<EnumType>...
+        @ValueBuilder<EnumType> _ values: () -> Value<EnumType>
     ) {
-        self.init(type: type, name: name, values: values)
+        self.init(type: type, name: name, values: [values()])
+    }
+    
+    convenience init(
+        _ type: EnumType.Type,
+        as name: String? = nil,
+        @ValueBuilder<EnumType> _ values: () -> [Value<EnumType>]
+    ) {
+        self.init(type: type, name: name, values: values())
     }
 }

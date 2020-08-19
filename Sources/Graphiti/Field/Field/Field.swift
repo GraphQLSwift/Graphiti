@@ -6,23 +6,23 @@ public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : Fiel
     let arguments: [ArgumentComponent<Arguments>]
     let resolve: GraphQLFieldResolve
     
-    override func field(provider: TypeProvider) throws -> (String, GraphQLField) {
+    override func field(typeProvider: TypeProvider) throws -> (String, GraphQLField) {
         let field = GraphQLField(
-            type: try provider.getOutputType(from: FieldType.self, field: name),
+            type: try typeProvider.getOutputType(from: FieldType.self, field: name),
             description: description,
             deprecationReason: deprecationReason,
-            args: try arguments(provider: provider),
+            args: try arguments(typeProvider: typeProvider),
             resolve: resolve
         )
         
         return (name, field)
     }
     
-    func arguments(provider: TypeProvider) throws -> GraphQLArgumentConfigMap {
+    func arguments(typeProvider: TypeProvider) throws -> GraphQLArgumentConfigMap {
         var map: GraphQLArgumentConfigMap = [:]
         
         for argument in arguments {
-            let (name, argument) = try argument.argument(provider: provider)
+            let (name, argument) = try argument.argument(typeProvider: typeProvider)
             map[name] = argument
         }
         

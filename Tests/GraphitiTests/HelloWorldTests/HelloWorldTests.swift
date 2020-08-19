@@ -93,44 +93,44 @@ struct HelloAPI : API {
     let root = HelloRoot()
     let context = Context()
     
-    let schema = try! Schema<HelloRoot, Context>(
+    let schema = try! Schema<HelloRoot, Context> {
         Scalar(Float.self)
-            .description("The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point)."),
+            .description("The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).")
 
         Scalar(ID.self)
-            .description("The `ID` scalar type represents a unique identifier."),
+            .description("The `ID` scalar type represents a unique identifier.")
         
-        Type(User.self,
-            Field("id", at: \.id),
+        Type(User.self) {
+            Field("id", at: \.id)
             Field("name", at: \.name)
-        ),
+        }
 
-        Input(UserInput.self,
-            InputField("id", at: \.id),
+        Input(UserInput.self) {
+            InputField("id", at: \.id)
             InputField("name", at: \.name)
-        ),
+        }
         
-        Query(
-            Field("hello", at: HelloRoot.hello),
-            Field("asyncHello", at: HelloRoot.asyncHello),
+        Query {
+            Field("hello", at: HelloRoot.hello)
+            Field("asyncHello", at: HelloRoot.asyncHello)
             
             Field("float", at: HelloRoot.getFloat,
                 Argument("float", at: \.float)
-            ),
+            )
             
             Field("id", at: HelloRoot.getId,
                 Argument("id", at: \.id)
-            ),
+            )
             
             Field("user", at: HelloRoot.getUser)
-        ),
+        }
 
-        Mutation(
+        Mutation {
             Field("addUser", at: HelloRoot.addUser,
                 Argument("user", at: \.user)
             )
-        )
-    )
+        }
+    }
 }
 
 class HelloWorldTests : XCTestCase {

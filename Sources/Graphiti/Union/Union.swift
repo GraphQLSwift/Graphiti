@@ -3,17 +3,17 @@ import GraphQL
 public final class Union<Root, Context, UnionType> : Component<Root, Context> {
     private let members: [Any.Type]
     
-    override func update(builder: SchemaBuilder) throws {
+    override func update(typeProvider: SchemaTypeProvider) throws {
         let unionType = try GraphQLUnionType(
             name: name,
             description: description,
             resolveType: nil,
             types: members.map {
-                try builder.getObjectType(from: $0)
+                try typeProvider.getObjectType(from: $0)
             }
         )
         
-        try builder.map(UnionType.self, to: unionType)
+        try typeProvider.map(UnionType.self, to: unionType)
     }
     
     init(

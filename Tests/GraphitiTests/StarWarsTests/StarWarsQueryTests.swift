@@ -654,17 +654,17 @@ class StarWarsQueryTests : XCTestCase {
             var root: Root = Root()
             var context: NoContext = NoContext()
             
-            let schema = try! Schema<Root, NoContext>(
-                Type(A.self,
-                    Field("nullableA", at: A.nullableA, as: (TypeReference<A>?).self),
-                    Field("nonNullA", at: A.nonNullA, as: TypeReference<A>.self),
+            let schema = try! Schema<Root, NoContext> {
+                Type(A.self) {
+                    Field("nullableA", at: A.nullableA, as: (TypeReference<A>?).self)
+                    Field("nonNullA", at: A.nonNullA, as: TypeReference<A>.self)
                     Field("throws", at: A.throws)
-                ),
+                }
 
-                Query(
+                Query {
                     Field("nullableA", at: Root.nullableA)
-                )
-            )
+                }
+            }
         }
 
         let query = """

@@ -7,7 +7,7 @@ open class Component<RootType, Context> {
     }
     
     
-    func update(builder: SchemaBuilder) throws {}
+    func update(typeProvider: SchemaTypeProvider) throws {}
 }
 
 public extension Component {

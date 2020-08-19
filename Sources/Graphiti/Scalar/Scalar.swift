@@ -1,7 +1,7 @@
 import GraphQL
 
 open class Scalar<RootType, Context, ScalarType : Codable> : Component<RootType, Context> {
-    override func update(builder: SchemaBuilder) throws {
+    override func update(typeProvider: SchemaTypeProvider) throws {
         let scalarType = try GraphQLScalarType(
             name: name,
             description: description,
@@ -23,7 +23,7 @@ open class Scalar<RootType, Context, ScalarType : Codable> : Component<RootType,
             }
         )
         
-        try builder.map(ScalarType.self, to: scalarType)
+        try typeProvider.map(ScalarType.self, to: scalarType)
     }
     
     open func serialize(scalar: ScalarType) throws -> Map {

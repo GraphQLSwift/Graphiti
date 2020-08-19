@@ -7,27 +7,27 @@ public final class Query<RootType, Context> : Component<RootType, Context> {
         return source is RootType
     }
     
-    override func update(builder: SchemaBuilder) throws {
-        builder.query = try GraphQLObjectType(
+    override func update(typeProvider: SchemaTypeProvider) throws {
+        typeProvider.query = try GraphQLObjectType(
             name: name,
             description: description,
-            fields: fields(provider: builder),
+            fields: fields(typeProvider: typeProvider),
             isTypeOf: isTypeOf
         )
     }
     
-    func fields(provider: TypeProvider) throws -> GraphQLFieldMap {
+    func fields(typeProvider: TypeProvider) throws -> GraphQLFieldMap {
         var map: GraphQLFieldMap = [:]
         
         for field in fields {
-            let (name, field) = try field.field(provider: provider)
+            let (name, field) = try field.field(typeProvider: typeProvider)
             map[name] = field
         }
         
         return map
     }
     
-    init(
+    private init(
         name: String,
         fields: [FieldComponent<RootType, Context>]
     ) {
@@ -39,8 +39,15 @@ public final class Query<RootType, Context> : Component<RootType, Context> {
 public extension Query {
     convenience init(
         as name: String = "Query",
-        _ fields: FieldComponent<RootType, Context>...
+        @FieldComponentBuilder<RootType, Context> _ fields: () -> FieldComponent<RootType, Context>
     ) {
-        self.init(name: name, fields: fields)
+        self.init(name: name, fields: [fields()])
+    }
+    
+    convenience init(
+        as name: String = "Query",
+        @FieldComponentBuilder<RootType, Context> _ fields: () -> [FieldComponent<RootType, Context>]
+    ) {
+        self.init(name: name, fields: fields())
     }
 }

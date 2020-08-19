@@ -1,9 +1,9 @@
 public final class Types<Root, Context> : Component<Root, Context> {
     let types: [Any.Type]
     
-    override func update(builder: SchemaBuilder) throws {
-        builder.types = try types.map {
-            try builder.getNamedType(from: $0)
+    override func update(typeProvider: SchemaTypeProvider) throws {
+        typeProvider.types = try types.map {
+            try typeProvider.getNamedType(from: $0)
         }
     }
     

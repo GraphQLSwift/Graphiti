@@ -4,9 +4,9 @@ public class Argument<ArgumentsType : Decodable, ArgumentType> : ArgumentCompone
     let name: String
     var defaultValue: AnyEncodable? = nil
     
-    override func argument(provider: TypeProvider) throws -> (String, GraphQLArgument) {
+    override func argument(typeProvider: TypeProvider) throws -> (String, GraphQLArgument) {
         let argument = GraphQLArgument(
-            type: try provider.getInputType(from: ArgumentType.self, field: name),
+            type: try typeProvider.getInputType(from: ArgumentType.self, field: name),
             description: description,
             defaultValue: try defaultValue.map({ try MapEncoder().encode($0) })
         )

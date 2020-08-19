@@ -8,32 +8,32 @@ public final class Type<RootType, Context, ObjectType : Encodable> : Component<R
         return source is ObjectType
     }
     
-    override func update(builder: SchemaBuilder) throws {
+    override func update(typeProvider: SchemaTypeProvider) throws {
         let objectType = try GraphQLObjectType(
             name: name,
             description: description,
-            fields: fields(provider: builder),
+            fields: fields(typeProvider: typeProvider),
             interfaces: interfaces.map {
-                try builder.getInterfaceType(from: $0)
+                try typeProvider.getInterfaceType(from: $0)
             },
             isTypeOf: isTypeOf
         )
         
-        try builder.map(ObjectType.self, to: objectType)
+        try typeProvider.map(ObjectType.self, to: objectType)
     }
     
-    func fields(provider: TypeProvider) throws -> GraphQLFieldMap {
+    func fields(typeProvider: TypeProvider) throws -> GraphQLFieldMap {
         var map: GraphQLFieldMap = [:]
         
         for field in fields {
-            let (name, field) = try field.field(provider: provider)
+            let (name, field) = try field.field(typeProvider: typeProvider)
             map[name] = field
         }
         
         return map
     }
     
-    init(
+    private init(
         type: ObjectType.Type,
         name: String?,
         interfaces: [Any.Type],
@@ -50,13 +50,27 @@ public extension Type {
         _ type: ObjectType.Type,
         as name: String? = nil,
         interfaces: [Any.Type] = [],
-        _ fields: FieldComponent<ObjectType, Context>...
+        @FieldComponentBuilder<ObjectType, Context> _ fields: () -> FieldComponent<ObjectType, Context>
     ) {
         self.init(
             type: type,
             name: name,
             interfaces: interfaces,
-            fields: fields
+            fields: [fields()]
+        )
+    }
+    
+    convenience init(
+        _ type: ObjectType.Type,
+        as name: String? = nil,
+        interfaces: [Any.Type] = [],
+        @FieldComponentBuilder<ObjectType, Context> _ fields: () -> [FieldComponent<ObjectType, Context>]
+    ) {
+        self.init(
+            type: type,
+            name: name,
+            interfaces: interfaces,
+            fields: fields()
         )
     }
 }

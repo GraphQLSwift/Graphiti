@@ -3,7 +3,7 @@ import GraphQL
 public class InputFieldComponent<InputObjectType, Context> {
     var description: String? = nil
     
-    func field(provider: TypeProvider) throws -> (String, InputObjectField) {
+    func field(typeProvider: TypeProvider) throws -> (String, InputObjectField) {
         fatalError()
     }
 }

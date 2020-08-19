@@ -1,6 +1,6 @@
 import GraphQL
 
-final class SchemaBuilder : TypeProvider {
+final class SchemaTypeProvider : TypeProvider {
     var graphQLTypeMap: [AnyType: GraphQLType] = [
         AnyType(Int.self): GraphQLInt,
         AnyType(Double.self): GraphQLFloat,
@@ -14,3 +14,4 @@ final class SchemaBuilder : TypeProvider {
     var types: [GraphQLNamedType] = []
     var directives: [GraphQLDirective] = []
 }
+
