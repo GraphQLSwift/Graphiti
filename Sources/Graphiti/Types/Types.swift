@@ -1,4 +1,4 @@
-public final class Types<Root, Context> : Component<Root, Context> {
+public final class Types<Resolver, Context> : Component<Resolver, Context> {
     let types: [Any.Type]
     
     override func update(typeProvider: SchemaTypeProvider) throws {

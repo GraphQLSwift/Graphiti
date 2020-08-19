@@ -1,10 +1,10 @@
 import GraphQL
 import NIO
 
-public final class Schema<RootType, Context> {
+public final class Schema<Resolver, Context> {
     public let schema: GraphQLSchema
 
-    private init(components: [Component<RootType, Context>]) throws {
+    private init(components: [Component<Resolver, Context>]) throws {
         let typeProvider = SchemaTypeProvider()
         
         for component in components {
@@ -26,17 +26,17 @@ public final class Schema<RootType, Context> {
 }
 
 public extension Schema {
-    convenience init(@ComponentBuilder<RootType, Context> _ components: () -> Component<RootType, Context>) throws {
+    convenience init(@ComponentBuilder<Resolver, Context> _ components: () -> Component<Resolver, Context>) throws {
         try self.init(components: [components()])
     }
     
-    convenience init(@ComponentBuilder<RootType, Context> _ components: () -> [Component<RootType, Context>]) throws {
+    convenience init(@ComponentBuilder<Resolver, Context> _ components: () -> [Component<Resolver, Context>]) throws {
         try self.init(components: components())
     }
     
     func execute(
         request: String,
-        root: RootType,
+        resolver: Resolver,
         context: Context,
         eventLoopGroup: EventLoopGroup,
         variables: [String: Map] = [:],
@@ -46,7 +46,7 @@ public extension Schema {
             return try graphql(
                 schema: schema,
                 request: request,
-                rootValue: root,
+                rootValue: resolver,
                 context: context,
                 eventLoopGroup: eventLoopGroup,
                 variableValues: variables,

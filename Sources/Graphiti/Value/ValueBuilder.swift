@@ -4,10 +4,6 @@ public struct ValueBuilder<EnumType : Encodable & RawRepresentable> where EnumTy
         value
     }
 
-    public static func buildBlock(_ value: Value<EnumType>) -> [Value<EnumType>] {
-        [value]
-    }
-
     public static func buildBlock(_ value: Value<EnumType>...) -> [Value<EnumType>] {
         value
     }

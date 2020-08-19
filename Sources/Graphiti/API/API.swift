@@ -2,10 +2,10 @@ import GraphQL
 import NIO
 
 public protocol API {
-    associatedtype RootType
+    associatedtype Resolver
     associatedtype ContextType
-    var root: RootType { get }
-    var schema: Schema<RootType, ContextType> { get }
+    var resolver: Resolver { get }
+    var schema: Schema<Resolver, ContextType> { get }
 }
 
 extension API {
@@ -18,7 +18,7 @@ extension API {
     ) -> EventLoopFuture<GraphQLResult> {
         return schema.execute(
             request: request,
-            root: root,
+            resolver: resolver,
             context: context,
             eventLoopGroup: eventLoopGroup,
             variables: variables,

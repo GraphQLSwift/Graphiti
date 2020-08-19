@@ -1,4 +1,4 @@
-open class Component<RootType, Context> {
+open class Component<Resolver, Context> {
     let name: String
     var description: String? = nil
     

@@ -1,12 +1,12 @@
 import Graphiti
 
 public struct StarWarsAPI : API {
-    public let root = Root()
-    public let context = Store()
+    public let resolver = StarWarsResolver()
+    public let context = StarWarsContext()
     
     public init() {}
     
-    public let schema = try! Schema<Root, Store> {
+    public let schema = try! Schema<StarWarsResolver, StarWarsContext> {
         Enum(Episode.self) {
             Value(.newHope)
                 .description("Released in 1977.")
@@ -78,27 +78,27 @@ public struct StarWarsAPI : API {
         Union(SearchResult.self, members: Planet.self, Human.self, Droid.self)
 
         Query {
-            Field("hero", at: Root.hero, as: Character.self,
+            Field("hero", at: StarWarsResolver.hero, as: Character.self) {
                 Argument("episode", at: \.episode)
                     .description("If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode.")
-            )
+            }
             .description("Returns a hero based on the given episode.")
 
 
-            Field("human", at: Root.human,
+            Field("human", at: StarWarsResolver.human) {
                 Argument("id", at: \.id)
                     .description("Id of the human.")
-            )
+            }
 
-            Field("droid", at: Root.droid,
+            Field("droid", at: StarWarsResolver.droid) {
                 Argument("id", at: \.id)
                     .description("Id of the droid.")
-            )
+            }
 
-            Field("search", at: Root.search, as: [SearchResult].self,
+            Field("search", at: StarWarsResolver.search, as: [SearchResult].self) {
                 Argument("query", at: \.query)
                     .defaultValue("R2-D2")
-            )
+            }
         }
 
         Types(Human.self, Droid.self)

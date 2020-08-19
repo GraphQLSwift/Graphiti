@@ -644,17 +644,17 @@ class StarWarsQueryTests : XCTestCase {
             }
         }
 
-        struct Root {
+        struct TestResolver {
             func nullableA(context: NoContext, arguments: NoArguments) -> A? {
                 return A()
             }
         }
         
         struct MyAPI : API {
-            var root: Root = Root()
+            var resolver: TestResolver = TestResolver()
             var context: NoContext = NoContext()
             
-            let schema = try! Schema<Root, NoContext> {
+            let schema = try! Schema<TestResolver, NoContext> {
                 Type(A.self) {
                     Field("nullableA", at: A.nullableA, as: (TypeReference<A>?).self)
                     Field("nonNullA", at: A.nonNullA, as: TypeReference<A>.self)
@@ -662,7 +662,7 @@ class StarWarsQueryTests : XCTestCase {
                 }
 
                 Query {
-                    Field("nullableA", at: Root.nullableA)
+                    Field("nullableA", at: TestResolver.nullableA)
                 }
             }
         }

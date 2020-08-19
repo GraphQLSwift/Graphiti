@@ -41,19 +41,19 @@ struct UserInput : Codable {
     let name: String?
 }
 
-final class Context {
+final class HelloContext {
     func hello() -> String {
         "world"
     }
 }
 
-struct HelloRoot {
-    func hello(context: Context, arguments: NoArguments) -> String {
+struct HelloResolver {
+    func hello(context: HelloContext, arguments: NoArguments) -> String {
         context.hello()
     }
     
     func asyncHello(
-        context: Context,
+        context: HelloContext,
         arguments: NoArguments,
         group: EventLoopGroup
     ) -> EventLoopFuture<String> {
@@ -64,7 +64,7 @@ struct HelloRoot {
         let float: Float
     }
     
-    func getFloat(context: Context, arguments: FloatArguments) -> Float {
+    func getFloat(context: HelloContext, arguments: FloatArguments) -> Float {
         arguments.float
     }
     
@@ -72,11 +72,11 @@ struct HelloRoot {
         let id: ID
     }
     
-    func getId(context: Context, arguments: IDArguments) -> ID {
+    func getId(context: HelloContext, arguments: IDArguments) -> ID {
         arguments.id
     }
     
-    func getUser(context: Context, arguments: NoArguments) -> User {
+    func getUser(context: HelloContext, arguments: NoArguments) -> User {
         User(id: "123", name: "John Doe")
     }
     
@@ -84,16 +84,16 @@ struct HelloRoot {
         let user: UserInput
     }
     
-    func addUser(context: Context, arguments: AddUserArguments) -> User {
+    func addUser(context: HelloContext, arguments: AddUserArguments) -> User {
         User(arguments.user)
     }
 }
 
 struct HelloAPI : API {
-    let root = HelloRoot()
-    let context = Context()
+    let resolver = HelloResolver()
+    let context = HelloContext()
     
-    let schema = try! Schema<HelloRoot, Context> {
+    let schema = try! Schema<HelloResolver, HelloContext> {
         Scalar(Float.self)
             .description("The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).")
 
@@ -111,24 +111,24 @@ struct HelloAPI : API {
         }
         
         Query {
-            Field("hello", at: HelloRoot.hello)
-            Field("asyncHello", at: HelloRoot.asyncHello)
+            Field("hello", at: HelloResolver.hello)
+            Field("asyncHello", at: HelloResolver.asyncHello)
             
-            Field("float", at: HelloRoot.getFloat,
+            Field("float", at: HelloResolver.getFloat) {
                 Argument("float", at: \.float)
-            )
+            }
             
-            Field("id", at: HelloRoot.getId,
+            Field("id", at: HelloResolver.getId) {
                 Argument("id", at: \.id)
-            )
+            }
             
-            Field("user", at: HelloRoot.getUser)
+            Field("user", at: HelloResolver.getUser)
         }
 
         Mutation {
-            Field("addUser", at: HelloRoot.addUser,
+            Field("addUser", at: HelloResolver.addUser) {
                 Argument("user", at: \.user)
-            )
+            }
         }
     }
 }

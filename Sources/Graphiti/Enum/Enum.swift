@@ -1,6 +1,6 @@
 import GraphQL
 
-public final class Enum<RootType, Context, EnumType : Encodable & RawRepresentable> : Component<RootType, Context> where EnumType.RawValue == String {
+public final class Enum<Resolver, Context, EnumType : Encodable & RawRepresentable> : Component<Resolver, Context> where EnumType.RawValue == String {
     private let values: [Value<EnumType>]
     
     override func update(typeProvider: SchemaTypeProvider) throws {

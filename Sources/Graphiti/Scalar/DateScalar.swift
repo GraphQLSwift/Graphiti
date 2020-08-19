@@ -1,7 +1,7 @@
 import Foundation
 import GraphQL
 
-public final class DateScalar<RootType, Context> : Scalar<RootType, Context, Date> {
+public final class DateScalar<Resolver, Context> : Scalar<Resolver, Context, Date> {
     let formatter: Graphiti.DateFormatter
     
     public init(as name: String? = nil, formatter: Graphiti.DateFormatter) {

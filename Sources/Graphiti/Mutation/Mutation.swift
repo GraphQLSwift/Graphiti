@@ -1,10 +1,10 @@
 import GraphQL
 
-public final class Mutation<RootType, Context> : Component<RootType, Context> {
-    let fields: [FieldComponent<RootType, Context>]
+public final class Mutation<Resolver, Context> : Component<Resolver, Context> {
+    let fields: [FieldComponent<Resolver, Context>]
     
     let isTypeOf: GraphQLIsTypeOf = { source, _, _ in
-        return source is RootType
+        return source is Resolver
     }
     
     override func update(typeProvider: SchemaTypeProvider) throws {
@@ -29,7 +29,7 @@ public final class Mutation<RootType, Context> : Component<RootType, Context> {
     
     private init(
         name: String,
-        fields: [FieldComponent<RootType, Context>]
+        fields: [FieldComponent<Resolver, Context>]
     ) {
         self.fields = fields
         super.init(name: name)
@@ -39,14 +39,14 @@ public final class Mutation<RootType, Context> : Component<RootType, Context> {
 public extension Mutation {
     convenience init(
         as name: String = "Mutation",
-        @FieldComponentBuilder<RootType, Context> _ fields: () -> FieldComponent<RootType, Context>
+        @FieldComponentBuilder<Resolver, Context> _ fields: () -> FieldComponent<Resolver, Context>
     ) {
         self.init(name: name, fields: [fields()])
     }
     
     convenience init(
         as name: String = "Mutation",
-        @FieldComponentBuilder<RootType, Context> _ fields: () -> [FieldComponent<RootType, Context>]
+        @FieldComponentBuilder<Resolver, Context> _ fields: () -> [FieldComponent<Resolver, Context>]
     ) {
         self.init(name: name, fields: fields())
     }

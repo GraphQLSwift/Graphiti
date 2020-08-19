@@ -5,7 +5,7 @@
  * fetching this data from a backend service rather than from hardcoded
  * values in a more complex demo.
  */
-public final class Store {
+public final class StarWarsContext {
     private lazy var tatooine = Planet(
         id:"10001",
         name: "Tatooine",

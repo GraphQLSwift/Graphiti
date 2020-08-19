@@ -1,6 +1,6 @@
 import GraphQL
 
-public final class Interface<RootType, Context, InterfaceType> : Component<RootType, Context> {
+public final class Interface<Resolver, Context, InterfaceType> : Component<Resolver, Context> {
     let fields: [FieldComponent<InterfaceType, Context>]
     
     override func update(typeProvider: SchemaTypeProvider) throws {

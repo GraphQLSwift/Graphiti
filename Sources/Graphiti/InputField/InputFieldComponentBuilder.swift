@@ -4,10 +4,6 @@ public struct InputFieldComponentBuilder<InputObjectType, Context> {
         component
     }
 
-    public static func buildBlock(_ component: InputFieldComponent<InputObjectType, Context>) -> [InputFieldComponent<InputObjectType, Context>] {
-        [component]
-    }
-
     public static func buildBlock(_ components: InputFieldComponent<InputObjectType, Context>...) -> [InputFieldComponent<InputObjectType, Context>] {
         components
     }

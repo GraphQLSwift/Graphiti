@@ -1,6 +1,6 @@
 import GraphQL
 
-public final class Type<RootType, Context, ObjectType : Encodable> : Component<RootType, Context> {
+public final class Type<Resolver, Context, ObjectType : Encodable> : Component<Resolver, Context> {
     let interfaces: [Any.Type]
     let fields: [FieldComponent<ObjectType, Context>]
     
