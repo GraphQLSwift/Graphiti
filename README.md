@@ -152,6 +152,10 @@ struct Resolver {
 }
 ```
 
+#### Star Wars API example
+
+Check the [Star Wars API](Tests/GraphitiTests/StarWarsAPI/StarWarsAPI.swift) for a more complete example.
+
 ## License
 
 This project is released under the MIT license. See [LICENSE](LICENSE) for details.
