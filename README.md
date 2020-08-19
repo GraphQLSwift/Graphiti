@@ -152,7 +152,7 @@ struct Resolver {
 }
 ```
 
-#### Star Wars API example
+## Star Wars API example
 
 Check the [Star Wars API](Tests/GraphitiTests/StarWarsAPI/StarWarsAPI.swift) for a more complete example.
 
