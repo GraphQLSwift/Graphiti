@@ -18,6 +18,26 @@ public extension Connection where Node : Identifiable, Node.ID : LosslessStringC
     }
 }
 
+public extension EventLoopFuture where Value: Sequence, Value.Element: Encodable & HasCustomCursor {
+    func connection(from arguments: Paginatable) -> EventLoopFuture<Connection<Value.Element>> {
+        flatMapThrowing { value in
+            try value.connection(from: arguments)
+        }
+    }
+    
+    func connection(from arguments: ForwardPaginatable) -> EventLoopFuture<Connection<Value.Element>> {
+        flatMapThrowing { value in
+            try value.connection(from: arguments)
+        }
+    }
+    
+    func connection(from arguments: BackwardPaginatable) -> EventLoopFuture<Connection<Value.Element>> {
+        flatMapThrowing { value in
+            try value.connection(from: arguments)
+        }
+    }
+}
+
 @available(OSX 10.15, *)
 public extension EventLoopFuture where Value : Sequence, Value.Element : Encodable & Identifiable, Value.Element.ID : LosslessStringConvertible {
     func connection(from arguments: Paginatable) -> EventLoopFuture<Connection<Value.Element>> {
@@ -39,6 +59,20 @@ public extension EventLoopFuture where Value : Sequence, Value.Element : Encodab
     }
 }
 
+public extension Sequence where Element: Encodable & HasCustomCursor {
+    func connection(from arguments: Paginatable) throws -> Connection<Element> {
+        try connect(to: Array(self), arguments: PaginationArguments(arguments))
+    }
+    
+    func connection(from arguments: ForwardPaginatable) throws -> Connection<Element> {
+        try connect(to: Array(self), arguments: PaginationArguments(arguments))
+    }
+    
+    func connection(from arguments: BackwardPaginatable) throws -> Connection<Element> {
+        try connect(to: Array(self), arguments: PaginationArguments(arguments))
+    }
+}
+
 @available(OSX 10.15, *)
 public extension Sequence where Element : Encodable & Identifiable, Element.ID : LosslessStringConvertible {
     func connection(from arguments: Paginatable) throws -> Connection<Element> {
@@ -52,6 +86,28 @@ public extension Sequence where Element : Encodable & Identifiable, Element.ID :
     func connection(from arguments: BackwardPaginatable) throws -> Connection<Element> {
         try connect(to: Array(self), arguments: PaginationArguments(arguments))
     }
+}
+
+func connect<Node>(
+    to elements: [Node],
+    arguments: PaginationArguments
+) throws -> Connection<Node> where Node: Encodable & HasCustomCursor {
+    let edges = try elements.map { element in
+        Edge<Node>(node: element, cursor: try element.cursor().base64Encoded())
+    }
+    
+    let cursorEdges = slicingCursor(edges: edges, arguments: arguments)
+    let countEdges = try slicingCount(edges: cursorEdges, arguments: arguments)
+    
+    return Connection(
+        edges: countEdges,
+        pageInfo: PageInfo(
+            hasPreviousPage: hasPreviousPage(edges: cursorEdges, arguments: arguments),
+            hasNextPage: hasNextPage(edges: cursorEdges, arguments: arguments),
+            startCursor: countEdges.first.map({ $0.cursor }),
+            endCursor: countEdges.last.map({ $0.cursor })
+        )
+    )
 }
 
 @available(OSX 10.15, *)
@@ -112,7 +168,7 @@ func slicingCount<Node : Encodable>(
     if let first = arguments.first {
         if first < 0 {
             throw GraphQLError(
-                message: #"Invalid agurment "first". Argument must be a positive integer."#
+                message: #"Invalid argument "first". Argument must be a positive integer."#
             )
         }
         
@@ -122,7 +178,7 @@ func slicingCount<Node : Encodable>(
     if let last = arguments.last {
         if last < 0 {
             throw GraphQLError(
-                message: #"Invalid agurment "last". Argument must be a positive integer."#
+                message: #"Invalid argument "last". Argument must be a positive integer."#
             )
         }
         
