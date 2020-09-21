@@ -34,19 +34,19 @@ public extension EventLoopFuture where Value : Sequence, Value.Element : Encodab
 }
 
 public extension EventLoopFuture where Value: Sequence, Value.Element: Encodable {
-    func connection(from arguments: Paginatable, makeCursor: @escaping (Value.Element) -> String) -> EventLoopFuture<Connection<Value.Element>> {
+    func connection(from arguments: Paginatable, makeCursor: @escaping (Value.Element) throws -> String) -> EventLoopFuture<Connection<Value.Element>> {
         flatMapThrowing { value in
             try value.connection(from: arguments, makeCursor: makeCursor)
         }
     }
     
-    func connection(from arguments: ForwardPaginatable, makeCursor: @escaping (Value.Element) -> String) -> EventLoopFuture<Connection<Value.Element>> {
+    func connection(from arguments: ForwardPaginatable, makeCursor: @escaping (Value.Element) throws -> String) -> EventLoopFuture<Connection<Value.Element>> {
         flatMapThrowing { value in
             try value.connection(from: arguments, makeCursor: makeCursor)
         }
     }
     
-    func connection(from arguments: BackwardPaginatable, makeCursor: @escaping (Value.Element) -> String) -> EventLoopFuture<Connection<Value.Element>> {
+    func connection(from arguments: BackwardPaginatable, makeCursor: @escaping (Value.Element) throws -> String) -> EventLoopFuture<Connection<Value.Element>> {
         flatMapThrowing { value in
             try value.connection(from: arguments, makeCursor: makeCursor)
         }
@@ -69,15 +69,15 @@ public extension Sequence where Element : Encodable & Identifiable, Element.ID :
 }
 
 public extension Sequence where Element : Encodable {
-    func connection(from arguments: Paginatable, makeCursor: @escaping (Element) -> String) throws -> Connection<Element> {
+    func connection(from arguments: Paginatable, makeCursor: @escaping (Element) throws -> String) throws -> Connection<Element> {
         try connect(to: Array(self), arguments: PaginationArguments(arguments), makeCursor: makeCursor)
     }
     
-    func connection(from arguments: ForwardPaginatable, makeCursor: @escaping (Element) -> String) throws -> Connection<Element> {
+    func connection(from arguments: ForwardPaginatable, makeCursor: @escaping (Element) throws -> String) throws -> Connection<Element> {
         try connect(to: Array(self), arguments: PaginationArguments(arguments), makeCursor: makeCursor)
     }
     
-    func connection(from arguments: BackwardPaginatable, makeCursor: @escaping (Element) -> String) throws -> Connection<Element> {
+    func connection(from arguments: BackwardPaginatable, makeCursor: @escaping (Element) throws -> String) throws -> Connection<Element> {
         try connect(to: Array(self), arguments: PaginationArguments(arguments), makeCursor: makeCursor)
     }
 }
@@ -85,10 +85,10 @@ public extension Sequence where Element : Encodable {
 func connect<Node>(
     to elements: [Node],
     arguments: PaginationArguments,
-    makeCursor: @escaping (Node) -> String
+    makeCursor: @escaping (Node) throws -> String
 ) throws -> Connection<Node> where Node : Encodable {
-    let edges = elements.map { element in
-        Edge<Node>(node: element, cursor: makeCursor(element))
+    let edges = try elements.map { element in
+        Edge<Node>(node: element, cursor: try makeCursor(element))
     }
     
     let cursorEdges = slicingCursor(edges: edges, arguments: arguments)
