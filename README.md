@@ -87,6 +87,8 @@ struct MessageAPI : API {
     let resolver: Resolver
     let schema: Schema<Resolver, Context>
     
+    // Notice that `API` allows dependency injection.
+    // You could pass mocks of `resolver` and `context` when testing, for example.
     init(resolver: Resolver) throws {
         self.resolver = resolver
 
@@ -102,8 +104,6 @@ struct MessageAPI : API {
     }
 }
 ```
-
-⭐️ Notice that `API` allows dependency injection. You could pass mocks of `resolver` and `context` when testing, for example.
 
 #### Querying
 
