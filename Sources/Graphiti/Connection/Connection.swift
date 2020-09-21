@@ -13,28 +13,42 @@ public extension Connection where Node : Identifiable, Node.ID : LosslessStringC
         cursor.base64Decoded().flatMap({ Node.ID($0) })
     }
     
-    static func cursor(_ id: Node.ID) -> String? {
-        id.description.base64Encoded()
+    static func cursor(_ node: Node) -> String {
+        node.id.description.base64Encoded()!
     }
 }
 
 @available(OSX 10.15, *)
 public extension EventLoopFuture where Value : Sequence, Value.Element : Encodable & Identifiable, Value.Element.ID : LosslessStringConvertible {
     func connection(from arguments: Paginatable) -> EventLoopFuture<Connection<Value.Element>> {
-        flatMapThrowing { value in
-            try value.connection(from: arguments)
-        }
+        connection(from: arguments, makeCursor: Connection<Value.Element>.cursor)
     }
     
     func connection(from arguments: ForwardPaginatable) -> EventLoopFuture<Connection<Value.Element>> {
-        flatMapThrowing { value in
-            try value.connection(from: arguments)
-        }
+        connection(from: arguments, makeCursor: Connection<Value.Element>.cursor)
     }
     
     func connection(from arguments: BackwardPaginatable) -> EventLoopFuture<Connection<Value.Element>> {
+        connection(from: arguments, makeCursor: Connection<Value.Element>.cursor)
+    }
+}
+
+public extension EventLoopFuture where Value: Sequence, Value.Element: Encodable {
+    func connection(from arguments: Paginatable, makeCursor: @escaping (Value.Element) throws -> String) -> EventLoopFuture<Connection<Value.Element>> {
         flatMapThrowing { value in
-            try value.connection(from: arguments)
+            try value.connection(from: arguments, makeCursor: makeCursor)
+        }
+    }
+    
+    func connection(from arguments: ForwardPaginatable, makeCursor: @escaping (Value.Element) throws -> String) -> EventLoopFuture<Connection<Value.Element>> {
+        flatMapThrowing { value in
+            try value.connection(from: arguments, makeCursor: makeCursor)
+        }
+    }
+    
+    func connection(from arguments: BackwardPaginatable, makeCursor: @escaping (Value.Element) throws -> String) -> EventLoopFuture<Connection<Value.Element>> {
+        flatMapThrowing { value in
+            try value.connection(from: arguments, makeCursor: makeCursor)
         }
     }
 }
@@ -42,25 +56,39 @@ public extension EventLoopFuture where Value : Sequence, Value.Element : Encodab
 @available(OSX 10.15, *)
 public extension Sequence where Element : Encodable & Identifiable, Element.ID : LosslessStringConvertible {
     func connection(from arguments: Paginatable) throws -> Connection<Element> {
-        try connect(to: Array(self), arguments: PaginationArguments(arguments))
+        try connection(from: arguments, makeCursor: Connection<Element>.cursor)
     }
     
     func connection(from arguments: ForwardPaginatable) throws -> Connection<Element> {
-        try connect(to: Array(self), arguments: PaginationArguments(arguments))
+        try connection(from: arguments, makeCursor: Connection<Element>.cursor)
     }
     
     func connection(from arguments: BackwardPaginatable) throws -> Connection<Element> {
-        try connect(to: Array(self), arguments: PaginationArguments(arguments))
+        try connection(from: arguments, makeCursor: Connection<Element>.cursor)
     }
 }
 
-@available(OSX 10.15, *)
+public extension Sequence where Element : Encodable {
+    func connection(from arguments: Paginatable, makeCursor: @escaping (Element) throws -> String) throws -> Connection<Element> {
+        try connect(to: Array(self), arguments: PaginationArguments(arguments), makeCursor: makeCursor)
+    }
+    
+    func connection(from arguments: ForwardPaginatable, makeCursor: @escaping (Element) throws -> String) throws -> Connection<Element> {
+        try connect(to: Array(self), arguments: PaginationArguments(arguments), makeCursor: makeCursor)
+    }
+    
+    func connection(from arguments: BackwardPaginatable, makeCursor: @escaping (Element) throws -> String) throws -> Connection<Element> {
+        try connect(to: Array(self), arguments: PaginationArguments(arguments), makeCursor: makeCursor)
+    }
+}
+
 func connect<Node>(
     to elements: [Node],
-    arguments: PaginationArguments
-) throws -> Connection<Node> where Node : Encodable & Identifiable, Node.ID : LosslessStringConvertible {
-    let edges = elements.map { element in
-        Edge<Node>(node: element, cursor: Connection<Node>.cursor(element.id)!)
+    arguments: PaginationArguments,
+    makeCursor: @escaping (Node) throws -> String
+) throws -> Connection<Node> where Node : Encodable {
+    let edges = try elements.map { element in
+        Edge<Node>(node: element, cursor: try makeCursor(element))
     }
     
     let cursorEdges = slicingCursor(edges: edges, arguments: arguments)
