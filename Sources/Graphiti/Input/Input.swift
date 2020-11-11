@@ -24,9 +24,9 @@ public final class Input<Resolver, Context, InputObjectType : Decodable> : Compo
         return map
     }
     
-    init(
+    public init(
         type: InputObjectType.Type,
-        name: String?,
+        name: String? = nil,
         fields: [InputFieldComponent<InputObjectType, Context>]
     ) {
         self.fields = fields

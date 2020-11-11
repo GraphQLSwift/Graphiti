@@ -33,10 +33,10 @@ public final class Type<Resolver, Context, ObjectType : Encodable> : Component<R
         return map
     }
     
-    private init(
+    public init(
         type: ObjectType.Type,
-        name: String?,
-        interfaces: [Any.Type],
+        name: String? = nil,
+        interfaces: [Any.Type] = [],
         fields: [FieldComponent<ObjectType, Context>]
     ) {
         self.interfaces = interfaces

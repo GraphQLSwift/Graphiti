@@ -4,7 +4,7 @@ import NIO
 public final class Schema<Resolver, Context> {
     public let schema: GraphQLSchema
 
-    private init(components: [Component<Resolver, Context>]) throws {
+    public init(components: [Component<Resolver, Context>]) throws {
         let typeProvider = SchemaTypeProvider()
         
         for component in components {
