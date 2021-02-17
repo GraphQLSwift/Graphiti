@@ -130,6 +130,10 @@ struct HelloAPI : API {
                 Argument("user", at: \.user)
             }
         }
+        
+        Subscription {
+            Field("hello", at: HelloResolver.hello)
+        }
     }
 }
 
@@ -311,6 +315,30 @@ class HelloWorldTests : XCTestCase {
             context: api.context,
             on: group,
             variables: variables
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
+    }
+    
+    // TODO Adjust this to expect an Observable when GraphQL is piped up correctly.
+    func testSubscription() throws {
+        let subscription = """
+        subscription {
+            hello
+        }
+        """
+        
+        let expected = GraphQLResult(data: ["hello": "world"])
+        
+        let expectation = XCTestExpectation()
+        
+        api.execute(
+            request: subscription,
+            context: api.context,
+            on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
             expectation.fulfill()
