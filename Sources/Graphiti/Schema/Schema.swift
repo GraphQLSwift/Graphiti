@@ -1,5 +1,6 @@
 import GraphQL
 import NIO
+import RxSwift
 
 public final class Schema<Resolver, Context> {
     public let schema: GraphQLSchema
@@ -44,6 +45,29 @@ public extension Schema {
     ) -> EventLoopFuture<GraphQLResult> {
         do {
             return try graphql(
+                schema: schema,
+                request: request,
+                rootValue: resolver,
+                context: context,
+                eventLoopGroup: eventLoopGroup,
+                variableValues: variables,
+                operationName: operationName
+            )
+        } catch {
+            return eventLoopGroup.next().makeFailedFuture(error)
+        }
+    }
+    
+    func subscribe(
+        request: String,
+        resolver: Resolver,
+        context: Context,
+        eventLoopGroup: EventLoopGroup,
+        variables: [String: Map] = [:],
+        operationName: String? = nil
+    ) -> EventLoopFuture<SubscriptionResult> {
+        do {
+            return try graphqlSubscribe(
                 schema: schema,
                 request: request,
                 rootValue: resolver,
