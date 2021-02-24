@@ -2,6 +2,8 @@ import GraphQL
 import Runtime
 import RxSwift
 
+// Subscription resolver must return an Observer<Any>, not a specific type, due to lack of support for covariance generics in Swift
+
 public class SubscriptionField<ObjectType, Context, SubscriptionType, FieldType, Arguments : Decodable> : FieldComponent<ObjectType, Context> {
     let name: String
     let arguments: [ArgumentComponent<Arguments>]
