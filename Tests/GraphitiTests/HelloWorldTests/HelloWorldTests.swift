@@ -4,7 +4,7 @@ import NIO
 import RxSwift
 @testable import Graphiti
 
-let pubsub = PublishSubject<User>()
+let pubsub = PublishSubject<Any>()
 
 struct ID : Codable {
     let id: String
@@ -101,7 +101,7 @@ struct HelloResolver {
         User(arguments.user)
     }
     
-    func subscribeUser(context: HelloContext, arguments: NoArguments) -> Observable<User> {
+    func subscribeUser(context: HelloContext, arguments: NoArguments) -> Observable<Any> {
         pubsub
     }
 }
@@ -344,8 +344,9 @@ class HelloWorldTests : XCTestCase {
         wait(for: [expectation], timeout: 10)
     }
     
-    // TODO Adjust this to expect an Observable when GraphQL is piped up correctly.
     func testSubscription() throws {
+        let disposeBag = DisposeBag()
+        
         let subscription = """
         subscription {
             subscribeUser {
@@ -357,42 +358,34 @@ class HelloWorldTests : XCTestCase {
         }
         """
         
-        let expected = GraphQLResult(data: [
-            "subscribeUser": [
-                "user": [
-                    "name": "John Doe",
-                    "id": "123"
-                ]
-            ]
-        ])
-        
-        let result = try api.subscribe(
+        let observable = try api.subscribe(
             request: subscription,
             context: api.context,
             on: group
-        ).wait()
-        print(result)
-//        let observable = try api.subscribe(
-//            request: subscription,
-//            context: api.context,
-//            on: group
-//        ).wait().observable!
+        ).wait().observable!
         
         let expectation = XCTestExpectation()
         
-//        var currentResult = GraphQLResult()
-//        let _ = observable.subscribe { event in
-//            event.element!.whenSuccess { result in
-//                currentResult = result
-//                expectation.fulfill()
-//            }
-//        }
-//
-//        pubsub.onNext(User(id: "124", name: "Jerry"))
-//
-//        wait(for: [expectation], timeout: 10)
-//
-//        XCTAssertEqual(currentResult, expected)
+        var currentResult = GraphQLResult()
+        let _ = observable.subscribe { event in
+            event.element!.whenSuccess { result in
+                currentResult = result
+                expectation.fulfill()
+            }
+        }.disposed(by: disposeBag)
+
+        pubsub.onNext(User(id: "124", name: "Jerry"))
+
+        wait(for: [expectation], timeout: 10)
+
+        XCTAssertEqual(currentResult, GraphQLResult(data: [
+            "subscribeUser": [
+                "user": [
+                    "name": "Jerry",
+                    "id": "124"
+                ]
+            ]
+        ]))
     }
 }
 
