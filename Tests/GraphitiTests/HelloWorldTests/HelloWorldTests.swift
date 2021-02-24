@@ -1,7 +1,10 @@
 import XCTest
-@testable import Graphiti
 import GraphQL
 import NIO
+import RxSwift
+@testable import Graphiti
+
+let pubsub = PublishSubject<User>()
 
 struct ID : Codable {
     let id: String
@@ -41,9 +44,19 @@ struct UserInput : Codable {
     let name: String?
 }
 
+struct UserEvent : Codable {
+    let user: User
+}
+
 final class HelloContext {
     func hello() -> String {
         "world"
+    }
+}
+
+extension User {
+    func toEvent(context: HelloContext, arguments: NoArguments) throws -> UserEvent {
+        return UserEvent(user: self)
     }
 }
 
@@ -87,6 +100,10 @@ struct HelloResolver {
     func addUser(context: HelloContext, arguments: AddUserArguments) -> User {
         User(arguments.user)
     }
+    
+    func subscribeUser(context: HelloContext, arguments: NoArguments) -> Observable<User> {
+        pubsub
+    }
 }
 
 struct HelloAPI : API {
@@ -108,6 +125,10 @@ struct HelloAPI : API {
         Input(UserInput.self) {
             InputField("id", at: \.id)
             InputField("name", at: \.name)
+        }
+        
+        Type(UserEvent.self) {
+            Field("user", at: \.user)
         }
         
         Query {
@@ -132,7 +153,7 @@ struct HelloAPI : API {
         }
         
         Subscription {
-            Field("hello", at: HelloResolver.hello)
+            SubscriptionField("subscribeUser", at: User.toEvent, atSub: HelloResolver.subscribeUser)
         }
     }
 }
@@ -327,24 +348,51 @@ class HelloWorldTests : XCTestCase {
     func testSubscription() throws {
         let subscription = """
         subscription {
-            hello
+            subscribeUser {
+                user {
+                    id
+                    name
+                }
+            }
         }
         """
         
-        let expected = GraphQLResult(data: ["hello": "world"])
+        let expected = GraphQLResult(data: [
+            "subscribeUser": [
+                "user": [
+                    "name": "John Doe",
+                    "id": "123"
+                ]
+            ]
+        ])
         
-        let expectation = XCTestExpectation()
-        
-        api.execute(
+        let result = try api.subscribe(
             request: subscription,
             context: api.context,
             on: group
-        ).whenSuccess { result in
-            XCTAssertEqual(result, expected)
-            expectation.fulfill()
-        }
+        ).wait()
+        print(result)
+//        let observable = try api.subscribe(
+//            request: subscription,
+//            context: api.context,
+//            on: group
+//        ).wait().observable!
         
-        wait(for: [expectation], timeout: 10)
+        let expectation = XCTestExpectation()
+        
+//        var currentResult = GraphQLResult()
+//        let _ = observable.subscribe { event in
+//            event.element!.whenSuccess { result in
+//                currentResult = result
+//                expectation.fulfill()
+//            }
+//        }
+//
+//        pubsub.onNext(User(id: "124", name: "Jerry"))
+//
+//        wait(for: [expectation], timeout: 10)
+//
+//        XCTAssertEqual(currentResult, expected)
     }
 }
 
