@@ -8,9 +8,10 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/GraphQLSwift/GraphQL.git", .upToNextMajor(from: "1.1.7")),
+        .package(url: "https://github.com/ReactiveX/RxSwift.git", .upToNextMajor(from: "6.1.0"))
     ],
     targets: [
-        .target(name: "Graphiti", dependencies: ["GraphQL"]),
+        .target(name: "Graphiti", dependencies: ["GraphQL", "RxSwift"]),
         .testTarget(name: "GraphitiTests", dependencies: ["Graphiti"]),
     ]
 )
