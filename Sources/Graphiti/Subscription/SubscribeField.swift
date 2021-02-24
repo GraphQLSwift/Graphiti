@@ -4,7 +4,7 @@ import RxSwift
 
 // Subscription resolver must return an Observer<Any>, not a specific type, due to lack of support for covariance generics in Swift
 
-public class SubscriptionField<ObjectType, Context, SubscriptionType, FieldType, Arguments : Decodable> : FieldComponent<ObjectType, Context> {
+public class SubscriptionField<ObjectType, Context, SourceEventType, FieldType, Arguments : Decodable> : FieldComponent<ObjectType, Context> {
     let name: String
     let arguments: [ArgumentComponent<Arguments>]
     let resolve: GraphQLFieldResolve
@@ -49,11 +49,11 @@ public class SubscriptionField<ObjectType, Context, SubscriptionType, FieldType,
     convenience init<ResolveType>(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
-        asyncResolve: @escaping AsyncResolve<SubscriptionType, Context, Arguments, ResolveType>,
+        asyncResolve: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         asyncSubscribe: @escaping AsyncResolve<ObjectType, Context, Arguments, Observable<Any>>
     ) {
         let resolve: GraphQLFieldResolve = { source, arguments, context, eventLoopGroup, _ in
-            guard let s = source as? SubscriptionType else {
+            guard let s = source as? SourceEventType else {
                 throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
             }
             
@@ -83,10 +83,10 @@ public class SubscriptionField<ObjectType, Context, SubscriptionType, FieldType,
     convenience init<ResolveType>(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
-        simpleAsyncResolve: @escaping SimpleAsyncResolve<SubscriptionType, Context, Arguments, ResolveType>,
+        simpleAsyncResolve: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         simpleAsyncSubscribe: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, Observable<Any>>
     ) {
-        let asyncResolve: AsyncResolve<SubscriptionType, Context, Arguments, ResolveType> = { type in
+        let asyncResolve: AsyncResolve<SourceEventType, Context, Arguments, ResolveType> = { type in
             { context, arguments, group in
                 // We hop to guarantee that the future will
                 // return in the same event loop group of the execution.
@@ -107,10 +107,10 @@ public class SubscriptionField<ObjectType, Context, SubscriptionType, FieldType,
     convenience init<ResolveType>(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
-        syncResolve: @escaping SyncResolve<SubscriptionType, Context, Arguments, ResolveType>,
+        syncResolve: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         syncSubscribe: @escaping SyncResolve<ObjectType, Context, Arguments, Observable<Any>>
     ) {
-        let asyncResolve: AsyncResolve<SubscriptionType, Context, Arguments, ResolveType> = { type in
+        let asyncResolve: AsyncResolve<SourceEventType, Context, Arguments, ResolveType> = { type in
             { context, arguments, group in
                 let result = try syncResolve(type)(context, arguments)
                 return group.next().makeSucceededFuture(result)
@@ -132,7 +132,7 @@ public class SubscriptionField<ObjectType, Context, SubscriptionType, FieldType,
 public extension SubscriptionField where FieldType : Encodable {
     convenience init(
         _ name: String,
-        at function: @escaping AsyncResolve<SubscriptionType, Context, Arguments, FieldType>,
+        at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, FieldType>,
         atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
@@ -152,7 +152,7 @@ public extension SubscriptionField where FieldType : Encodable {
 public extension SubscriptionField {
     convenience init<ResolveType>(
         _ name: String,
-        at function: @escaping AsyncResolve<SubscriptionType, Context, Arguments, ResolveType>,
+        at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
         atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
@@ -162,7 +162,7 @@ public extension SubscriptionField {
     
     convenience init<ResolveType>(
         _ name: String,
-        at function: @escaping AsyncResolve<SubscriptionType, Context, Arguments, ResolveType>,
+        at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
         atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
         @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
@@ -176,7 +176,7 @@ public extension SubscriptionField {
 public extension SubscriptionField where FieldType : Encodable {
     convenience init(
         _ name: String,
-        at function: @escaping SimpleAsyncResolve<SubscriptionType, Context, Arguments, FieldType>,
+        at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, FieldType>,
         atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
@@ -185,7 +185,7 @@ public extension SubscriptionField where FieldType : Encodable {
 
     convenience init(
         _ name: String,
-        at function: @escaping SimpleAsyncResolve<SubscriptionType, Context, Arguments, FieldType>,
+        at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, FieldType>,
         atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
         @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
     ) {
@@ -196,7 +196,7 @@ public extension SubscriptionField where FieldType : Encodable {
 public extension SubscriptionField {
     convenience init<ResolveType>(
         _ name: String,
-        at function: @escaping SimpleAsyncResolve<SubscriptionType, Context, Arguments, ResolveType>,
+        at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
         atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
@@ -206,7 +206,7 @@ public extension SubscriptionField {
 
     convenience init<ResolveType>(
         _ name: String,
-        at function: @escaping SimpleAsyncResolve<SubscriptionType, Context, Arguments, ResolveType>,
+        at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
         atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
         @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
@@ -220,7 +220,7 @@ public extension SubscriptionField {
 public extension SubscriptionField where FieldType : Encodable {
     convenience init(
         _ name: String,
-        at function: @escaping SyncResolve<SubscriptionType, Context, Arguments, FieldType>,
+        at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
         atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
@@ -229,7 +229,7 @@ public extension SubscriptionField where FieldType : Encodable {
 
     convenience init(
         _ name: String,
-        at function: @escaping SyncResolve<SubscriptionType, Context, Arguments, FieldType>,
+        at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
         atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
         @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
     ) {
@@ -240,7 +240,7 @@ public extension SubscriptionField where FieldType : Encodable {
 public extension SubscriptionField {
     convenience init<ResolveType>(
         _ name: String,
-        at function: @escaping SyncResolve<SubscriptionType, Context, Arguments, ResolveType>,
+        at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
         atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
@@ -250,7 +250,7 @@ public extension SubscriptionField {
 
     convenience init<ResolveType>(
         _ name: String,
-        at function: @escaping SyncResolve<SubscriptionType, Context, Arguments, ResolveType>,
+        at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
         atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
         @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
