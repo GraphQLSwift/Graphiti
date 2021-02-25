@@ -37,6 +37,10 @@ struct User : Codable {
         self.id = input.id
         self.name = input.name
     }
+    
+    func toEvent(context: HelloContext, arguments: NoArguments) throws -> UserEvent {
+        return UserEvent(user: self)
+    }
 }
 
 struct UserInput : Codable {
@@ -51,12 +55,6 @@ struct UserEvent : Codable {
 final class HelloContext {
     func hello() -> String {
         "world"
-    }
-}
-
-extension User {
-    func toEvent(context: HelloContext, arguments: NoArguments) throws -> UserEvent {
-        return UserEvent(user: self)
     }
 }
 
@@ -153,7 +151,8 @@ struct HelloAPI : API {
         }
         
         Subscription {
-            SubscriptionField("subscribeUser", at: User.toEvent, atSub: HelloResolver.subscribeUser)
+            SubscriptionField("subscribeUser", as: User.self, atSub: HelloResolver.subscribeUser)
+            SubscriptionField("subscribeUserEvent", at: User.toEvent, atSub: HelloResolver.subscribeUser)
         }
     }
 }
@@ -344,25 +343,26 @@ class HelloWorldTests : XCTestCase {
         wait(for: [expectation], timeout: 10)
     }
     
-    func testSubscription() throws {
+    /// Tests subscription when the sourceEventStream type matches the resolved type (i.e. the normal resolution function should just short-circuit to the sourceEventStream object)
+    func testSubscriptionSelf() throws {
         let disposeBag = DisposeBag()
         
-        let subscription = """
+        let request = """
         subscription {
             subscribeUser {
-                user {
-                    id
-                    name
-                }
+                id
+                name
             }
         }
         """
         
-        let observable = try api.subscribe(
-            request: subscription,
+        let result = try api.subscribe(
+            request: request,
             context: api.context,
             on: group
-        ).wait().observable!
+        ).wait()
+        
+        let observable = result.observable!
         
         let expectation = XCTestExpectation()
         
@@ -380,6 +380,51 @@ class HelloWorldTests : XCTestCase {
 
         XCTAssertEqual(currentResult, GraphQLResult(data: [
             "subscribeUser": [
+                "name": "Jerry",
+                "id": "124"
+            ]
+        ]))
+    }
+    
+    /// Tests subscription when the sourceEventStream type does not match the resolved type (i.e. there is a non-trivial resolution function that transforms the sourceEventStream object)
+    func testSubscriptionEvent() throws {
+        let disposeBag = DisposeBag()
+        
+        let request = """
+        subscription {
+            subscribeUserEvent {
+                user {
+                    id
+                    name
+                }
+            }
+        }
+        """
+        
+        let result = try api.subscribe(
+            request: request,
+            context: api.context,
+            on: group
+        ).wait()
+        
+        let observable = result.observable!
+        
+        let expectation = XCTestExpectation()
+        
+        var currentResult = GraphQLResult()
+        let _ = observable.subscribe { event in
+            event.element!.whenSuccess { result in
+                currentResult = result
+                expectation.fulfill()
+            }
+        }.disposed(by: disposeBag)
+
+        pubsub.onNext(User(id: "124", name: "Jerry"))
+
+        wait(for: [expectation], timeout: 10)
+
+        XCTAssertEqual(currentResult, GraphQLResult(data: [
+            "subscribeUserEvent": [
                 "user": [
                     "name": "Jerry",
                     "id": "124"
