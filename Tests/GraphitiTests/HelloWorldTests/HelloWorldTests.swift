@@ -356,21 +356,25 @@ class HelloWorldTests : XCTestCase {
         }
         """
         
-        let result = try api.subscribe(
+        let subResult = try api.subscribe(
             request: request,
             context: api.context,
             on: group
         ).wait()
         
-        let observable = result.observable!
+        let observable = subResult.observable!
         
         let expectation = XCTestExpectation()
         
         var currentResult = GraphQLResult()
         let _ = observable.subscribe { event in
-            event.element!.whenSuccess { result in
+            let resultFuture = event.element!
+            resultFuture.whenSuccess { result in
                 currentResult = result
                 expectation.fulfill()
+            }
+            resultFuture.whenFailure { error in
+                XCTFail()
             }
         }.disposed(by: disposeBag)
 
@@ -401,21 +405,25 @@ class HelloWorldTests : XCTestCase {
         }
         """
         
-        let result = try api.subscribe(
+        let subResult = try api.subscribe(
             request: request,
             context: api.context,
             on: group
         ).wait()
         
-        let observable = result.observable!
+        let observable = subResult.observable!
         
         let expectation = XCTestExpectation()
         
         var currentResult = GraphQLResult()
         let _ = observable.subscribe { event in
-            event.element!.whenSuccess { result in
+            let resultFuture = event.element!
+            resultFuture.whenSuccess { result in
                 currentResult = result
                 expectation.fulfill()
+            }
+            resultFuture.whenFailure { error in
+                XCTFail()
             }
         }.disposed(by: disposeBag)
 
