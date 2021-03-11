@@ -152,6 +152,16 @@ struct Resolver {
 }
 ```
 
+#### Subscription
+
+This library supports GraphQL subscriptions. To use them, you must create a concrete subclass of the `EventStream` class that implements event streaming
+functionality.
+
+If you don't feel like creating a subclass yourself, you can use the [GraphQLRxSwift](https://github.com/GraphQLSwift/GraphQLRxSwift) repository
+to integrate [RxSwift](https://github.com/ReactiveX/RxSwift) observables out-of-the-box. Or you can use that repository as a reference to connect a different 
+stream library like [ReactiveSwift](https://github.com/ReactiveCocoa/ReactiveSwift), [OpenCombine](https://github.com/OpenCombine/OpenCombine), or
+one that you've created yourself.
+
 ## Star Wars API example
 
 Check the [Star Wars API](Tests/GraphitiTests/StarWarsAPI/StarWarsAPI.swift) for a more complete example.
