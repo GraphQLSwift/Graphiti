@@ -1,6 +1,5 @@
 import GraphQL
 import NIO
-import RxSwift
 
 public final class Schema<Resolver, Context> {
     public let schema: GraphQLSchema

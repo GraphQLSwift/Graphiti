@@ -1,10 +1,7 @@
 import XCTest
 import GraphQL
 import NIO
-import RxSwift
 @testable import Graphiti
-
-let pubsub = PublishSubject<Any>()
 
 struct ID : Codable {
     let id: String
@@ -98,10 +95,6 @@ struct HelloResolver {
     func addUser(context: HelloContext, arguments: AddUserArguments) -> User {
         User(arguments.user)
     }
-    
-    func subscribeUser(context: HelloContext, arguments: NoArguments) -> Observable<Any> {
-        pubsub
-    }
 }
 
 struct HelloAPI : API {
@@ -148,11 +141,6 @@ struct HelloAPI : API {
             Field("addUser", at: HelloResolver.addUser) {
                 Argument("user", at: \.user)
             }
-        }
-        
-        Subscription {
-            SubscriptionField("subscribeUser", as: User.self, atSub: HelloResolver.subscribeUser)
-            SubscriptionField("subscribeUserEvent", at: User.toEvent, atSub: HelloResolver.subscribeUser)
         }
     }
 }
@@ -341,104 +329,6 @@ class HelloWorldTests : XCTestCase {
         }
         
         wait(for: [expectation], timeout: 10)
-    }
-    
-    /// Tests subscription when the sourceEventStream type matches the resolved type (i.e. the normal resolution function should just short-circuit to the sourceEventStream object)
-    func testSubscriptionSelf() throws {
-        let disposeBag = DisposeBag()
-        
-        let request = """
-        subscription {
-            subscribeUser {
-                id
-                name
-            }
-        }
-        """
-        
-        let subResult = try api.subscribe(
-            request: request,
-            context: api.context,
-            on: group
-        ).wait()
-        
-        let observable = subResult.observable!
-        
-        let expectation = XCTestExpectation()
-        
-        var currentResult = GraphQLResult()
-        let _ = observable.subscribe { event in
-            let resultFuture = event.element!
-            resultFuture.whenSuccess { result in
-                currentResult = result
-                expectation.fulfill()
-            }
-            resultFuture.whenFailure { error in
-                XCTFail()
-            }
-        }.disposed(by: disposeBag)
-
-        pubsub.onNext(User(id: "124", name: "Jerry"))
-
-        wait(for: [expectation], timeout: 10)
-
-        XCTAssertEqual(currentResult, GraphQLResult(data: [
-            "subscribeUser": [
-                "name": "Jerry",
-                "id": "124"
-            ]
-        ]))
-    }
-    
-    /// Tests subscription when the sourceEventStream type does not match the resolved type (i.e. there is a non-trivial resolution function that transforms the sourceEventStream object)
-    func testSubscriptionEvent() throws {
-        let disposeBag = DisposeBag()
-        
-        let request = """
-        subscription {
-            subscribeUserEvent {
-                user {
-                    id
-                    name
-                }
-            }
-        }
-        """
-        
-        let subResult = try api.subscribe(
-            request: request,
-            context: api.context,
-            on: group
-        ).wait()
-        
-        let observable = subResult.observable!
-        
-        let expectation = XCTestExpectation()
-        
-        var currentResult = GraphQLResult()
-        let _ = observable.subscribe { event in
-            let resultFuture = event.element!
-            resultFuture.whenSuccess { result in
-                currentResult = result
-                expectation.fulfill()
-            }
-            resultFuture.whenFailure { error in
-                XCTFail()
-            }
-        }.disposed(by: disposeBag)
-
-        pubsub.onNext(User(id: "124", name: "Jerry"))
-
-        wait(for: [expectation], timeout: 10)
-
-        XCTAssertEqual(currentResult, GraphQLResult(data: [
-            "subscribeUserEvent": [
-                "user": [
-                    "name": "Jerry",
-                    "id": "124"
-                ]
-            ]
-        ]))
     }
 }
 

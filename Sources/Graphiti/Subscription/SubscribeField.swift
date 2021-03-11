@@ -1,6 +1,5 @@
 import GraphQL
 import Runtime
-import RxSwift
 
 // Subscription resolver MUST return an Observer<Any>, not a specific type, due to lack of support for covariance generics in Swift
 
@@ -50,7 +49,7 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         asyncResolve: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
-        asyncSubscribe: @escaping AsyncResolve<ObjectType, Context, Arguments, Observable<Any>>
+        asyncSubscribe: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>
     ) {
         let resolve: GraphQLFieldResolve = { source, arguments, context, eventLoopGroup, _ in
             guard let source = source as? SourceEventType else {
@@ -84,7 +83,7 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         as: FieldType.Type,
-        asyncSubscribe: @escaping AsyncResolve<ObjectType, Context, Arguments, Observable<Any>>
+        asyncSubscribe: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>
     ) {
         let resolve: GraphQLFieldResolve = { source, _, context, eventLoopGroup, _ in
             guard let source = source as? FieldType else {
@@ -113,7 +112,7 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         simpleAsyncResolve: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
-        simpleAsyncSubscribe: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, Observable<Any>>
+        simpleAsyncSubscribe: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>
     ) {
         let asyncResolve: AsyncResolve<SourceEventType, Context, Arguments, ResolveType> = { type in
             { context, arguments, group in
@@ -123,7 +122,7 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
             }
         }
         
-        let asyncSubscribe: AsyncResolve<ObjectType, Context, Arguments, Observable<Any>> = { type in
+        let asyncSubscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>> = { type in
             { context, arguments, group in
                 // We hop to guarantee that the future will
                 // return in the same event loop group of the execution.
@@ -137,9 +136,9 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         as: FieldType.Type,
-        simpleAsyncSubscribe: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, Observable<Any>>
+        simpleAsyncSubscribe: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>
     ) {
-        let asyncSubscribe: AsyncResolve<ObjectType, Context, Arguments, Observable<Any>> = { type in
+        let asyncSubscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>> = { type in
             { context, arguments, group in
                 // We hop to guarantee that the future will
                 // return in the same event loop group of the execution.
@@ -153,7 +152,7 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         syncResolve: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
-        syncSubscribe: @escaping SyncResolve<ObjectType, Context, Arguments, Observable<Any>>
+        syncSubscribe: @escaping SyncResolve<ObjectType, Context, Arguments, EventStream<Any>>
     ) {
         let asyncResolve: AsyncResolve<SourceEventType, Context, Arguments, ResolveType> = { type in
             { context, arguments, group in
@@ -162,7 +161,7 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
             }
         }
         
-        let asyncSubscribe: AsyncResolve<ObjectType, Context, Arguments, Observable<Any>> = { type in
+        let asyncSubscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>> = { type in
             { context, arguments, group in
                 let result = try syncSubscribe(type)(context, arguments)
                 return group.next().makeSucceededFuture(result)
@@ -175,9 +174,9 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         as: FieldType.Type,
-        syncSubscribe: @escaping SyncResolve<ObjectType, Context, Arguments, Observable<Any>>
+        syncSubscribe: @escaping SyncResolve<ObjectType, Context, Arguments, EventStream<Any>>
     ) {
-        let asyncSubscribe: AsyncResolve<ObjectType, Context, Arguments, Observable<Any>> = { type in
+        let asyncSubscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>> = { type in
             { context, arguments, group in
                 let result = try syncSubscribe(type)(context, arguments)
                 return group.next().makeSucceededFuture(result)
@@ -193,7 +192,7 @@ public extension SubscriptionField where FieldType : Encodable {
     convenience init<SourceEventType>(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, FieldType>,
-        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(name: name, arguments: [argument()], asyncResolve: function, asyncSubscribe: subFunc)
@@ -202,7 +201,7 @@ public extension SubscriptionField where FieldType : Encodable {
     convenience init<SourceEventType>(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, FieldType>,
-        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
     ) {
         self.init(name: name, arguments: arguments(), asyncResolve: function, asyncSubscribe: subFunc)
@@ -213,7 +212,7 @@ public extension SubscriptionField {
     convenience init(
         _ name: String,
         as: FieldType.Type,
-        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(name: name, arguments: [argument()], as: `as`, asyncSubscribe: subFunc)
@@ -222,7 +221,7 @@ public extension SubscriptionField {
     convenience init(
         _ name: String,
         as: FieldType.Type,
-        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
     ) {
         self.init(name: name, arguments: arguments(), as: `as`, asyncSubscribe: subFunc)
@@ -232,7 +231,7 @@ public extension SubscriptionField {
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
-        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(name: name, arguments: [argument()], asyncResolve: function, asyncSubscribe: subFunc)
@@ -242,7 +241,7 @@ public extension SubscriptionField {
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
-        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
     ) {
         self.init(name: name, arguments: arguments(), asyncResolve: function, asyncSubscribe: subFunc)
@@ -255,7 +254,7 @@ public extension SubscriptionField where FieldType : Encodable {
     convenience init<SourceEventType>(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, FieldType>,
-        atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(name: name, arguments: [argument()], simpleAsyncResolve: function, simpleAsyncSubscribe: subFunc)
@@ -264,7 +263,7 @@ public extension SubscriptionField where FieldType : Encodable {
     convenience init<SourceEventType>(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, FieldType>,
-        atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
     ) {
         self.init(name: name, arguments: arguments(), simpleAsyncResolve: function, simpleAsyncSubscribe: subFunc)
@@ -275,7 +274,7 @@ public extension SubscriptionField {
     convenience init(
         _ name: String,
         as: FieldType.Type,
-        atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(name: name, arguments: [argument()], as: `as`, simpleAsyncSubscribe: subFunc)
@@ -284,7 +283,7 @@ public extension SubscriptionField {
     convenience init(
         _ name: String,
         as: FieldType.Type,
-        atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
     ) {
         self.init(name: name, arguments: arguments(), as: `as`, simpleAsyncSubscribe: subFunc)
@@ -294,7 +293,7 @@ public extension SubscriptionField {
         _ name: String,
         at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
-        atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(name: name, arguments: [argument()], simpleAsyncResolve: function, simpleAsyncSubscribe: subFunc)
@@ -304,7 +303,7 @@ public extension SubscriptionField {
         _ name: String,
         at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
-        atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
     ) {
         self.init(name: name, arguments: arguments(), simpleAsyncResolve: function, simpleAsyncSubscribe: subFunc)
@@ -317,7 +316,7 @@ public extension SubscriptionField where FieldType : Encodable {
     convenience init<SourceEventType>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
-        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(name: name, arguments: [argument()], syncResolve: function, syncSubscribe: subFunc)
@@ -326,7 +325,7 @@ public extension SubscriptionField where FieldType : Encodable {
     convenience init<SourceEventType>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
-        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
     ) {
         self.init(name: name, arguments: arguments(), syncResolve: function, syncSubscribe: subFunc)
@@ -337,7 +336,7 @@ public extension SubscriptionField {
     convenience init(
         _ name: String,
         as: FieldType.Type,
-        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(name: name, arguments: [argument()], as: `as`, syncSubscribe: subFunc)
@@ -346,7 +345,7 @@ public extension SubscriptionField {
     convenience init(
         _ name: String,
         as: FieldType.Type,
-        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
     ) {
         self.init(name: name, arguments: arguments(), as: `as`, syncSubscribe: subFunc)
@@ -356,7 +355,7 @@ public extension SubscriptionField {
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
-        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(name: name, arguments: [argument()], syncResolve: function, syncSubscribe: subFunc)
@@ -366,7 +365,7 @@ public extension SubscriptionField {
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
-        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, Observable<Any>>,
+        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
         @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
     ) {
         self.init(name: name, arguments: arguments(), syncResolve: function, syncSubscribe: subFunc)

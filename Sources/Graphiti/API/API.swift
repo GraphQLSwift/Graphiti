@@ -1,6 +1,5 @@
 import GraphQL
 import NIO
-import RxSwift
 
 public protocol API {
     associatedtype Resolver
