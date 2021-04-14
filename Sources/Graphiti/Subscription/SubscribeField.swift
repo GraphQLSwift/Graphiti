@@ -52,29 +52,29 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
         asyncSubscribe: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>
     ) {
         let resolve: GraphQLFieldResolve = { source, arguments, context, eventLoopGroup, _ in
-            guard let source = source as? SourceEventType else {
+            guard let _source = source as? SourceEventType else {
                 throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
             }
             
-            guard let context = context as? Context else {
+            guard let _context = context as? Context else {
                 throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
             }
         
             let args = try MapDecoder().decode(Arguments.self, from: arguments)
-            return try asyncResolve(source)(context, args, eventLoopGroup).map({ $0 })
+            return try asyncResolve(_source)(_context, args, eventLoopGroup).map({ $0 })
         }
         
         let subscribe: GraphQLFieldResolve = { source, arguments, context, eventLoopGroup, _ in
-            guard let source = source as? ObjectType else {
+            guard let _source = source as? ObjectType else {
                 throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
             }
         
-            guard let context = context as? Context else {
+            guard let _context = context as? Context else {
                 throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
             }
         
             let args = try MapDecoder().decode(Arguments.self, from: arguments)
-            return try asyncSubscribe(source)(context, args, eventLoopGroup).map({ $0 })
+            return try asyncSubscribe(_source)(_context, args, eventLoopGroup).map({ $0 })
         }
         self.init(name: name, arguments: arguments, resolve: resolve, subscribe: subscribe)
     }
@@ -86,24 +86,24 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
         asyncSubscribe: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>
     ) {
         let resolve: GraphQLFieldResolve = { source, _, context, eventLoopGroup, _ in
-            guard let source = source as? FieldType else {
+            guard let _source = source as? FieldType else {
                 throw GraphQLError(message: "Expected source type \(FieldType.self) but got \(type(of: source))")
             }
             
-            return eventLoopGroup.next().makeSucceededFuture(source)
+            return eventLoopGroup.next().makeSucceededFuture(_source)
         }
         
         let subscribe: GraphQLFieldResolve = { source, arguments, context, eventLoopGroup, _ in
-            guard let source = source as? ObjectType else {
+            guard let _source = source as? ObjectType else {
                 throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
             }
         
-            guard let context = context as? Context else {
+            guard let _context = context as? Context else {
                 throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
             }
         
             let args = try MapDecoder().decode(Arguments.self, from: arguments)
-            return try asyncSubscribe(source)(context, args, eventLoopGroup).map({ $0 })
+            return try asyncSubscribe(_source)(_context, args, eventLoopGroup).map({ $0 })
         }
         self.init(name: name, arguments: arguments, resolve: resolve, subscribe: subscribe)
     }
