@@ -25,4 +25,21 @@ extension API {
             operationName: operationName
         )
     }
+    
+    public func subscribe(
+        request: String,
+        context: ContextType,
+        on eventLoopGroup: EventLoopGroup,
+        variables: [String: Map] = [:],
+        operationName: String? = nil
+    ) -> EventLoopFuture<SubscriptionResult> {
+        return schema.subscribe(
+            request: request,
+            resolver: resolver,
+            context: context,
+            eventLoopGroup: eventLoopGroup,
+            variables: variables,
+            operationName: operationName
+        )
+    }
 }

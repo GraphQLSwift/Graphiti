@@ -56,4 +56,27 @@ public extension Schema {
             return eventLoopGroup.next().makeFailedFuture(error)
         }
     }
+    
+    func subscribe(
+        request: String,
+        resolver: Resolver,
+        context: Context,
+        eventLoopGroup: EventLoopGroup,
+        variables: [String: Map] = [:],
+        operationName: String? = nil
+    ) -> EventLoopFuture<SubscriptionResult> {
+        do {
+            return try graphqlSubscribe(
+                schema: schema,
+                request: request,
+                rootValue: resolver,
+                context: context,
+                eventLoopGroup: eventLoopGroup,
+                variableValues: variables,
+                operationName: operationName
+            )
+        } catch {
+            return eventLoopGroup.next().makeFailedFuture(error)
+        }
+    }
 }

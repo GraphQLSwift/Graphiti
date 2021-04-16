@@ -1,7 +1,7 @@
 import XCTest
-@testable import Graphiti
 import GraphQL
 import NIO
+@testable import Graphiti
 
 struct ID : Codable {
     let id: String
@@ -34,11 +34,19 @@ struct User : Codable {
         self.id = input.id
         self.name = input.name
     }
+    
+    func toEvent(context: HelloContext, arguments: NoArguments) throws -> UserEvent {
+        return UserEvent(user: self)
+    }
 }
 
 struct UserInput : Codable {
     let id: String
     let name: String?
+}
+
+struct UserEvent : Codable {
+    let user: User
 }
 
 final class HelloContext {
@@ -108,6 +116,10 @@ struct HelloAPI : API {
         Input(UserInput.self) {
             InputField("id", at: \.id)
             InputField("name", at: \.name)
+        }
+        
+        Type(UserEvent.self) {
+            Field("user", at: \.user)
         }
         
         Query {
