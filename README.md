@@ -1,6 +1,6 @@
 # Graphiti 
 
-Graphiti is a Swift library for building GraphQL schemas/types fast, safely and easily.
+Graphiti is a Swift library for building GraphQL schemas fast, safely and easily.
 
 [![Swift][swift-badge]][swift-url]
 [![License][mit-badge]][mit-url]
