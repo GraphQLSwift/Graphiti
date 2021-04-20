@@ -13,8 +13,8 @@ public final class Input<Resolver, Context, InputObjectType : Decodable> : Compo
         try typeProvider.map(InputObjectType.self, to: inputObjectType)
     }
     
-    func fields(typeProvider: TypeProvider) throws -> InputObjectConfigFieldMap {
-        var map: InputObjectConfigFieldMap = [:]
+    func fields(typeProvider: TypeProvider) throws -> InputObjectFieldMap {
+        var map: InputObjectFieldMap = [:]
         
         for field in fields {
             let (name, field) = try field.field(typeProvider: typeProvider)
