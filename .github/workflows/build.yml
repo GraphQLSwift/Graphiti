@@ -7,6 +7,8 @@ on:
   pull_request:
     branches: [ master ]
     paths-ignore: [ README.md ]
+  workflow_dispatch:
+  
 jobs:
   macos:
     name: Build and test on macOS
