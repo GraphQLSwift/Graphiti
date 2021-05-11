@@ -6,7 +6,7 @@
  * values in a more complex demo.
  */
 public final class StarWarsContext {
-    private lazy var tatooine = Planet(
+    private static var tatooine = Planet(
         id:"10001",
         name: "Tatooine",
         diameter: 10465,
@@ -15,7 +15,7 @@ public final class StarWarsContext {
         residents: []
     )
     
-    private lazy var alderaan = Planet(
+    private static var alderaan = Planet(
         id: "10002",
         name: "Alderaan",
         diameter: 12500,
@@ -24,12 +24,12 @@ public final class StarWarsContext {
         residents: []
     )
     
-    private lazy var planetData: [String: Planet] = [
+    private static var planetData: [String: Planet] = [
         "10001": tatooine,
         "10002": alderaan,
     ]
     
-    private lazy var luke = Human(
+    private static var luke = Human(
         id: "1000",
         name: "Luke Skywalker",
         friends: ["1002", "1003", "2000", "2001"],
@@ -37,7 +37,7 @@ public final class StarWarsContext {
         homePlanet: tatooine
     )
     
-    private lazy var vader = Human(
+    private static var vader = Human(
         id: "1001",
         name: "Darth Vader",
         friends: [ "1004" ],
@@ -45,7 +45,7 @@ public final class StarWarsContext {
         homePlanet: tatooine
     )
     
-    private lazy var han = Human(
+    private static var han = Human(
         id: "1002",
         name: "Han Solo",
         friends: ["1000", "1003", "2001"],
@@ -53,7 +53,7 @@ public final class StarWarsContext {
         homePlanet: alderaan
     )
     
-    private lazy var leia = Human(
+    private static var leia = Human(
         id: "1003",
         name: "Leia Organa",
         friends: ["1000", "1002", "2000", "2001"],
@@ -61,7 +61,7 @@ public final class StarWarsContext {
         homePlanet: alderaan
     )
     
-    private lazy var tarkin = Human(
+    private static var tarkin = Human(
         id: "1004",
         name: "Wilhuff Tarkin",
         friends: ["1001"],
@@ -69,7 +69,7 @@ public final class StarWarsContext {
         homePlanet: alderaan
     )
     
-    private lazy var humanData: [String: Human] = [
+    private static var humanData: [String: Human] = [
         "1000": luke,
         "1001": vader,
         "1002": han,
@@ -77,7 +77,7 @@ public final class StarWarsContext {
         "1004": tarkin,
     ]
     
-    private lazy var c3po = Droid(
+    private static var c3po = Droid(
         id: "2000",
         name: "C-3PO",
         friends: ["1000", "1002", "1003", "2001"],
@@ -85,7 +85,7 @@ public final class StarWarsContext {
         primaryFunction: "Protocol"
     )
     
-    private lazy var r2d2 = Droid(
+    private static var r2d2 = Droid(
         id: "2001",
         name: "R2-D2",
         friends: [ "1000", "1002", "1003" ],
@@ -93,7 +93,7 @@ public final class StarWarsContext {
         primaryFunction: "Astromech"
     )
     
-    private lazy var droidData: [String: Droid] = [
+    private static var droidData: [String: Droid] = [
         "2000": c3po,
         "2001": r2d2,
     ]
@@ -104,7 +104,7 @@ public final class StarWarsContext {
      * Helper function to get a character by ID.
      */
     public func getCharacter(id: String) -> Character? {
-        humanData[id] ?? droidData[id]
+        Self.humanData[id] ?? Self.droidData[id]
     }
     
     /**
@@ -122,24 +122,24 @@ public final class StarWarsContext {
     public func getHero(of episode: Episode?) -> Character {
         if episode == .empire {
             // Luke is the hero of Episode V.
-            return luke
+            return Self.luke
         }
         // R2-D2 is the hero otherwise.
-        return r2d2
+        return Self.r2d2
     }
     
     /**
      * Allows us to query for the human with the given id.
      */
     public func getHuman(id: String) -> Human? {
-        humanData[id]
+        Self.humanData[id]
     }
     
     /**
      * Allows us to query for the droid with the given id.
      */
     public func getDroid(id: String) -> Droid? {
-        droidData[id]
+        Self.droidData[id]
     }
     
     /**
@@ -157,7 +157,7 @@ public final class StarWarsContext {
      * Allows us to query for a Planet.
      */
     public func getPlanets(query: String) -> [Planet] {
-        planetData
+        Self.planetData
             .sorted(by: { $0.key < $1.key })
             .map({ $1 })
             .filter({ $0.name.lowercased().contains(query.lowercased()) })
@@ -167,7 +167,7 @@ public final class StarWarsContext {
      * Allows us to query for a Human.
      */
     public func getHumans(query: String) -> [Human] {
-        humanData
+        Self.humanData
             .sorted(by: { $0.key < $1.key })
             .map({ $1 })
             .filter({ $0.name.lowercased().contains(query.lowercased()) })
@@ -177,7 +177,7 @@ public final class StarWarsContext {
      * Allows us to query for a Droid.
      */
     public func getDroids(query: String) -> [Droid] {
-        droidData
+        Self.droidData
             .sorted(by: { $0.key < $1.key })
             .map({ $1 })
             .filter({ $0.name.lowercased().contains(query.lowercased()) })
