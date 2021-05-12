@@ -24,15 +24,22 @@ struct ID : Codable {
 struct User : Codable {
     let id: String
     let name: String?
+    let friends: [User]?
     
-    init(id: String, name: String?) {
+    init(id: String, name: String?, friends: [User]?) {
         self.id = id
         self.name = name
+        self.friends = friends
     }
     
     init(_ input: UserInput) {
         self.id = input.id
         self.name = input.name
+        if let friends = input.friends {
+            self.friends = friends.map{ User($0) }
+        } else {
+            self.friends = nil
+        }
     }
     
     func toEvent(context: HelloContext, arguments: NoArguments) throws -> UserEvent {
@@ -43,6 +50,7 @@ struct User : Codable {
 struct UserInput : Codable {
     let id: String
     let name: String?
+    let friends: [UserInput]?
 }
 
 struct UserEvent : Codable {
@@ -85,7 +93,7 @@ struct HelloResolver {
     }
     
     func getUser(context: HelloContext, arguments: NoArguments) -> User {
-        User(id: "123", name: "John Doe")
+        User(id: "123", name: "John Doe", friends: nil)
     }
     
     struct AddUserArguments : Codable {
@@ -111,11 +119,13 @@ struct HelloAPI : API {
         Type(User.self) {
             Field("id", at: \.id)
             Field("name", at: \.name)
+            Field("friends", at: \.friends, as: [TypeReference<User>]?.self)
         }
 
         Input(UserInput.self) {
             InputField("id", at: \.id)
             InputField("name", at: \.name)
+            InputField("friends", at: \.friends, as: [TypeReference<UserInput>]?.self)
         }
         
         Type(UserEvent.self) {
@@ -314,6 +324,41 @@ class HelloWorldTests : XCTestCase {
         
         let expected = GraphQLResult(
             data: ["addUser" : [ "id" : "123", "name" : "bob" ]]
+        )
+        
+        let expectation = XCTestExpectation()
+        
+        api.execute(
+            request: mutation,
+            context: api.context,
+            on: group,
+            variables: variables
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 10)
+    }
+    
+    func testInputRecursive() throws {
+        let mutation = """
+        mutation addUser($user: UserInput!) {
+            addUser(user: $user) {
+                id,
+                name,
+                friends {
+                    id,
+                    name
+                }
+            }
+        }
+        """
+        
+        let variables: [String: Map] = ["user" : [ "id" : "123", "name" : "bob", "friends": [["id": "124", "name": "jeff"]]]]
+        
+        let expected = GraphQLResult(
+            data: ["addUser" : [ "id" : "123", "name" : "bob", "friends": [["id": "124", "name": "jeff"]]]]
         )
         
         let expectation = XCTestExpectation()
