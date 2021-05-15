@@ -1,5 +1,4 @@
 import GraphQL
-import Runtime
 
 // Subscription resolver MUST return an Observer<Any>, not a specific type, due to lack of support for covariance generics in Swift
 

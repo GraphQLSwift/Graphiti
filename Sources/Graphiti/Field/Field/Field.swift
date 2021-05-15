@@ -1,5 +1,4 @@
 import GraphQL
-import Runtime
 
 public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : FieldComponent<ObjectType, Context> {
     let name: String
