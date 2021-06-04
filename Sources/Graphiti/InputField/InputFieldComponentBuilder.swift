@@ -1,4 +1,4 @@
-@_functionBuilder
+@resultBuilder
 public struct InputFieldComponentBuilder<InputObjectType, Context> {
     public static func buildExpression(_ component: InputFieldComponent<InputObjectType, Context>) -> InputFieldComponent<InputObjectType, Context> {
         component
