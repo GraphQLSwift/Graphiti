@@ -1,4 +1,4 @@
-@_functionBuilder
+@resultBuilder
 public struct ArgumentComponentBuilder<ArgumentsType : Decodable> {
     public static func buildExpression(_ component: ArgumentComponent<ArgumentsType>) -> ArgumentComponent<ArgumentsType> {
         component

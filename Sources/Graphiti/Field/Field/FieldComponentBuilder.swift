@@ -1,4 +1,4 @@
-@_functionBuilder
+@resultBuilder
 public struct FieldComponentBuilder<ObjectType, Context> {
     public static func buildExpression(_ component: FieldComponent<ObjectType, Context>) -> FieldComponent<ObjectType, Context> {
         component

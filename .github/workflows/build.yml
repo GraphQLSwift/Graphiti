@@ -10,21 +10,22 @@ on:
   workflow_dispatch:
   
 jobs:
-  macos:
-    name: Build and test on macOS
-    runs-on: macOS-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set code coverage path 
-      run: echo "codecov_path=$(swift test --show-codecov-path)" >> $GITHUB_ENV
-    - name: Test and publish code coverage to Code Climate
-      uses: paulofaria/codeclimate-action@master
-      env:
-        CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
-      with:
-        downloadUrl: https://github.com/paulofaria/test-reporter/releases/download/0.9.0/test-reporter-0.9.0-darwin-amd64
-        coverageCommand: swift test --enable-test-discovery --enable-code-coverage
-        coverageLocations: ${{ env.codecov_path }}:lcov-json
+  # Disabled until https://github.com/paulofaria/test-reporter is updated to Swift 5.4
+  # macos:
+  #   name: Build and test on macOS
+  #   runs-on: macOS-latest
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Set code coverage path 
+  #     run: echo "codecov_path=$(swift test --show-codecov-path)" >> $GITHUB_ENV
+  #   - name: Test and publish code coverage to Code Climate
+  #     uses: paulofaria/codeclimate-action@master
+  #     env:
+  #       CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+  #     with:
+  #       downloadUrl: https://github.com/paulofaria/test-reporter/releases/download/0.9.0/test-reporter-0.9.0-darwin-amd64
+  #       coverageCommand: swift test --enable-test-discovery --enable-code-coverage
+  #       coverageLocations: ${{ env.codecov_path }}:lcov-json
 
   linux:
     name: Build and test on ${{ matrix.tag }}-${{ matrix.os }}
@@ -35,7 +36,6 @@ jobs:
           - focal
           - bionic
         tag:
-          - swift:5.3
           - swift:5.4
     container:
       image: ${{ matrix.tag }}-${{ matrix.os }}
