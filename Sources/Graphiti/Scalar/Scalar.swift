@@ -1,4 +1,5 @@
 import GraphQL
+import OrderedCollections
 
 open class Scalar<Resolver, Context, ScalarType : Codable> : Component<Resolver, Context> {
     override func update(typeProvider: SchemaTypeProvider) throws {
@@ -92,7 +93,7 @@ extension GraphQL.Value {
         if
             let value = self as? ObjectValue
         {
-            let dictionary = value.fields.reduce(into: [:]) { result, field in
+            let dictionary: OrderedDictionary<String, Map> = value.fields.reduce(into: [:]) { result, field in
                 result[field.name.value] = field.value.map
             }
             
