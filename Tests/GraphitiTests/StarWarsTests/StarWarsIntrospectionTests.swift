@@ -331,8 +331,8 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "name": nil,
                                 "kind": "NON_NULL",
                                 "ofType": [
-                                    "kind": "LIST",
-                                    "name": nil
+                                    "name": nil,
+                                    "kind": "LIST"
                                 ]
                             ]
                         ],
@@ -342,8 +342,8 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "name": nil,
                                 "kind": "NON_NULL",
                                 "ofType": [
-                                    "kind": "LIST",
-                                    "name": nil
+                                    "name": nil,
+                                    "kind": "LIST"
                                 ]
                             ]
                         ],
