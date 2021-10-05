@@ -15,12 +15,12 @@ open class Scalar<Resolver, Context, ScalarType : Codable> : Component<Resolver,
             },
             parseValue: { map in
                 let scalar = try self.parse(map: map)
-                return try MapEncoder().encode(scalar)
+                return try self.serialize(scalar: scalar)
             },
             parseLiteral: { value in
                 let map = value.map
                 let scalar = try self.parse(map: map)
-                return try MapEncoder().encode(scalar)
+                return try self.serialize(scalar: scalar)
             }
         )
         
