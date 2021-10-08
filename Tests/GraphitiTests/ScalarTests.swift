@@ -40,7 +40,7 @@ class ScalarTests : XCTestCase {
         defer { try? group.syncShutdownGracefully() }
         
         XCTAssertEqual(
-            try? api.execute(
+            try api.execute(
                 request: """
                 query {
                   date {
@@ -99,7 +99,7 @@ class ScalarTests : XCTestCase {
         defer { try? group.syncShutdownGracefully() }
         
         XCTAssertEqual(
-            try? api.execute(
+            try api.execute(
                 request: """
                 query {
                   date (value: "2001-01-01T00:00:00Z") {
@@ -165,7 +165,7 @@ class ScalarTests : XCTestCase {
         defer { try? group.syncShutdownGracefully() }
         
         XCTAssertEqual(
-            try? api.execute(
+            try api.execute(
                 request: """
                 query {
                   date (input: {value: "2001-01-01T00:00:00Z"}) {
@@ -214,7 +214,7 @@ class ScalarTests : XCTestCase {
         defer { try? group.syncShutdownGracefully() }
         
         XCTAssertEqual(
-            try? api.execute(
+            try api.execute(
                 request: """
                 query {
                   coord {
@@ -268,7 +268,7 @@ class ScalarTests : XCTestCase {
         defer { try? group.syncShutdownGracefully() }
         
         XCTAssertEqual(
-            try? api.execute(
+            try api.execute(
                 request: """
                 query {
                   coord (value: "(0.0, 0.0)") {
@@ -329,7 +329,7 @@ class ScalarTests : XCTestCase {
         defer { try? group.syncShutdownGracefully() }
         
         XCTAssertEqual(
-            try? api.execute(
+            try api.execute(
                 request: """
                 query {
                   coord (input: {value: "(0.0, 0.0)"}) {
@@ -377,26 +377,27 @@ class ScalarTests : XCTestCase {
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
         
+        // Test individual fields because we can't be confident we'll match the ordering of Map's OrderedDictionary
+        let result = try api.execute(
+            request: """
+            query {
+              coord {
+                value
+              }
+            }
+            """,
+            context: NoContext(),
+            on: group
+        ).wait()
+        let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
+        
         XCTAssertEqual(
-            try? api.execute(
-                request: """
-                query {
-                  coord {
-                    value
-                  }
-                }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
-            GraphQLResult(data: [
-                "coord": [
-                    "value": [
-                        "longitude": 0.0,
-                        "latitude": 0.0
-                    ]
-                ]
-            ])
+            value?["longitude"],
+            .number(0.0)
+        )
+        XCTAssertEqual(
+            value?["latitude"],
+            .number(0.0)
         )
     }
     
@@ -434,26 +435,27 @@ class ScalarTests : XCTestCase {
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
         
+        // Test individual fields because we can't be confident we'll match the ordering of Map's OrderedDictionary
+        let result = try api.execute(
+            request: """
+            query {
+              coord (value: {latitude: 0.0, longitude: 0.0}) {
+                value
+              }
+            }
+            """,
+            context: NoContext(),
+            on: group
+        ).wait()
+        let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
+        
         XCTAssertEqual(
-            try? api.execute(
-                request: """
-                query {
-                  coord (value: {latitude: 0.0, longitude: 0.0}) {
-                    value
-                  }
-                }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
-            GraphQLResult(data: [
-                "coord": [
-                    "value": [
-                        "longitude": 0.0,
-                        "latitude": 0.0
-                    ]
-                ]
-            ])
+            value?["longitude"],
+            .number(0.0)
+        )
+        XCTAssertEqual(
+            value?["latitude"],
+            .number(0.0)
         )
     }
     
@@ -498,26 +500,27 @@ class ScalarTests : XCTestCase {
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
         
+        // Test individual fields because we can't be confident we'll match the ordering of Map's OrderedDictionary
+        let result = try api.execute(
+            request: """
+            query {
+              coord (input: {value: {latitude: 0.0, longitude: 0.0}}) {
+                value
+              }
+            }
+            """,
+            context: NoContext(),
+            on: group
+        ).wait()
+        let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
+        
         XCTAssertEqual(
-            try? api.execute(
-                request: """
-                query {
-                  coord (input: {value: {latitude: 0.0, longitude: 0.0}}) {
-                    value
-                  }
-                }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
-            GraphQLResult(data: [
-                "coord": [
-                    "value": [
-                        "longitude": 0.0,
-                        "latitude": 0.0
-                    ]
-                ]
-            ])
+            value?["longitude"],
+            .number(0.0)
+        )
+        XCTAssertEqual(
+            value?["latitude"],
+            .number(0.0)
         )
     }
 }
