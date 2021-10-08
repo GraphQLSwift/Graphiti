@@ -5,7 +5,7 @@ import NIO
 @testable import Graphiti
 
 class ScalarTests : XCTestCase {
-    @available(macOS 10.12, iOS 10.0, watchOS 3.0, tvOS 10.0, *)
+    // MARK: Test Date scalars convert to String using ISO8601 encoders
     func testDateOutput() throws {
         struct DateOutput : Codable {
             let value: Date
@@ -23,7 +23,7 @@ class ScalarTests : XCTestCase {
         let testSchema = try Schema<TestResolver, NoContext>(
             coders: coders
         ) {
-            DateScalar(as: "Date", formatter: ISO8601DateFormatter())
+            Scalar(Date.self, as: "Date")
             Type(DateOutput.self) {
                 Field("value", at: \.value)
             }
@@ -80,7 +80,7 @@ class ScalarTests : XCTestCase {
         let testSchema = try Schema<TestResolver, NoContext>(
             coders: coders
         ) {
-            DateScalar(as: "Date", formatter: ISO8601DateFormatter())
+            Scalar(Date.self, as: "Date")
             Type(DateOutput.self) {
                 Field("value", at: \.value)
             }
@@ -143,7 +143,7 @@ class ScalarTests : XCTestCase {
         let testSchema = try Schema<TestResolver, NoContext>(
             coders: coders
         ) {
-            DateScalar(as: "Date", formatter: ISO8601DateFormatter())
+            Scalar(Date.self, as: "Date")
             Type(DateOutput.self) {
                 Field("value", at: \.value)
             }
@@ -183,6 +183,343 @@ class ScalarTests : XCTestCase {
             ])
         )
     }
+    
+    // MARK: Test a scalar that converts to a single-value Map (StringCodedCoordinate -> String)
+    func testStringCoordOutput() throws {
+        struct CoordinateOutput : Codable {
+            let value: StringCodedCoordinate
+        }
+        
+        struct TestResolver {
+            func coord(context: NoContext, arguments: NoArguments) -> CoordinateOutput {
+                return CoordinateOutput(value: StringCodedCoordinate(latitude: 0.0, longitude: 0.0))
+            }
+        }
+        
+        let testSchema = try Schema<TestResolver, NoContext> {
+            Scalar(StringCodedCoordinate.self, as: "Coordinate")
+            Type(CoordinateOutput.self) {
+                Field("value", at: \.value)
+            }
+            Query {
+                Field("coord", at: TestResolver.coord)
+            }
+        }
+        let api = TestAPI<TestResolver, NoContext> (
+            resolver: TestResolver(),
+            schema: testSchema
+        )
+        
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        defer { try? group.syncShutdownGracefully() }
+        
+        XCTAssertEqual(
+            try? api.execute(
+                request: """
+                query {
+                  coord {
+                    value
+                  }
+                }
+                """,
+                context: NoContext(),
+                on: group
+            ).wait(),
+            GraphQLResult(data: [
+                "coord": [
+                    "value": "(0.0, 0.0)"
+                ]
+            ])
+        )
+    }
+    
+    func testStringCoordArg() throws {
+        struct CoordinateOutput : Codable {
+            let value: StringCodedCoordinate
+        }
+        
+        struct Arguments : Codable {
+            let value: StringCodedCoordinate
+        }
+        
+        struct TestResolver {
+            func coord(context: NoContext, arguments: Arguments) -> CoordinateOutput {
+                return CoordinateOutput(value: arguments.value)
+            }
+        }
+        
+        let testSchema = try Schema<TestResolver, NoContext> {
+            Scalar(StringCodedCoordinate.self, as: "Coordinate")
+            Type(CoordinateOutput.self) {
+                Field("value", at: \.value)
+            }
+            Query {
+                Field("coord", at: TestResolver.coord) {
+                    Argument("value", at: \.value)
+                }
+            }
+        }
+        let api = TestAPI<TestResolver, NoContext> (
+            resolver: TestResolver(),
+            schema: testSchema
+        )
+        
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        defer { try? group.syncShutdownGracefully() }
+        
+        XCTAssertEqual(
+            try? api.execute(
+                request: """
+                query {
+                  coord (value: "(0.0, 0.0)") {
+                    value
+                  }
+                }
+                """,
+                context: NoContext(),
+                on: group
+            ).wait(),
+            GraphQLResult(data: [
+                "coord": [
+                    "value": "(0.0, 0.0)"
+                ]
+            ])
+        )
+    }
+    
+    func testStringCoordInput() throws {
+        struct CoordinateOutput : Codable {
+            let value: StringCodedCoordinate
+        }
+        
+        struct CoordinateInput : Codable {
+            let value: StringCodedCoordinate
+        }
+        
+        struct Arguments : Codable {
+            let input: CoordinateInput
+        }
+        
+        struct TestResolver {
+            func coord(context: NoContext, arguments: Arguments) -> CoordinateOutput {
+                return CoordinateOutput(value: arguments.input.value)
+            }
+        }
+        
+        let testSchema = try Schema<TestResolver, NoContext> {
+            Scalar(StringCodedCoordinate.self, as: "Coordinate")
+            Type(CoordinateOutput.self) {
+                Field("value", at: \.value)
+            }
+            Input(CoordinateInput.self) {
+                InputField("value", at: \.value)
+            }
+            Query {
+                Field("coord", at: TestResolver.coord) {
+                    Argument("input", at: \.input)
+                }
+            }
+        }
+        let api = TestAPI<TestResolver, NoContext> (
+            resolver: TestResolver(),
+            schema: testSchema
+        )
+        
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        defer { try? group.syncShutdownGracefully() }
+        
+        XCTAssertEqual(
+            try? api.execute(
+                request: """
+                query {
+                  coord (input: {value: "(0.0, 0.0)"}) {
+                    value
+                  }
+                }
+                """,
+                context: NoContext(),
+                on: group
+            ).wait(),
+            GraphQLResult(data: [
+                "coord": [
+                    "value": "(0.0, 0.0)"
+                ]
+            ])
+        )
+    }
+    
+    // MARK: Test a scalar that converts to a multi-value Map (Coordinate -> Dict)
+    func testDictCoordOutput() throws {
+        struct CoordinateOutput : Codable {
+            let value: DictCodedCoordinate
+        }
+        
+        struct TestResolver {
+            func coord(context: NoContext, arguments: NoArguments) -> CoordinateOutput {
+                return CoordinateOutput(value: DictCodedCoordinate(latitude: 0, longitude: 0))
+            }
+        }
+        
+        let testSchema = try Schema<TestResolver, NoContext> {
+            Scalar(DictCodedCoordinate.self, as: "Coordinate")
+            Type(CoordinateOutput.self) {
+                Field("value", at: \.value)
+            }
+            Query {
+                Field("coord", at: TestResolver.coord)
+            }
+        }
+        let api = TestAPI<TestResolver, NoContext> (
+            resolver: TestResolver(),
+            schema: testSchema
+        )
+        
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        defer { try? group.syncShutdownGracefully() }
+        
+        XCTAssertEqual(
+            try? api.execute(
+                request: """
+                query {
+                  coord {
+                    value
+                  }
+                }
+                """,
+                context: NoContext(),
+                on: group
+            ).wait(),
+            GraphQLResult(data: [
+                "coord": [
+                    "value": [
+                        "longitude": 0.0,
+                        "latitude": 0.0
+                    ]
+                ]
+            ])
+        )
+    }
+    
+    func testDictCoordArg() throws {
+        struct CoordinateOutput : Codable {
+            let value: DictCodedCoordinate
+        }
+        
+        struct Arguments : Codable {
+            let value: DictCodedCoordinate
+        }
+        
+        struct TestResolver {
+            func coord(context: NoContext, arguments: Arguments) -> CoordinateOutput {
+                return CoordinateOutput(value: arguments.value)
+            }
+        }
+        
+        let testSchema = try Schema<TestResolver, NoContext> {
+            Scalar(DictCodedCoordinate.self, as: "Coordinate")
+            Type(CoordinateOutput.self) {
+                Field("value", at: \.value)
+            }
+            Query {
+                Field("coord", at: TestResolver.coord) {
+                    Argument("value", at: \.value)
+                }
+            }
+        }
+        let api = TestAPI<TestResolver, NoContext> (
+            resolver: TestResolver(),
+            schema: testSchema
+        )
+        
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        defer { try? group.syncShutdownGracefully() }
+        
+        XCTAssertEqual(
+            try? api.execute(
+                request: """
+                query {
+                  coord (value: {latitude: 0.0, longitude: 0.0}) {
+                    value
+                  }
+                }
+                """,
+                context: NoContext(),
+                on: group
+            ).wait(),
+            GraphQLResult(data: [
+                "coord": [
+                    "value": [
+                        "longitude": 0.0,
+                        "latitude": 0.0
+                    ]
+                ]
+            ])
+        )
+    }
+    
+    func testDictCoordInput() throws {
+        struct CoordinateOutput : Codable {
+            let value: DictCodedCoordinate
+        }
+        
+        struct CoordinateInput : Codable {
+            let value: DictCodedCoordinate
+        }
+        
+        struct Arguments : Codable {
+            let input: CoordinateInput
+        }
+        
+        struct TestResolver {
+            func coord(context: NoContext, arguments: Arguments) -> CoordinateOutput {
+                return CoordinateOutput(value: arguments.input.value)
+            }
+        }
+        
+        let testSchema = try Schema<TestResolver, NoContext> {
+            Scalar(DictCodedCoordinate.self, as: "Coordinate")
+            Type(CoordinateOutput.self) {
+                Field("value", at: \.value)
+            }
+            Input(CoordinateInput.self) {
+                InputField("value", at: \.value)
+            }
+            Query {
+                Field("coord", at: TestResolver.coord) {
+                    Argument("input", at: \.input)
+                }
+            }
+        }
+        let api = TestAPI<TestResolver, NoContext> (
+            resolver: TestResolver(),
+            schema: testSchema
+        )
+        
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        defer { try? group.syncShutdownGracefully() }
+        
+        XCTAssertEqual(
+            try? api.execute(
+                request: """
+                query {
+                  coord (input: {value: {latitude: 0.0, longitude: 0.0}}) {
+                    value
+                  }
+                }
+                """,
+                context: NoContext(),
+                on: group
+            ).wait(),
+            GraphQLResult(data: [
+                "coord": [
+                    "value": [
+                        "longitude": 0.0,
+                        "latitude": 0.0
+                    ]
+                ]
+            ])
+        )
+    }
 }
 
 fileprivate class TestAPI<Resolver, ContextType> : API {
@@ -192,5 +529,68 @@ fileprivate class TestAPI<Resolver, ContextType> : API {
     init(resolver: Resolver, schema: Schema<Resolver, ContextType>) {
         self.resolver = resolver
         self.schema = schema
+    }
+}
+
+struct StringCodedCoordinate : Codable {
+    let latitude: Double
+    let longitude: Double
+    
+    init(latitude: Double, longitude: Double) {
+        self.latitude = latitude
+        self.longitude = longitude
+    }
+    
+    init(_ string: String) throws {
+        let range = NSRange(location: 0, length: string.utf8.count)
+        let regex = try NSRegularExpression(pattern: "\\((.*), (.*)\\)")
+        guard let match = regex.firstMatch(in: string, options: .init(), range: range) else {
+            throw GraphQLError(message: "Coordinate string didn't match expected value")
+        }
+
+
+        guard
+            let latitudeRange = Range(match.range(at: 1), in: string),
+            let longitudeRange = Range(match.range(at: 2), in: string)
+        else {
+            throw GraphQLError(message: "Coordinate regex failure")
+        }
+
+        let latitudeString = String(string[latitudeRange])
+        let longitudeString = String(string[longitudeRange])
+
+        guard
+            let latitude = Double(latitudeString),
+            let longitude = Double(longitudeString)
+        else {
+            throw GraphQLError(message: "Couldn't parse string values to doubles")
+        }
+
+        self.latitude = latitude
+        self.longitude = longitude
+    }
+
+    init(from decoder: Decoder) throws {
+        let string = try decoder.singleValueContainer().decode(String.self)
+        try self.init(string)
+    }
+
+    func toString() -> String {
+        return "(\(latitude), \(longitude))"
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self.toString())
+    }
+}
+
+struct DictCodedCoordinate : Codable {
+    let latitude: Double
+    let longitude: Double
+    
+    init(latitude: Double, longitude: Double) {
+        self.latitude = latitude
+        self.longitude = longitude
     }
 }
