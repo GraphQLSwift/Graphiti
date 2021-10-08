@@ -1,7 +1,9 @@
+import GraphQL
+
 public final class Types<Resolver, Context> : Component<Resolver, Context> {
     let types: [Any.Type]
     
-    override func update(typeProvider: SchemaTypeProvider) throws {
+    override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         typeProvider.types = try types.map {
             try typeProvider.getNamedType(from: $0)
         }

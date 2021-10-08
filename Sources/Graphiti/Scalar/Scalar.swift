@@ -2,7 +2,7 @@ import GraphQL
 import OrderedCollections
 
 open class Scalar<Resolver, Context, ScalarType : Codable> : Component<Resolver, Context> {
-    override func update(typeProvider: SchemaTypeProvider) throws {
+    override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         let scalarType = try GraphQLScalarType(
             name: name,
             description: description,
@@ -11,28 +11,28 @@ open class Scalar<Resolver, Context, ScalarType : Codable> : Component<Resolver,
                     throw GraphQLError(message: "Serialize expected type \(ScalarType.self) but got \(type(of: value))")
                 }
                 
-                return try self.serialize(scalar: scalar)
+                return try self.serialize(scalar: scalar, encoder: coders.encoder)
             },
             parseValue: { map in
-                let scalar = try self.parse(map: map)
-                return try self.serialize(scalar: scalar)
+                let scalar = try self.parse(map: map, decoder: coders.decoder)
+                return try self.serialize(scalar: scalar, encoder: coders.encoder)
             },
             parseLiteral: { value in
                 let map = value.map
-                let scalar = try self.parse(map: map)
-                return try self.serialize(scalar: scalar)
+                let scalar = try self.parse(map: map, decoder: coders.decoder)
+                return try self.serialize(scalar: scalar, encoder: coders.encoder)
             }
         )
         
         try typeProvider.map(ScalarType.self, to: scalarType)
     }
     
-    open func serialize(scalar: ScalarType) throws -> Map {
-        try MapEncoder().encode(scalar)
+    open func serialize(scalar: ScalarType, encoder: MapEncoder) throws -> Map {
+        try encoder.encode(scalar)
     }
     
-    open func parse(map: Map) throws -> ScalarType {
-        try MapDecoder().decode(ScalarType.self, from: map)
+    open func parse(map: Map, decoder: MapDecoder) throws -> ScalarType {
+        try decoder.decode(ScalarType.self, from: map)
     }
     
     init(

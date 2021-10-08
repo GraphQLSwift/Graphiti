@@ -1,27 +1,39 @@
 import GraphQL
+import NIO
 
 public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : FieldComponent<ObjectType, Context> {
     let name: String
     let arguments: [ArgumentComponent<Arguments>]
-    let resolve: GraphQLFieldResolve
+    let resolve: AsyncResolve<ObjectType, Context, Arguments, Any?>
     
-    override func field(typeProvider: TypeProvider) throws -> (String, GraphQLField) {
+    override func field(typeProvider: TypeProvider, coders: Coders) throws -> (String, GraphQLField) {
         let field = GraphQLField(
             type: try typeProvider.getOutputType(from: FieldType.self, field: name),
             description: description,
             deprecationReason: deprecationReason,
-            args: try arguments(typeProvider: typeProvider),
-            resolve: resolve
+            args: try arguments(typeProvider: typeProvider, coders: coders),
+            resolve: { source, arguments, context, eventLoopGroup, _ in
+                guard let s = source as? ObjectType else {
+                    throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
+                }
+    
+                guard let c = context as? Context else {
+                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                }
+    
+                let a = try coders.decoder.decode(Arguments.self, from: arguments)
+                return  try self.resolve(s)(c, a, eventLoopGroup)
+            }
         )
         
         return (name, field)
     }
     
-    func arguments(typeProvider: TypeProvider) throws -> GraphQLArgumentConfigMap {
+    func arguments(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLArgumentConfigMap {
         var map: GraphQLArgumentConfigMap = [:]
         
         for argument in arguments {
-            let (name, argument) = try argument.argument(typeProvider: typeProvider)
+            let (name, argument) = try argument.argument(typeProvider: typeProvider, coders: coders)
             map[name] = argument
         }
         
@@ -31,7 +43,7 @@ public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : Fiel
     init(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
-        resolve: @escaping GraphQLFieldResolve
+        resolve: @escaping AsyncResolve<ObjectType, Context, Arguments, Any?>
     ) {
         self.name = name
         self.arguments = arguments
@@ -43,19 +55,11 @@ public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : Fiel
         arguments: [ArgumentComponent<Arguments>],
         asyncResolve: @escaping AsyncResolve<ObjectType, Context, Arguments, ResolveType>
     ) {
-        let resolve: GraphQLFieldResolve = { source, arguments, context, eventLoopGroup, _ in
-            guard let s = source as? ObjectType else {
-                throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
+        let resolve: AsyncResolve<ObjectType, Context, Arguments, Any?> = { type in
+            { context, arguments, eventLoopGroup in
+                return try asyncResolve(type)(context, arguments, eventLoopGroup).map { $0 as Any? }
             }
-        
-            guard let c = context as? Context else {
-                throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
-            }
-        
-            let a = try MapDecoder().decode(Arguments.self, from: arguments)
-            return  try asyncResolve(s)(c, a, eventLoopGroup).map({ $0 })
         }
-        
         self.init(name: name, arguments: arguments, resolve: resolve)
     }
     

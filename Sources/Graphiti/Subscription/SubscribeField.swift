@@ -1,31 +1,54 @@
 import GraphQL
+import NIO
 
 // Subscription resolver MUST return an Observer<Any>, not a specific type, due to lack of support for covariance generics in Swift
 
-public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decodable> : FieldComponent<ObjectType, Context> {
+public class SubscriptionField<SourceEventType, ObjectType, Context, FieldType, Arguments : Decodable> : FieldComponent<ObjectType, Context> {
     let name: String
     let arguments: [ArgumentComponent<Arguments>]
-    let resolve: GraphQLFieldResolve
-    let subscribe: GraphQLFieldResolve
+    let resolve: AsyncResolve<SourceEventType, Context, Arguments, Any?>
+    let subscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>
     
-    override func field(typeProvider: TypeProvider) throws -> (String, GraphQLField) {
+    override func field(typeProvider: TypeProvider, coders: Coders) throws -> (String, GraphQLField) {
         let field = GraphQLField(
             type: try typeProvider.getOutputType(from: FieldType.self, field: name),
             description: description,
             deprecationReason: deprecationReason,
-            args: try arguments(typeProvider: typeProvider),
-            resolve: resolve,
-            subscribe: subscribe
+            args: try arguments(typeProvider: typeProvider, coders: coders),
+            resolve: { source, arguments, context, eventLoopGroup, _ in
+                guard let _source = source as? SourceEventType else {
+                    throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
+                }
+                
+                guard let _context = context as? Context else {
+                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                }
+            
+                let args = try coders.decoder.decode(Arguments.self, from: arguments)
+                return try self.resolve(_source)(_context, args, eventLoopGroup)
+            },
+            subscribe: { source, arguments, context, eventLoopGroup, _ in
+                guard let _source = source as? ObjectType else {
+                    throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
+                }
+            
+                guard let _context = context as? Context else {
+                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                }
+            
+                let args = try coders.decoder.decode(Arguments.self, from: arguments)
+                return try self.subscribe(_source)(_context, args, eventLoopGroup).map({ $0 })
+            }
         )
         
         return (name, field)
     }
     
-    func arguments(typeProvider: TypeProvider) throws -> GraphQLArgumentConfigMap {
+    func arguments(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLArgumentConfigMap {
         var map: GraphQLArgumentConfigMap = [:]
         
         for argument in arguments {
-            let (name, argument) = try argument.argument(typeProvider: typeProvider)
+            let (name, argument) = try argument.argument(typeProvider: typeProvider, coders: coders)
             map[name] = argument
         }
         
@@ -35,8 +58,8 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
     init(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
-        resolve: @escaping GraphQLFieldResolve,
-        subscribe: @escaping GraphQLFieldResolve
+        resolve: @escaping AsyncResolve<SourceEventType, Context, Arguments, Any?>,
+        subscribe: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>
     ) {
         self.name = name
         self.arguments = arguments
@@ -44,38 +67,18 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
         self.subscribe = subscribe
     }
 
-    convenience init<SourceEventType, ResolveType>(
+    convenience init<ResolveType>(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         asyncResolve: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         asyncSubscribe: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>
     ) {
-        let resolve: GraphQLFieldResolve = { source, arguments, context, eventLoopGroup, _ in
-            guard let _source = source as? SourceEventType else {
-                throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
+        let resolve: AsyncResolve<SourceEventType, Context, Arguments, Any?> = { type in
+            { context, arguments, eventLoopGroup in
+                return try asyncResolve(type)(context, arguments, eventLoopGroup).map { $0 }
             }
-            
-            guard let _context = context as? Context else {
-                throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
-            }
-        
-            let args = try MapDecoder().decode(Arguments.self, from: arguments)
-            return try asyncResolve(_source)(_context, args, eventLoopGroup).map({ $0 })
         }
-        
-        let subscribe: GraphQLFieldResolve = { source, arguments, context, eventLoopGroup, _ in
-            guard let _source = source as? ObjectType else {
-                throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
-            }
-        
-            guard let _context = context as? Context else {
-                throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
-            }
-        
-            let args = try MapDecoder().decode(Arguments.self, from: arguments)
-            return try asyncSubscribe(_source)(_context, args, eventLoopGroup).map({ $0 })
-        }
-        self.init(name: name, arguments: arguments, resolve: resolve, subscribe: subscribe)
+        self.init(name: name, arguments: arguments, resolve: resolve, subscribe: asyncSubscribe)
     }
     
     convenience init(
@@ -84,30 +87,15 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
         as: FieldType.Type,
         asyncSubscribe: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>
     ) {
-        let resolve: GraphQLFieldResolve = { source, _, context, eventLoopGroup, _ in
-            guard let _source = source as? FieldType else {
-                throw GraphQLError(message: "Expected source type \(FieldType.self) but got \(type(of: source))")
+        let resolve: AsyncResolve<SourceEventType, Context, Arguments, Any?> = { source in
+            { context, arguments, eventLoopGroup in
+                return eventLoopGroup.next().makeSucceededFuture(source)
             }
-            
-            return eventLoopGroup.next().makeSucceededFuture(_source)
         }
-        
-        let subscribe: GraphQLFieldResolve = { source, arguments, context, eventLoopGroup, _ in
-            guard let _source = source as? ObjectType else {
-                throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
-            }
-        
-            guard let _context = context as? Context else {
-                throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
-            }
-        
-            let args = try MapDecoder().decode(Arguments.self, from: arguments)
-            return try asyncSubscribe(_source)(_context, args, eventLoopGroup).map({ $0 })
-        }
-        self.init(name: name, arguments: arguments, resolve: resolve, subscribe: subscribe)
+        self.init(name: name, arguments: arguments, resolve: resolve, subscribe: asyncSubscribe)
     }
     
-    convenience init<SourceEventType, ResolveType>(
+    convenience init<ResolveType>(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         simpleAsyncResolve: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
@@ -147,7 +135,7 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
         self.init(name: name, arguments: arguments, as: `as`, asyncSubscribe: asyncSubscribe)
     }
     
-    convenience init<SourceEventType, ResolveType>(
+    convenience init<ResolveType>(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         syncResolve: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
@@ -188,7 +176,7 @@ public class SubscriptionField<ObjectType, Context, FieldType, Arguments : Decod
 // MARK: AsyncResolve Initializers
 
 public extension SubscriptionField where FieldType : Encodable {
-    convenience init<SourceEventType>(
+    convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, FieldType>,
         atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
@@ -197,7 +185,7 @@ public extension SubscriptionField where FieldType : Encodable {
         self.init(name: name, arguments: [argument()], asyncResolve: function, asyncSubscribe: subFunc)
     }
     
-    convenience init<SourceEventType>(
+    convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, FieldType>,
         atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
@@ -226,7 +214,7 @@ public extension SubscriptionField {
         self.init(name: name, arguments: arguments(), as: `as`, asyncSubscribe: subFunc)
     }
     
-    convenience init<SourceEventType, ResolveType>(
+    convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
@@ -236,7 +224,7 @@ public extension SubscriptionField {
         self.init(name: name, arguments: [argument()], asyncResolve: function, asyncSubscribe: subFunc)
     }
     
-    convenience init<SourceEventType, ResolveType>(
+    convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
@@ -250,7 +238,7 @@ public extension SubscriptionField {
 // MARK: SimpleAsyncResolve Initializers
 
 public extension SubscriptionField where FieldType : Encodable {
-    convenience init<SourceEventType>(
+    convenience init(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, FieldType>,
         atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
@@ -259,7 +247,7 @@ public extension SubscriptionField where FieldType : Encodable {
         self.init(name: name, arguments: [argument()], simpleAsyncResolve: function, simpleAsyncSubscribe: subFunc)
     }
 
-    convenience init<SourceEventType>(
+    convenience init(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, FieldType>,
         atSub subFunc: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
@@ -288,7 +276,7 @@ public extension SubscriptionField {
         self.init(name: name, arguments: arguments(), as: `as`, simpleAsyncSubscribe: subFunc)
     }
     
-    convenience init<SourceEventType, ResolveType>(
+    convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
@@ -298,7 +286,7 @@ public extension SubscriptionField {
         self.init(name: name, arguments: [argument()], simpleAsyncResolve: function, simpleAsyncSubscribe: subFunc)
     }
 
-    convenience init<SourceEventType, ResolveType>(
+    convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
@@ -312,7 +300,7 @@ public extension SubscriptionField {
 // MARK: SyncResolve Initializers
 
 public extension SubscriptionField where FieldType : Encodable {
-    convenience init<SourceEventType>(
+    convenience init(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
         atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
@@ -321,7 +309,7 @@ public extension SubscriptionField where FieldType : Encodable {
         self.init(name: name, arguments: [argument()], syncResolve: function, syncSubscribe: subFunc)
     }
 
-    convenience init<SourceEventType>(
+    convenience init(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
         atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, EventStream<Any>>,
@@ -350,7 +338,7 @@ public extension SubscriptionField {
         self.init(name: name, arguments: arguments(), as: `as`, syncSubscribe: subFunc)
     }
     
-    convenience init<SourceEventType, ResolveType>(
+    convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
@@ -360,7 +348,7 @@ public extension SubscriptionField {
         self.init(name: name, arguments: [argument()], syncResolve: function, syncSubscribe: subFunc)
     }
 
-    convenience init<SourceEventType, ResolveType>(
+    convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as: FieldType.Type,

@@ -3,7 +3,7 @@ import GraphQL
 public final class Enum<Resolver, Context, EnumType : Encodable & RawRepresentable> : Component<Resolver, Context> where EnumType.RawValue == String {
     private let values: [Value<EnumType>]
     
-    override func update(typeProvider: SchemaTypeProvider) throws {
+    override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         let enumType = try GraphQLEnumType(
             name: name,
             description: description,
