@@ -5,6 +5,170 @@ import NIO
 @testable import Graphiti
 
 class ScalarTests : XCTestCase {
+    // MARK: Test UUID converts to String as expected
+    func testUUIDOutput() throws {
+        struct UUIDOutput : Codable {
+            let value: UUID
+        }
+        
+        struct TestResolver {
+            func uuid(context: NoContext, arguments: NoArguments) -> UUIDOutput {
+                return UUIDOutput(value: UUID(uuidString: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F")!)
+            }
+        }
+        
+        let testSchema = try Schema<TestResolver, NoContext> {
+            Scalar(UUID.self, as: "UUID")
+            Type(UUIDOutput.self) {
+                Field("value", at: \.value)
+            }
+            Query {
+                Field("uuid", at: TestResolver.uuid)
+            }
+        }
+        let api = TestAPI<TestResolver, NoContext> (
+            resolver: TestResolver(),
+            schema: testSchema
+        )
+        
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        defer { try? group.syncShutdownGracefully() }
+        
+        XCTAssertEqual(
+            try api.execute(
+                request: """
+                query {
+                  uuid {
+                    value
+                  }
+                }
+                """,
+                context: NoContext(),
+                on: group
+            ).wait(),
+            GraphQLResult(data: [
+                "uuid": [
+                    "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"
+                ]
+            ])
+        )
+    }
+    
+    func testUUIDArg() throws {
+        struct UUIDOutput : Codable {
+            let value: UUID
+        }
+        
+        struct Arguments : Codable {
+            let value: UUID
+        }
+        
+        struct TestResolver {
+            func uuid(context: NoContext, arguments: Arguments) -> UUIDOutput {
+                return UUIDOutput(value: arguments.value)
+            }
+        }
+        
+        let testSchema = try Schema<TestResolver, NoContext> {
+            Scalar(UUID.self, as: "UUID")
+            Type(UUIDOutput.self) {
+                Field("value", at: \.value)
+            }
+            Query {
+                Field("uuid", at: TestResolver.uuid) {
+                    Argument("value", at: \.value)
+                }
+            }
+        }
+        let api = TestAPI<TestResolver, NoContext> (
+            resolver: TestResolver(),
+            schema: testSchema
+        )
+        
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        defer { try? group.syncShutdownGracefully() }
+        
+        XCTAssertEqual(
+            try api.execute(
+                request: """
+                query {
+                  uuid (value: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F") {
+                    value
+                  }
+                }
+                """,
+                context: NoContext(),
+                on: group
+            ).wait(),
+            GraphQLResult(data: [
+                "uuid": [
+                    "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"
+                ]
+            ])
+        )
+    }
+    
+    func testUUIDInput() throws {
+        struct UUIDOutput : Codable {
+            let value: UUID
+        }
+        
+        struct UUIDInput : Codable {
+            let value: UUID
+        }
+        
+        struct Arguments : Codable {
+            let input: UUIDInput
+        }
+        
+        struct TestResolver {
+            func uuid(context: NoContext, arguments: Arguments) -> UUIDOutput {
+                return UUIDOutput(value: arguments.input.value)
+            }
+        }
+        
+        let testSchema = try Schema<TestResolver, NoContext> {
+            Scalar(UUID.self, as: "UUID")
+            Type(UUIDOutput.self) {
+                Field("value", at: \.value)
+            }
+            Input(UUIDInput.self) {
+                InputField("value", at: \.value)
+            }
+            Query {
+                Field("uuid", at: TestResolver.uuid) {
+                    Argument("input", at: \.input)
+                }
+            }
+        }
+        let api = TestAPI<TestResolver, NoContext> (
+            resolver: TestResolver(),
+            schema: testSchema
+        )
+        
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        defer { try? group.syncShutdownGracefully() }
+        
+        XCTAssertEqual(
+            try api.execute(
+                request: """
+                query {
+                  uuid (input: {value: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"}) {
+                    value
+                  }
+                }
+                """,
+                context: NoContext(),
+                on: group
+            ).wait(),
+            GraphQLResult(data: [
+                "uuid": [
+                    "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"
+                ]
+            ])
+        )
+    }
+    
     // MARK: Test Date scalars convert to String using ISO8601 encoders
     func testDateOutput() throws {
         struct DateOutput : Codable {
