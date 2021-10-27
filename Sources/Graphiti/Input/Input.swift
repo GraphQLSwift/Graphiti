@@ -3,7 +3,7 @@ import GraphQL
 public final class Input<Resolver, Context, InputObjectType : Decodable> : Component<Resolver, Context> {
     let fields: [InputFieldComponent<InputObjectType, Context>]
     
-    override func update(typeProvider: SchemaTypeProvider) throws {
+    override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         let inputObjectType = try GraphQLInputObjectType(
             name: name,
             description: description,

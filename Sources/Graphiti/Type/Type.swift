@@ -8,11 +8,11 @@ public final class Type<Resolver, Context, ObjectType : Encodable> : Component<R
         return source is ObjectType
     }
     
-    override func update(typeProvider: SchemaTypeProvider) throws {
+    override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         let objectType = try GraphQLObjectType(
             name: name,
             description: description,
-            fields: fields(typeProvider: typeProvider),
+            fields: fields(typeProvider: typeProvider, coders: coders),
             interfaces: interfaces.map {
                 try typeProvider.getInterfaceType(from: $0)
             },
@@ -22,11 +22,11 @@ public final class Type<Resolver, Context, ObjectType : Encodable> : Component<R
         try typeProvider.map(ObjectType.self, to: objectType)
     }
     
-    func fields(typeProvider: TypeProvider) throws -> GraphQLFieldMap {
+    func fields(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLFieldMap {
         var map: GraphQLFieldMap = [:]
         
         for field in fields {
-            let (name, field) = try field.field(typeProvider: typeProvider)
+            let (name, field) = try field.field(typeProvider: typeProvider, coders: coders)
             map[name] = field
         }
         

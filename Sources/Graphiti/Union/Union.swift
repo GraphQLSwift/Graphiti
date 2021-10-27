@@ -3,7 +3,7 @@ import GraphQL
 public final class Union<Resolver, Context, UnionType> : Component<Resolver, Context> {
     private let members: [Any.Type]
     
-    override func update(typeProvider: SchemaTypeProvider) throws {
+    override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         let unionType = try GraphQLUnionType(
             name: name,
             description: description,

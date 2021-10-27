@@ -7,20 +7,20 @@ public final class Subscription<Resolver, Context> : Component<Resolver, Context
         return source is Resolver
     }
     
-    override func update(typeProvider: SchemaTypeProvider) throws {
+    override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         typeProvider.subscription = try GraphQLObjectType(
             name: name,
             description: description,
-            fields: fields(typeProvider: typeProvider),
+            fields: fields(typeProvider: typeProvider, coders: coders),
             isTypeOf: isTypeOf
         )
     }
     
-    func fields(typeProvider: TypeProvider) throws -> GraphQLFieldMap {
+    func fields(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLFieldMap {
         var map: GraphQLFieldMap = [:]
         
         for field in fields {
-            let (name, field) = try field.field(typeProvider: typeProvider)
+            let (name, field) = try field.field(typeProvider: typeProvider, coders: coders)
             map[name] = field
         }
         

@@ -4,11 +4,14 @@ import NIO
 public final class Schema<Resolver, Context> {
     public let schema: GraphQLSchema
 
-    private init(components: [Component<Resolver, Context>]) throws {
+    private init(
+        coders: Coders,
+        components: [Component<Resolver, Context>]
+    ) throws {
         let typeProvider = SchemaTypeProvider()
         
         for component in components {
-            try component.update(typeProvider: typeProvider)
+            try component.update(typeProvider: typeProvider, coders: coders)
         }
         
         guard let query = typeProvider.query else {
@@ -26,12 +29,24 @@ public final class Schema<Resolver, Context> {
 }
 
 public extension Schema {
-    convenience init(@ComponentBuilder<Resolver, Context> _ components: () -> Component<Resolver, Context>) throws {
-        try self.init(components: [components()])
+    convenience init(
+        coders: Coders = Coders(),
+        @ComponentBuilder<Resolver, Context> _ components: () -> Component<Resolver, Context>
+    ) throws {
+        try self.init(
+            coders: coders,
+            components: [components()]
+        )
     }
     
-    convenience init(@ComponentBuilder<Resolver, Context> _ components: () -> [Component<Resolver, Context>]) throws {
-        try self.init(components: components())
+    convenience init(
+        coders: Coders = Coders(),
+        @ComponentBuilder<Resolver, Context> _ components: () -> [Component<Resolver, Context>]
+    ) throws {
+        try self.init(
+            coders: coders,
+            components: components()
+        )
     }
     
     func execute(
