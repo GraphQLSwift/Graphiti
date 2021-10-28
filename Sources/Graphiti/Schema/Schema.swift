@@ -4,7 +4,7 @@ import NIO
 public final class Schema<Resolver, Context> {
     public let schema: GraphQLSchema
 
-    private init(
+    internal init(
         coders: Coders,
         components: [Component<Resolver, Context>]
     ) throws {
@@ -32,8 +32,8 @@ public extension Schema {
     convenience init(
         coders: Coders = Coders(),
         @ComponentBuilder<Resolver, Context> _ components: () -> Component<Resolver, Context>
-    ) throws {
-        try self.init(
+    ) {
+        try! self.init(
             coders: coders,
             components: [components()]
         )
@@ -42,8 +42,8 @@ public extension Schema {
     convenience init(
         coders: Coders = Coders(),
         @ComponentBuilder<Resolver, Context> _ components: () -> [Component<Resolver, Context>]
-    ) throws {
-        try self.init(
+    ) {
+        try! self.init(
             coders: coders,
             components: components()
         )

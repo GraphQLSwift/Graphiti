@@ -1,6 +1,6 @@
 import Graphiti
 
-public struct StarWarsAPI : API {
+public struct StarWarsAPI: API {
     public let resolver = StarWarsResolver()
     
     public let schema = try! Schema<StarWarsResolver, StarWarsContext> {

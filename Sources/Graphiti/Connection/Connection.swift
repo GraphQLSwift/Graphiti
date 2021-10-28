@@ -2,13 +2,13 @@ import Foundation
 import NIO
 import GraphQL
 
-public struct Connection<Node : Encodable> : Encodable {
+public struct Connection<Node: Encodable>: Encodable {
     let edges: [Edge<Node>]
     let pageInfo: PageInfo
 }
 
 @available(OSX 10.15, *)
-public extension Connection where Node : Identifiable, Node.ID : LosslessStringConvertible {
+public extension Connection where Node: Identifiable, Node.ID: LosslessStringConvertible {
     static func id(_ cursor: String) -> Node.ID? {
         cursor.base64Decoded().flatMap({ Node.ID($0) })
     }
@@ -19,7 +19,7 @@ public extension Connection where Node : Identifiable, Node.ID : LosslessStringC
 }
 
 @available(OSX 10.15, *)
-public extension EventLoopFuture where Value : Sequence, Value.Element : Encodable & Identifiable, Value.Element.ID : LosslessStringConvertible {
+public extension EventLoopFuture where Value: Sequence, Value.Element: Encodable & Identifiable, Value.Element.ID: LosslessStringConvertible {
     func connection(from arguments: Paginatable) -> EventLoopFuture<Connection<Value.Element>> {
         connection(from: arguments, makeCursor: Connection<Value.Element>.cursor)
     }

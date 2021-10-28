@@ -98,6 +98,7 @@ public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : Fiel
 // MARK: AsyncResolve Initializers
 
 public extension Field where FieldType : Encodable {
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -106,6 +107,7 @@ public extension Field where FieldType : Encodable {
         self.init(name: name, arguments: [argument()], asyncResolve: function)
     }
     
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -116,6 +118,7 @@ public extension Field where FieldType : Encodable {
 }
 
 public extension Field {
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncResolve<ObjectType, Context, Arguments, ResolveType>,
@@ -125,6 +128,7 @@ public extension Field {
         self.init(name: name, arguments: [argument()], asyncResolve: function)
     }
     
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncResolve<ObjectType, Context, Arguments, ResolveType>,
@@ -138,6 +142,7 @@ public extension Field {
 // MARK: SimpleAsyncResolve Initializers
 
 public extension Field where FieldType : Encodable {
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -146,6 +151,7 @@ public extension Field where FieldType : Encodable {
         self.init(name: name, arguments: [argument()], simpleAsyncResolve: function)
     }
     
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -156,6 +162,7 @@ public extension Field where FieldType : Encodable {
 }
 
 public extension Field {
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, ResolveType>,
@@ -165,6 +172,7 @@ public extension Field {
         self.init(name: name, arguments: [argument()], simpleAsyncResolve: function)
     }
     
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, ResolveType>,
@@ -178,6 +186,7 @@ public extension Field {
 // MARK: SyncResolve Initializers
 
 public extension Field where FieldType : Encodable {
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -185,7 +194,8 @@ public extension Field where FieldType : Encodable {
     ) {
         self.init(name: name, arguments: [argument()], syncResolve: function)
     }
-    
+        
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -196,6 +206,7 @@ public extension Field where FieldType : Encodable {
 }
 
 public extension Field {
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, ResolveType>,
@@ -205,6 +216,7 @@ public extension Field {
         self.init(name: name, arguments: [argument()], syncResolve: function)
     }
     
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, ResolveType>,
@@ -215,15 +227,116 @@ public extension Field {
     }
 }
 
+#if compiler(>=5.5) && canImport(_Concurrency)
+
 // MARK: Keypath Initializers
 
+public typealias Resolve<Context, Arguments, ResolveType> = (
+    _ context: Context,
+    _ arguments: Arguments
+) async throws -> ResolveType
+
+@available(macOS 12, *)
+public extension Field where FieldType: Encodable {
+    convenience init(
+        _ name: String,
+        at keyPath: KeyPath<ObjectType, Resolve<Context, Arguments, FieldType>>,
+        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+    ) {
+        let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, FieldType> = { type in
+            { context, arguments, group in
+                let promise = group.next().makePromise(of: FieldType.self)
+                
+                promise.completeWithTask {
+                    try await type[keyPath: keyPath](context, arguments)
+                }
+                    
+                return promise.futureResult
+            }
+        }
+        
+        self.init(name: name, arguments: arguments(), asyncResolve: asyncResolve)
+    }
+}
+
+@available(macOS 12, *)
+public extension Field {
+    convenience init<ResolveType>(
+        _ name: String,
+        at keyPath: KeyPath<ObjectType, Resolve<Context, Arguments, ResolveType>>,
+        as: FieldType.Type,
+        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+    ) where ResolveType: Encodable {
+        let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+            { context, arguments, group in
+                let promise = group.next().makePromise(of: ResolveType.self)
+                
+                promise.completeWithTask {
+                    try await type[keyPath: keyPath](context, arguments)
+                }
+                    
+                return promise.futureResult
+            }
+        }
+        
+        self.init(name: name, arguments: arguments(), asyncResolve: asyncResolve)
+    }
+}
+
+@available(macOS 12, *)
+public extension Field where Arguments == NoArguments, FieldType: Encodable {
+    convenience init(
+        _ name: String,
+        at keyPath: KeyPath<ObjectType, Resolve<Context, Void, FieldType>>
+    ) {
+        let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, FieldType> = { type in
+            { context, _, group in
+                let promise = group.next().makePromise(of: FieldType.self)
+                
+                promise.completeWithTask {
+                    try await type[keyPath: keyPath](context, ())
+                }
+                    
+                return promise.futureResult
+            }
+        }
+        
+        self.init(name: name, arguments: [], asyncResolve: asyncResolve)
+    }
+}
+
+@available(macOS 12, *)
 public extension Field where Arguments == NoArguments {
+    convenience init<ResolveType>(
+        _ name: String,
+        at keyPath: KeyPath<ObjectType, Resolve<Context, Void, ResolveType>>,
+        as: FieldType.Type
+    ) where ResolveType: Encodable {
+        let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+            { context, _, group in
+                let promise = group.next().makePromise(of: ResolveType.self)
+                
+                promise.completeWithTask {
+                    try await type[keyPath: keyPath](context, ())
+                }
+                    
+                return promise.futureResult
+            }
+        }
+        
+        self.init(name: name, arguments: [], asyncResolve: asyncResolve)
+    }
+}
+
+#endif
+
+public extension Field where Arguments == NoArguments, FieldType: Encodable {
     convenience init(
         _ name: String,
         at keyPath: KeyPath<ObjectType, FieldType>
     ) {
-        let syncResolve: SyncResolve<ObjectType, Context, NoArguments, FieldType> = { type in
-            { context, _ in
+        let syncResolve: SyncResolve<ObjectType, Context, Arguments, FieldType> = { type in
+            { _, _ in
                 type[keyPath: keyPath]
             }
         }
@@ -237,10 +350,10 @@ public extension Field where Arguments == NoArguments {
         _ name: String,
         at keyPath: KeyPath<ObjectType, ResolveType>,
         as: FieldType.Type
-    ) {
-        let syncResolve: SyncResolve<ObjectType, Context, NoArguments, ResolveType> = { type in
-            return { context, _ in
-                return type[keyPath: keyPath]
+    ) where ResolveType: Encodable {
+        let syncResolve: SyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+            { _, _ in
+                type[keyPath: keyPath]
             }
         }
         
