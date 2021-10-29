@@ -3,7 +3,7 @@ import Graphiti
 public struct StarWarsAPI: API {
     public let resolver = StarWarsResolver()
     
-    public let schema = try! Schema<StarWarsResolver, StarWarsContext> {
+    public let schema = Schema<StarWarsResolver, StarWarsContext> {
         Enum(Episode.self) {
             Value(.newHope)
                 .description("Released in 1977.")

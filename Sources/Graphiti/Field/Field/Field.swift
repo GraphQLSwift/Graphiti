@@ -1,7 +1,7 @@
 import GraphQL
 import NIO
 
-public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : FieldComponent<ObjectType, Context> {
+public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<ObjectType, Context> where Arguments: Decodable {
     let name: String
     let arguments: [ArgumentComponent<Arguments>]
     let resolve: AsyncResolve<ObjectType, Context, Arguments, Any?>
@@ -234,14 +234,14 @@ public extension Field {
 public typealias Resolve<Context, Arguments, ResolveType> = (
     _ context: Context,
     _ arguments: Arguments
-) async throws -> ResolveType
+) async throws -> ResolveType where ResolveType: Encodable
 
 @available(macOS 12, *)
 public extension Field where FieldType: Encodable {
     convenience init(
         _ name: String,
         at keyPath: KeyPath<ObjectType, Resolve<Context, Arguments, FieldType>>,
-        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>]
     ) {
         let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, FieldType> = { type in
             { context, arguments, group in
@@ -265,7 +265,7 @@ public extension Field {
         _ name: String,
         at keyPath: KeyPath<ObjectType, Resolve<Context, Arguments, ResolveType>>,
         as: FieldType.Type,
-        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>]
     ) where ResolveType: Encodable {
         let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, arguments, group in

@@ -23,59 +23,92 @@ through that README and the corresponding tests in parallel.
 
 ### Using Graphiti
 
-Add Graphiti to your `Package.swift`
-
-```swift
-import PackageDescription
-
-let package = Package(
-    dependencies: [
-        .Package(url: "https://github.com/GraphQLSwift/Graphiti.git", .upToNextMinor(from: "0.20.1")),
-    ]
-)
-```
-
-Graphiti provides two important capabilities: building a type schema, and
+Add Graphiti to your `Package.swift`. Graphiti provides two important capabilities: building a type schema, and
 serving queries against that type schema.
 
 #### Defining entities
 
-First, we declare our regular Swift entities.
+First, we declare our regular Swift entities. For our example, we are using the quintessential counter. The only requirements are that GraphQL output types must conform to `Encodable` and GraphQL input types must conform to `Decodable`.
 
 ```swift
-struct Message : Codable {
-    let content: String
+struct Counter: Encodable {
+    var count: Int
 }
 ```
 
-⭐️ One of the main design decisions behind Graphiti is **not** to polute your entities declarations. This way you can bring your entities to any other solution with ease.
+⭐️ Notice that this step does not require importing `Graphiti`. One of the main design decisions behind Graphiti is **not** to pollute your entities declarations. This way you can bring your entities to any other environment with ease.
 
 #### Defining the context
 
-Second step is to create your application's **context**. The context will be passed to all of your field resolver functions. This allows you to apply dependency injection to your API. This is the place where you can put code that talks to a database or another service.
+Second step is to create your API's **context** actor. The context will be passed to all of your field resolver functions. This allows you to apply dependency injection to your API. This is the place where you can put code that derives your entities from a database or another service.
 
 ```swift
-struct Context {
-    func message() -> Message {
-        Message(content: "Hello, world!")
+actor CounterContext {
+    var counter: Counter
+    
+    init(counter: Counter) {
+        self.counter = counter
+    }
+    
+    func increment() -> Counter {
+        counter.count += 1
+        return counter
+    }
+    
+    func decrement() -> Counter {
+        counter.count -= 1
+        return counter
+    }
+    
+    func increment(by count: Int) -> Counter {
+        counter.count += count
+        return counter
+    }
+    
+    func decrement(by count: Int) -> Counter {
+        counter.count -= count
+        return counter
     }
 }
 ```
 
-⭐️ Notice again that this step doesn't require Graphiti. It's purely business logic.
+⭐️ Notice that this step does not require importing `Graphiti`. It is purely your API's business logic.
 
 #### Defining the GraphQL API resolver
 
-Now that we have our entities and context we can create the GraphQL API resolver.
+Now that we have our entities and context we can declare the GraphQL API resolver. These resolver functions will be used to resolve the queries and mutations defined in the schema.
 
 ```swift
-import Graphiti
-
-struct Resolver {
-    func message(context: Context, arguments: NoArguments) -> Message {
-        context.message()
+struct CounterResolver {
+    var counter: (CounterContext, Void) async throws -> Counter
+    var increment: (CounterContext, Void) async throws -> Counter
+    var decrement: (CounterContext, Void) async throws -> Counter
+   
+    struct IncrementByArguments: Decodable {
+        let count: Int
     }
+    
+    var incrementBy: (CounterContext, IncrementByArguments) async throws -> Counter
+    
+    struct DecrementByArguments: Decodable {
+        let count: Int
+    }
+    
+    var decrementBy: (CounterContext, DecrementByArguments) async throws -> Counter
 }
+```
+
+⭐️ Notice that this step does not require importing `Graphiti`. However, all resolver functions must take the following shape:
+
+```swift
+(Context, Arguments) async thows -> Output where Arguments: Decodable, Output: Encodable
+```
+
+In case your resolve function does not use any arguments you can use the following shape:
+
+
+```swift
+(Context, Void) async thows -> Output where Output: Encodable
 ```
 
 #### Defining the GraphQL API schema
@@ -83,31 +116,63 @@ struct Resolver {
 Now we can finally define the GraphQL API with its schema.
 
 ```swift
-struct MessageAPI : API {
-    let resolver: Resolver
-    let schema: Schema<Resolver, Context>
-    
-    init(resolver: Resolver) throws {
-        self.resolver = resolver
+import Graphiti
 
-        self.schema = try Schema<Resolver, Context> {
-            Type(Message.self) {
-                Field("content", at: \.content)
+struct CounterAPI {
+    let schema = Schema<CounterResolver, CounterContext> {
+        Type(Counter.self) {
+            Field("count", at: \.count)
+        }
+        
+        Query {
+            Field("counter", at: \.counter)
+        }
+
+        Mutation {
+            Field("increment", at: \.increment)
+            Field("decrement", at: \.decrement)
+            
+            Field("incrementBy", at: \.incrementBy) {
+                Argument("count", at: \.count)
             }
-
-            Query {
-                Field("message", at: Resolver.message)
+            
+            Field("decrementBy", at: \.decrementBy) {
+                Argument("count", at: \.count)
             }
         }
     }
 }
 ```
 
-⭐️ Notice that `API` allows dependency injection. You could pass mocks of `resolver` and `context` when testing, for example.
+⭐️ Now we finally import Graphiti. Notice that `Schema` allows dependency injection. You could pass mocks of `resolver` and `context` to `Schema.execute` when testing, for example.
 
 #### Querying
 
-To query the schema we need to instantiate the api and pass in an EventLoopGroup to feed the execute function alongside the query itself.
+To query the schema, we first need to create a live instance of the resolver:
+
+```swift
+extension CounterResolver {
+    static let live = CounterResolver(
+        counter: { context, _ in
+            await context.counter
+        },
+        increment: { context, _ in
+            await context.increment()
+        },
+        decrement: { context, _ in
+            await context.decrement()
+        },
+        incrementBy: { context, arguments in
+            await context.increment(by: arguments.count)
+        },
+        decrementBy: { context, arguments in
+            await context.decrement(by: arguments.count)
+        }
+    )
+}
+```
+
+This implementation basically extracts the arguments from the GraphQL query and delegates the business logic to the `context`. As mentioned before, you could create a `test` version of your resolver when testing.
 
 ```swift
 import NIO
@@ -187,3 +252,4 @@ This project is released under the MIT license. See [LICENSE](LICENSE) for detai
 
 [coverage-badge]: https://api.codeclimate.com/v1/badges/25559824033fc2caa94e/test_coverage
 [coverage-url]: https://codeclimate.com/github/GraphQLSwift/Graphiti/test_coverage
+

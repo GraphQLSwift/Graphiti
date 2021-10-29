@@ -17,7 +17,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(UUID.self, as: "UUID")
             Type(UUIDOutput.self) {
                 Field("value", at: \.value)
@@ -69,7 +69,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(UUID.self, as: "UUID")
             Type(UUIDOutput.self) {
                 Field("value", at: \.value)
@@ -127,7 +127,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(UUID.self, as: "UUID")
             Type(UUIDOutput.self) {
                 Field("value", at: \.value)
@@ -184,7 +184,7 @@ class ScalarTests : XCTestCase {
         let coders = Coders()
         coders.decoder.dateDecodingStrategy = .iso8601
         coders.encoder.dateEncodingStrategy = .iso8601
-        let testSchema = try Schema<TestResolver, NoContext>(
+        let testSchema = Schema<TestResolver, NoContext>(
             coders: coders
         ) {
             Scalar(Date.self, as: "Date")
@@ -241,7 +241,7 @@ class ScalarTests : XCTestCase {
         let coders = Coders()
         coders.decoder.dateDecodingStrategy = .iso8601
         coders.encoder.dateEncodingStrategy = .iso8601
-        let testSchema = try Schema<TestResolver, NoContext>(
+        let testSchema = Schema<TestResolver, NoContext>(
             coders: coders
         ) {
             Scalar(Date.self, as: "Date")
@@ -304,7 +304,7 @@ class ScalarTests : XCTestCase {
         let coders = Coders()
         coders.decoder.dateDecodingStrategy = .iso8601
         coders.encoder.dateEncodingStrategy = .iso8601
-        let testSchema = try Schema<TestResolver, NoContext>(
+        let testSchema = Schema<TestResolver, NoContext>(
             coders: coders
         ) {
             Scalar(Date.self, as: "Date")
@@ -360,7 +360,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(StringCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
                 Field("value", at: \.value)
@@ -412,7 +412,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(StringCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
                 Field("value", at: \.value)
@@ -470,7 +470,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(StringCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
                 Field("value", at: \.value)
@@ -524,7 +524,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(DictCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
                 Field("value", at: \.value)
@@ -580,7 +580,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(DictCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
                 Field("value", at: \.value)
@@ -642,7 +642,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(DictCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
                 Field("value", at: \.value)
