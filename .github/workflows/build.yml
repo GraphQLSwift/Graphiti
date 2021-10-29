@@ -36,7 +36,7 @@ jobs:
           - focal
           - bionic
         tag:
-          - swift:5.4
+          - swift:5.5
     container:
       image: ${{ matrix.tag }}-${{ matrix.os }}
     steps:
