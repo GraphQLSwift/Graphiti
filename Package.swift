@@ -8,7 +8,7 @@ let package = Package(
     ],
     dependencies: [
 //        .package(url: "https://github.com/GraphQLSwift/GraphQL.git", .upToNextMajor(from: "2.0.0")),
-        .package(path: "../GraphQL")
+        .package(url: "https://github.com/GraphQLSwift/GraphQL.git", .branch("feature/async-await")),
     ],
     targets: [
         .target(name: "Graphiti", dependencies: ["GraphQL"]),

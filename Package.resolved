@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "GraphQL",
+        "repositoryURL": "https://github.com/GraphQLSwift/GraphQL.git",
+        "state": {
+          "branch": "feature/async-await",
+          "revision": "291bf038a2eb85c3a9484a7638c26ef5b2fff9eb",
+          "version": null
+        }
+      },
+      {
         "package": "swift-collections",
         "repositoryURL": "https://github.com/apple/swift-collections",
         "state": {
