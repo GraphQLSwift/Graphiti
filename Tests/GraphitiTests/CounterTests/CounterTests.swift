@@ -3,6 +3,7 @@ import GraphQL
 import NIO
 @testable import Graphiti
 
+@available(macOS 12, *)
 actor CounterContext {
     var count = 0
     
@@ -17,6 +18,7 @@ actor CounterContext {
     }
 }
 
+@available(macOS 12, *)
 struct CounterResolver {
     var count: Resolve<CounterContext, Void, Int>
     var increment: Resolve<CounterContext, Void, Int>
@@ -39,6 +41,7 @@ struct CounterAPI: API {
     }
 }
 
+@available(macOS 12, *)
 extension CounterResolver {
     static let test = CounterResolver(
         count: { context, _ in

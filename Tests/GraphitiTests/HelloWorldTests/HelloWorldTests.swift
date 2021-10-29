@@ -21,6 +21,7 @@ struct ID: Codable {
     }
 }
 
+@available(macOS 12, *)
 struct User: Codable {
     let id: ID
     let name: String?
@@ -42,10 +43,6 @@ struct User: Codable {
             self.friends = nil
         }
     }
-    
-    func toEvent(context: HelloContext, arguments: NoArguments) throws -> UserEvent {
-        return UserEvent(user: self)
-    }
 }
 
 struct UserInput: Codable {
@@ -54,18 +51,21 @@ struct UserInput: Codable {
     let friends: [UserInput]?
 }
 
+@available(macOS 12, *)
 struct UserEvent: Codable {
     let user: User
 }
 
+@available(macOS 12, *)
 final class HelloContext {
     func hello() async -> String {
         "world"
     }
 }
 
+@available(macOS 12, *)
 struct HelloResolver {
-    var hello: Resolve<HelloContext, NoArguments, String>
+    var hello: Resolve<HelloContext, Void, String>
     
     struct FloatArguments: Codable {
         let float: Float
@@ -136,6 +136,7 @@ struct HelloAPI: API {
     }
 }
 
+@available(macOS 12, *)
 extension HelloResolver {
     static let test = HelloResolver(
         hello: { context, _ in
