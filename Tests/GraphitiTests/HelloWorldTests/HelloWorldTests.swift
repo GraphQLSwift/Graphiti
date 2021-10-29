@@ -78,7 +78,7 @@ struct HelloResolver {
     }
     
     var getId: Resolve<HelloContext, IDArguments, ID>
-    var getUser: Resolve<HelloContext, NoArguments, User>
+    var getUser: Resolve<HelloContext, Void, User>
     
     struct AddUserArguments: Codable {
         let user: UserInput
@@ -91,7 +91,7 @@ struct HelloResolver {
 struct HelloAPI: API {
     let resolver: HelloResolver
     
-    let schema = try! Schema<HelloResolver, HelloContext> {
+    let schema = Schema<HelloResolver, HelloContext> {
         Scalar(Float.self)
             .description("The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).")
 

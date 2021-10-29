@@ -48,12 +48,31 @@ public extension Schema {
             components: components()
         )
     }
-    
+   
+    @available(*, deprecated, message: "Use the signature where the label for eventLoopGroup is `on`.")
     func execute(
         request: String,
         resolver: Resolver,
         context: Context,
         eventLoopGroup: EventLoopGroup,
+        variables: [String: Map] = [:],
+        operationName: String? = nil
+    ) -> EventLoopFuture<GraphQLResult> {
+        self.execute(
+            request: request,
+            resolver: resolver,
+            context: context,
+            on: eventLoopGroup,
+            variables: variables,
+            operationName: operationName
+        )
+    }
+    
+    func execute(
+        request: String,
+        resolver: Resolver,
+        context: Context,
+        on eventLoopGroup: EventLoopGroup,
         variables: [String: Map] = [:],
         operationName: String? = nil
     ) -> EventLoopFuture<GraphQLResult> {
@@ -71,12 +90,31 @@ public extension Schema {
             return eventLoopGroup.next().makeFailedFuture(error)
         }
     }
-    
+   
+    @available(*, deprecated, message: "Use the signature where the label for eventLoopGroup is `on`.")
     func subscribe(
         request: String,
         resolver: Resolver,
         context: Context,
         eventLoopGroup: EventLoopGroup,
+        variables: [String: Map] = [:],
+        operationName: String? = nil
+    ) -> EventLoopFuture<SubscriptionResult> {
+        self.subscribe(
+            request: request,
+            resolver: resolver,
+            context: context,
+            on: eventLoopGroup,
+            variables: variables,
+            operationName: operationName
+        )
+    }
+    
+    func subscribe(
+        request: String,
+        resolver: Resolver,
+        context: Context,
+        on eventLoopGroup: EventLoopGroup,
         variables: [String: Map] = [:],
         operationName: String? = nil
     ) -> EventLoopFuture<SubscriptionResult> {

@@ -4,62 +4,110 @@ import NIO
 @testable import Graphiti
 
 @available(macOS 12, *)
+struct Counter: Encodable {
+    var count: Int
+}
+
 actor CounterContext {
-    var count = 0
+    var counter: Counter
     
-    func increment() -> Int {
-        count += 1
-        return count
+    init(counter: Counter) {
+        self.counter = counter
     }
     
-    func decrement() -> Int {
-        count -= 1
-        return count
+    func increment() -> Counter {
+        counter.count += 1
+        return counter
+    }
+    
+    func decrement() -> Counter {
+        counter.count -= 1
+        return counter
+    }
+    
+    func increment(by count: Int) -> Counter {
+        counter.count += count
+        return counter
+    }
+    
+    func decrement(by count: Int) -> Counter {
+        counter.count -= count
+        return counter
     }
 }
 
 @available(macOS 12, *)
 struct CounterResolver {
-    var count: Resolve<CounterContext, Void, Int>
-    var increment: Resolve<CounterContext, Void, Int>
-    var decrement: Resolve<CounterContext, Void, Int>
+    var counter: (CounterContext, Void) async throws -> Counter
+    var increment: (CounterContext, Void) async throws -> Counter
+    var decrement: (CounterContext, Void) async throws -> Counter
+   
+    struct IncrementByArguments: Decodable {
+        let count: Int
+    }
+    
+    var incrementBy: (CounterContext, IncrementByArguments) async throws -> Counter
+    
+    struct DecrementByArguments: Decodable {
+        let count: Int
+    }
+    
+    var decrementBy: (CounterContext, DecrementByArguments) async throws -> Counter
 }
 
 @available(macOS 12, *)
-struct CounterAPI: API {
-    let resolver: CounterResolver
-    
+struct CounterAPI {
     let schema = Schema<CounterResolver, CounterContext> {
-        Query {
+        Type(Counter.self) {
             Field("count", at: \.count)
+        }
+        
+        Query {
+            Field("counter", at: \.counter)
         }
 
         Mutation {
             Field("increment", at: \.increment)
             Field("decrement", at: \.decrement)
+            
+            Field("incrementBy", at: \.incrementBy) {
+                Argument("count", at: \.count)
+            }
+            
+            Field("decrementBy", at: \.decrementBy) {
+                Argument("count", at: \.count)
+            }
         }
     }
 }
 
 @available(macOS 12, *)
+extension CounterContext {
+    static let live = CounterContext(counter: Counter(count: 0))
+}
+
 extension CounterResolver {
-    static let test = CounterResolver(
-        count: { context, _ in
-            await context.count
+    static let live = CounterResolver(
+        counter: { context, _ in
+            await context.counter
         },
         increment: { context, _ in
             await context.increment()
         },
         decrement: { context, _ in
             await context.decrement()
+        },
+        incrementBy: { context, arguments in
+            await context.increment(by: arguments.count)
+        },
+        decrementBy: { context, arguments in
+            await context.decrement(by: arguments.count)
         }
     )
 }
 
 @available(macOS 12, *)
 class CounterTests: XCTestCase {
-    private let api = CounterAPI(resolver: .test)
-    private let context = CounterContext()
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
     
     deinit {
@@ -67,66 +115,67 @@ class CounterTests: XCTestCase {
     }
     
     func testCounter() throws {
-        var query = "{ count }"
-        var expected = GraphQLResult(data: ["count": 0])
-        var expectation = XCTestExpectation()
+        let api = CounterAPI()
         
-        api.execute(
+        var query = "query { counter { count } }"
+        var expected = GraphQLResult(data: ["counter": ["count": 0]])
+        
+        var result = try api.schema.execute(
             request: query,
-            context: context,
+            resolver: .live,
+            context: .live,
             on: group
-        ).whenSuccess { result in
-            XCTAssertEqual(result, expected)
-            expectation.fulfill()
-        }
+        ).wait()
         
-        wait(for: [expectation], timeout: 10)
+        XCTAssertEqual(result, expected)
         
-        query = """
-        mutation {
-            increment
-        }
-        """
+        query = "mutation { increment { count } }"
+        expected = GraphQLResult(data: ["increment": ["count": 1]])
         
-        expected = GraphQLResult(
-            data: ["increment": 1]
-        )
-        
-        expectation = XCTestExpectation()
-        
-        api.execute(
+        result = try api.schema.execute(
             request: query,
-            context: context,
+            resolver: .live,
+            context: .live,
             on: group
-        ).whenSuccess { result in
-            XCTAssertEqual(result, expected)
-            expectation.fulfill()
-        }
+        ).wait()
         
-        wait(for: [expectation], timeout: 10)
+        XCTAssertEqual(result, expected)
         
-        query = """
-        mutation {
-            decrement
-        }
-        """
+        query = "mutation { decrement { count } }"
+        expected = GraphQLResult(data: ["decrement": ["count": 0]])
         
-        expected = GraphQLResult(
-            data: ["decrement": 0]
-        )
-        
-        expectation = XCTestExpectation()
-        
-        api.execute(
+        result = try api.schema.execute(
             request: query,
-            context: context,
+            resolver: .live,
+            context: .live,
             on: group
-        ).whenSuccess { result in
-            XCTAssertEqual(result, expected)
-            expectation.fulfill()
-        }
+        ).wait()
+            
+        XCTAssertEqual(result, expected)
+    
+        query = "mutation { incrementBy(count: 5) { count } }"
+        expected = GraphQLResult(data: ["incrementBy": ["count": 5]])
         
-        wait(for: [expectation], timeout: 10)
+        result = try api.schema.execute(
+            request: query,
+            resolver: .live,
+            context: .live,
+            on: group
+        ).wait()
+         
+        XCTAssertEqual(result, expected)
+        
+        query = "mutation { decrementBy(count: 5) { count } }"
+        expected = GraphQLResult(data: ["decrementBy": ["count": 0]])
+        
+        result = try api.schema.execute(
+            request: query,
+            resolver: .live,
+            context: .live,
+            on: group
+        ).wait()
+         
+        XCTAssertEqual(result, expected)
     }
 }
 
