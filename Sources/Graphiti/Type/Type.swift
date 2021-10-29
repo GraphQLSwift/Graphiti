@@ -46,11 +46,43 @@ public final class Type<Resolver, Context, ObjectType : Encodable> : Component<R
 }
 
 public extension Type {
+    @available(*, deprecated, message: "Use the initializer where the label for the interfaces parameter is named `implements`.")
     convenience init(
         _ type: ObjectType.Type,
         as name: String? = nil,
-        interfaces: [Any.Type] = [],
+        interfaces: [Any.Type],
         @FieldComponentBuilder<ObjectType, Context> _ fields: () -> FieldComponent<ObjectType, Context>
+    ) {
+        self.init(
+            type: type,
+            name: name,
+            interfaces: interfaces,
+            fields: [fields()]
+        )
+    }
+    
+    @available(*, deprecated, message: "Use the initializer where the label for the interfaces parameter is named `implements`.")
+    convenience init(
+        _ type: ObjectType.Type,
+        as name: String? = nil,
+        interfaces: [Any.Type],
+        @FieldComponentBuilder<ObjectType, Context> _ fields: () -> [FieldComponent<ObjectType, Context>]
+    ) {
+        self.init(
+            type: type,
+            name: name,
+            interfaces: interfaces,
+            fields: fields()
+        )
+    }
+}
+
+public extension Type {
+    convenience init(
+        _ type: ObjectType.Type,
+        as name: String? = nil,
+        implements interfaces: Any.Type...,
+        @FieldComponentBuilder<ObjectType, Context> fields: () -> FieldComponent<ObjectType, Context>
     ) {
         self.init(
             type: type,
@@ -63,8 +95,8 @@ public extension Type {
     convenience init(
         _ type: ObjectType.Type,
         as name: String? = nil,
-        interfaces: [Any.Type] = [],
-        @FieldComponentBuilder<ObjectType, Context> _ fields: () -> [FieldComponent<ObjectType, Context>]
+        implements interfaces: Any.Type...,
+        @FieldComponentBuilder<ObjectType, Context> fields: () -> [FieldComponent<ObjectType, Context>]
     ) {
         self.init(
             type: type,

@@ -1,6 +1,7 @@
 import GraphQL
 import NIO
 
+@available(*, deprecated, message: "Use the schema directly.")
 public protocol API {
     associatedtype Resolver
     associatedtype ContextType

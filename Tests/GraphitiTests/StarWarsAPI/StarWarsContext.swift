@@ -5,7 +5,8 @@
  * fetching this data from a backend service rather than from hardcoded
  * values in a more complex demo.
  */
-public final class StarWarsContext {
+@available(macOS 12.0.0, *)
+public actor StarWarsContext {
     private static var tatooine = Planet(
         id:"10001",
         name: "Tatooine",
@@ -98,8 +99,6 @@ public final class StarWarsContext {
         "2001": r2d2,
     ]
     
-    public init() {}
-    
     /**
      * Helper function to get a character by ID.
      */
@@ -146,7 +145,7 @@ public final class StarWarsContext {
      * Allows us to get the secret backstory, or not.
      */
     public func getSecretBackStory() throws -> String? {
-        struct Secret : Error, CustomStringConvertible {
+        struct Secret: Error, CustomStringConvertible {
             let description: String
         }
         
@@ -187,6 +186,11 @@ public final class StarWarsContext {
      * Allows us to query for either a Human, Droid, or Planet.
      */
     public func search(query: String) -> [SearchResult] {
-        return getPlanets(query: query) + getHumans(query: query) + getDroids(query: query)
+        getPlanets(query: query) + getHumans(query: query) + getDroids(query: query)
     }
+}
+
+@available(macOS 12.0.0, *)
+public extension StarWarsContext {
+    static let live = StarWarsContext()
 }

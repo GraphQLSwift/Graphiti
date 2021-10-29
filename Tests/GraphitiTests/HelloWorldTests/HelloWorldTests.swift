@@ -88,9 +88,7 @@ struct HelloResolver {
 }
 
 @available(macOS 12, *)
-struct HelloAPI: API {
-    let resolver: HelloResolver
-    
+struct HelloAPI {
     let schema = Schema<HelloResolver, HelloContext> {
         Scalar(Float.self)
             .description("The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).")
@@ -137,6 +135,11 @@ struct HelloAPI: API {
 }
 
 @available(macOS 12, *)
+extension HelloContext {
+    static let test = HelloContext()
+}
+
+@available(macOS 12, *)
 extension HelloResolver {
     static let test = HelloResolver(
         hello: { context, _ in
@@ -159,8 +162,7 @@ extension HelloResolver {
 
 @available(macOS 12, *)
 class HelloWorldTests: XCTestCase {
-    private let api = HelloAPI(resolver: .test)
-    private let context = HelloContext()
+    private let api = HelloAPI()
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
     
     deinit {
@@ -172,9 +174,10 @@ class HelloWorldTests: XCTestCase {
         let expected = GraphQLResult(data: ["hello": "world"])
         let expectation = XCTestExpectation()
         
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: context,
+            resolver: .test,
+            context: .test,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -198,9 +201,10 @@ class HelloWorldTests: XCTestCase {
         
         let expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: context,
+            resolver: .test,
+            context: .test,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -216,15 +220,16 @@ class HelloWorldTests: XCTestCase {
 
         query = """
         query Query($float: Float!) {
-            float(float: $float)
+          float(float: $float)
         }
         """
 
         let expectationA = XCTestExpectation()
         
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: context,
+            resolver: .test,
+            context: .test,
             on: group,
             variables: ["float": 4]
         ).whenSuccess { result in
@@ -236,15 +241,16 @@ class HelloWorldTests: XCTestCase {
 
         query = """
         query Query {
-            float(float: 4)
+          float(float: 4)
         }
         """
         
         let expectationB = XCTestExpectation()
         
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: context,
+            resolver: .test,
+            context: .test,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -255,16 +261,17 @@ class HelloWorldTests: XCTestCase {
         
         query = """
         query Query($id: String!) {
-            id(id: $id)
+          id(id: $id)
         }
         """
         
         expected = GraphQLResult(data: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"])
         let expectationC = XCTestExpectation()
         
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: context,
+            resolver: .test,
+            context: .test,
             on: group,
             variables: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"]
         ).whenSuccess { result in
@@ -276,15 +283,16 @@ class HelloWorldTests: XCTestCase {
         
         query = """
         query Query {
-            id(id: "85b8d502-8190-40ab-b18f-88edd297d8b6")
+          id(id: "85b8d502-8190-40ab-b18f-88edd297d8b6")
         }
         """
         
         let expectationD = XCTestExpectation()
         
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: context,
+            resolver: .test,
+            context: .test,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -312,9 +320,10 @@ class HelloWorldTests: XCTestCase {
         
         let expectation = XCTestExpectation()
         
-        api.execute(
+        api.schema.execute(
             request: mutation,
-            context: context,
+            resolver: .test,
+            context: .test,
             on: group,
             variables: variables
         ).whenSuccess { result in
@@ -347,9 +356,10 @@ class HelloWorldTests: XCTestCase {
         
         let expectation = XCTestExpectation()
         
-        api.execute(
+        api.schema.execute(
             request: mutation,
-            context: context,
+            resolver: .test,
+            context: .test,
             on: group,
             variables: variables
         ).whenSuccess { result in

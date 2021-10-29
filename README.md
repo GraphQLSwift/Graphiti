@@ -148,7 +148,15 @@ struct CounterAPI {
 
 #### Querying
 
-To query the schema, we first need to create a live instance of the resolver:
+To query the schema, we first need to create a live instance of the context:
+
+```swift
+extension CounterContext {
+    static let live = CounterContext(counter: Counter(count: 0))
+}
+```
+
+Now we create a live instance of the resolver:
 
 ```swift
 extension CounterResolver {
@@ -172,50 +180,182 @@ extension CounterResolver {
 }
 ```
 
-This implementation basically extracts the arguments from the GraphQL query and delegates the business logic to the `context`. As mentioned before, you could create a `test` version of your resolver when testing.
+This implementation basically extracts the arguments from the GraphQL query and delegates the business logic to the `context`. As mentioned before, you could create a `test` version of the context and the resolver when testing. Now we just need an `EventLoopGroup` from `NIO` and we're ready to query the API.
 
 ```swift
 import NIO
 
-let resolver = Resolver()
-let context = Context()
-let api = try MessageAPI(resolver: resolver)
 let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         
 defer {
     try? group.syncShutdownGracefully()
 }
 
-api.execute(
-    request: "{ message { content } }",
-    context: context,
-    on: group
-).whenSuccess { result in
-    print(result)
+let api = CounterAPI()
+
+let countQuery = """
+query {
+  counter {
+    count
+  }
 }
+"""
+
+let countResult = try await api.schema.execute(
+    request: countQuery,
+    resolver: .live,
+    context: .live,
+    on: group
+)
+
+debugPrint(countResult)
 ```
 
 The output will be:
 
 ```json
-{"data":{"message":{"content":"Hello, world!"}}}
-```
-
-`API.execute` returns a `GraphQLResult` which adopts `Encodable`. You can use it with a `JSONEncoder` to send the response back to the client using JSON.
-
-#### Async resolvers
-
-To use async resolvers, just add one more parameter with type `EventLoopGroup` to the resolver function and change the return type to `EventLoopFuture<YouReturnType>`. Don't forget to import NIO.
-
-```swift
-import NIO
-
-struct Resolver {
-    func message(context: Context, arguments: NoArguments, group: EventLoopGroup) -> EventLoopFuture<Message> {
-        group.next().makeSucceededFuture(context.message())
+{
+  "data" : {
+    "counter" : {
+      "count" : 0
     }
+  }
 }
 ```
+
+For the increment mutation:
+
+```swift
+let incrementMutation = """
+mutation {
+  increment {
+    count
+  }
+}
+"""
+
+let incrementResult = try await api.schema.execute(
+    request: incrementMutation,
+    resolver: .live,
+    context: .live,
+    on: group
+)
+
+debugPrint(incrementResult)
+```
+
+The output will be:
+
+```json
+{
+  "data" : {
+    "increment" : {
+      "count" : 1
+    }
+  }
+}
+```
+
+For the decrement mutation:
+
+```swift
+let decrementMutation = """
+mutation {
+  decrement {
+    count
+  }
+}
+"""
+
+let decrementResult = try await api.schema.execute(
+    request: decrementMutation,
+    resolver: .live,
+    context: .live,
+    on: group
+)
+
+debugPrint(decrementResult)
+```
+
+The output will be:
+
+```json
+{
+  "data" : {
+    "decrement" : {
+      "count" : 0
+    }
+  }
+}
+```
+
+For the incrementBy mutation:
+
+```swift
+let incrementByMutation = """
+mutation {
+  incrementBy(count: 5) {
+    count
+  }
+}
+"""
+
+let incrementByResult = try await api.schema.execute(
+    request: incrementByMutation,
+    resolver: .live,
+    context: .live,
+    on: group
+)
+
+debugPrint(incrementByResult)
+```
+
+The output will be:
+
+```json
+{
+  "data" : {
+    "incrementBy" : {
+      "count" : 5
+    }
+  }
+}
+```
+
+For the decrementBy mutation:
+
+```swift
+let decrementByMutation = """
+mutation {
+  decrementBy(count: 5) {
+    count
+  }
+}
+"""
+
+let decrementByResult = try await api.schema.execute(
+    request: decrementByMutation,
+    resolver: .live,
+    context: .live,
+    on: group
+)
+
+debugPrint(decrementByResult)
+```
+
+The output will be:
+
+```json
+{
+  "data" : {
+    "decrementBy" : {
+      "count" : 0
+    }
+  }
+}
+```
+
+⭐️ `Schema.execute` returns a `GraphQLResult` which adopts `Encodable`. You can use it with a `JSONEncoder` to send the response back to the client using JSON.
 
 #### Subscription
 

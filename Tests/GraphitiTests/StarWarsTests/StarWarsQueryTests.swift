@@ -3,7 +3,7 @@ import NIO
 @testable import Graphiti
 import GraphQL
 
-@available(OSX 10.15, *)
+@available(macOS 12, *)
 class StarWarsQueryTests : XCTestCase {
     private let api = StarWarsAPI()
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
@@ -15,17 +15,18 @@ class StarWarsQueryTests : XCTestCase {
     func testHeroNameQuery() throws {
         let query = """
         query HeroNameQuery {
-            hero {
-                name
-            }
+          hero {
+            name
+          }
         }
         """
         
         let expected = GraphQLResult(data: ["hero": ["name": "R2-D2"]])
         let expectation = XCTestExpectation()
         
-        api.execute(
+        api.schema.execute(
             request: query,
+            resolver: .live,
             context: StarWarsContext(),
             on: group
         ).whenSuccess { result in
@@ -39,13 +40,13 @@ class StarWarsQueryTests : XCTestCase {
     func testHeroNameAndFriendsQuery() throws {
         let query = """
         query HeroNameAndFriendsQuery {
-            hero {
-                id
-                name
-                friends {
-                    name
-                }
+          hero {
+            id
+            name
+            friends {
+              name
             }
+          }
         }
         """
 
@@ -65,9 +66,10 @@ class StarWarsQueryTests : XCTestCase {
 
         let expectation = XCTestExpectation()
         
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -80,16 +82,16 @@ class StarWarsQueryTests : XCTestCase {
     func testNestedQuery() throws {
         let query = """
         query NestedQuery {
-            hero {
-                name
-                friends {
-                    name
-                    appearsIn
-                    friends {
-                        name
-                    }
-                }
-            }
+          hero {
+           name
+           friends {
+             name
+             appearsIn
+             friends {
+               name
+             }
+           }
+         }
         }
         """
 
@@ -134,9 +136,10 @@ class StarWarsQueryTests : XCTestCase {
         
         let expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -149,9 +152,9 @@ class StarWarsQueryTests : XCTestCase {
     func testFetchLukeQuery() throws {
         let query = """
         query FetchLukeQuery {
-            human(id: "1000") {
-                name
-            }
+          human(id: "1000") {
+            name
+          }
         }
         """
 
@@ -165,9 +168,10 @@ class StarWarsQueryTests : XCTestCase {
         
         let expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -180,9 +184,9 @@ class StarWarsQueryTests : XCTestCase {
     func testFetchSomeIDQuery() throws {
         let query = """
         query FetchSomeIDQuery($someId: String!) {
-            human(id: $someId) {
-                name
-            }
+          human(id: $someId) {
+            name
+          }
         }
         """
 
@@ -202,9 +206,10 @@ class StarWarsQueryTests : XCTestCase {
         
         expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group,
             variables: params
         ).whenSuccess { result in
@@ -226,9 +231,10 @@ class StarWarsQueryTests : XCTestCase {
         
         expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group,
             variables: params
         ).whenSuccess { result in
@@ -248,9 +254,10 @@ class StarWarsQueryTests : XCTestCase {
         
         expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group,
             variables: params
         ).whenSuccess { result in
@@ -264,9 +271,9 @@ class StarWarsQueryTests : XCTestCase {
     func testFetchLukeAliasedQuery() throws {
         let query = """
         query FetchLukeAliasedQuery {
-            luke: human(id: "1000") {
-                name
-            }
+          luke: human(id: "1000") {
+            name
+          }
         }
         """
 
@@ -280,9 +287,10 @@ class StarWarsQueryTests : XCTestCase {
         
         let expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -295,12 +303,12 @@ class StarWarsQueryTests : XCTestCase {
     func testFetchLukeAndLeiaAliasedQuery() throws {
         let query = """
         query FetchLukeAndLeiaAliasedQuery {
-            luke: human(id: "1000") {
-                name
-            }
-            leia: human(id: "1003") {
-                name
-            }
+          luke: human(id: "1000") {
+            name
+          }
+          leia: human(id: "1003") {
+            name
+          }
         }
         """
 
@@ -317,9 +325,10 @@ class StarWarsQueryTests : XCTestCase {
         
         let expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -332,14 +341,14 @@ class StarWarsQueryTests : XCTestCase {
     func testDuplicateFieldsQuery() throws {
         let query = """
         query DuplicateFieldsQuery {
-            luke: human(id: "1000") {
-                name
-                homePlanet { name }
-            }
-            leia: human(id: "1003") {
-                name
-                homePlanet  { name }
-            }
+          luke: human(id: "1000") {
+            name
+            homePlanet { name }
+          }
+          leia: human(id: "1003") {
+            name
+            homePlanet  { name }
+          }
         }
         """
 
@@ -358,9 +367,10 @@ class StarWarsQueryTests : XCTestCase {
         
         let expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -373,16 +383,16 @@ class StarWarsQueryTests : XCTestCase {
     func testUseFragmentQuery() throws {
         let query = """
         query UseFragmentQuery {
-            luke: human(id: "1000") {
-                ...HumanFragment
-            }
-            leia: human(id: "1003") {
-                ...HumanFragment
-            }
+          luke: human(id: "1000") {
+            ...HumanFragment
+          }
+          leia: human(id: "1003") {
+            ...HumanFragment
+          }
         }
         fragment HumanFragment on Human {
-            name
-            homePlanet { name }
+          name
+          homePlanet { name }
         }
         """
 
@@ -401,9 +411,10 @@ class StarWarsQueryTests : XCTestCase {
         
         let expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -416,10 +427,10 @@ class StarWarsQueryTests : XCTestCase {
     func testCheckTypeOfR2Query() throws {
         let query = """
         query CheckTypeOfR2Query {
-            hero {
-                __typename
-                name
-            }
+          hero {
+            __typename
+            name
+          }
         }
         """
 
@@ -434,9 +445,10 @@ class StarWarsQueryTests : XCTestCase {
         
         let expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -449,10 +461,10 @@ class StarWarsQueryTests : XCTestCase {
     func testCheckTypeOfLukeQuery() throws {
         let query = """
         query CheckTypeOfLukeQuery {
-            hero(episode: EMPIRE) {
-                __typename
-                name
-            }
+          hero(episode: EMPIRE) {
+            __typename
+            name
+          }
         }
         """
         
@@ -467,9 +479,10 @@ class StarWarsQueryTests : XCTestCase {
         
         let expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -482,10 +495,10 @@ class StarWarsQueryTests : XCTestCase {
     func testSecretBackstoryQuery() throws {
         let query = """
         query SecretBackstoryQuery {
-            hero {
-                name
-                secretBackstory
-            }
+          hero {
+            name
+            secretBackstory
+          }
         }
         """
 
@@ -507,9 +520,10 @@ class StarWarsQueryTests : XCTestCase {
         
         let expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -522,13 +536,13 @@ class StarWarsQueryTests : XCTestCase {
     func testSecretBackstoryListQuery() throws {
         let query = """
         query SecretBackstoryListQuery {
-            hero {
-                name
-                friends {
-                    name
-                    secretBackstory
-                }
+          hero {
+            name
+            friends {
+              name
+              secretBackstory
             }
+          }
         }
         """
         
@@ -573,9 +587,10 @@ class StarWarsQueryTests : XCTestCase {
         
         let expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -588,10 +603,10 @@ class StarWarsQueryTests : XCTestCase {
     func testSecretBackstoryAliasQuery() throws {
         let query = """
         query SecretBackstoryAliasQuery {
-            mainHero: hero {
-                name
-                story: secretBackstory
-            }
+          mainHero: hero {
+            name
+            story: secretBackstory
+          }
         }
         """
 
@@ -613,9 +628,10 @@ class StarWarsQueryTests : XCTestCase {
         
         let expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -626,57 +642,61 @@ class StarWarsQueryTests : XCTestCase {
     }
 
     func testNonNullableFieldsQuery() throws {
-        struct A : Codable {
-            func nullableA(context: NoContext, arguments: NoArguments) -> A? {
-                return A()
-            }
-
-            func nonNullA(context: NoContext, arguments: NoArguments) -> A {
-                return A()
-            }
-
-            func `throws`(context: NoContext, arguments: NoArguments) throws -> String {
-                struct 🏃 : Error, CustomStringConvertible {
-                    let description: String
+        struct A: Codable {
+            var nullableA: (Void, Void) async throws -> A? {
+                return { _, _ in
+                    A()
                 }
+            }
 
-                throw 🏃(description: "catch me if you can.")
+            var nonNullA: (Void, Void) async throws -> A {
+                return { _, _ in
+                    A()
+                }
+            }
+
+            var `throws`: (Void, Void) async throws -> String {
+                return { _, _ in
+                    struct 🏃: Error, CustomStringConvertible {
+                        let description: String
+                    }
+
+                    throw 🏃(description: "catch me if you can.")
+                }
             }
         }
 
         struct TestResolver {
-            func nullableA(context: NoContext, arguments: NoArguments) -> A? {
-                return A()
+            var nullableA: (Void, Void) async throws -> A? = { _, _ in
+                A()
             }
         }
         
-        struct MyAPI : API {
-            var resolver: TestResolver = TestResolver()
-            
-            let schema = Schema<TestResolver, NoContext> {
+        struct MyAPI {
+            let schema = Schema<TestResolver, Void> {
                 Type(A.self) {
-                    Field("nullableA", at: A.nullableA, as: (TypeReference<A>?).self)
-                    Field("nonNullA", at: A.nonNullA, as: TypeReference<A>.self)
-                    Field("throws", at: A.throws)
+                    Field("nullableA", at: \.nullableA, as: (TypeReference<A>?).self)
+                    Field("nonNullA", at: \.nonNullA, as: TypeReference<A>.self)
+                    Field("throws", at: \.throws)
                 }
 
                 Query {
-                    Field("nullableA", at: TestResolver.nullableA)
+                    Field("nullableA", at: \.nullableA)
                 }
             }
         }
 
         let query = """
         query {
+          nullableA {
             nullableA {
-                nullableA {
-                    nonNullA {
-                        nonNullA {
-                            throws
-                        }
-                    }
+              nonNullA {
+                nonNullA {
+                  throws
                 }
+              }
             }
+          }
         }
         """
 
@@ -698,8 +718,9 @@ class StarWarsQueryTests : XCTestCase {
         let expectation = XCTestExpectation()
         let api = MyAPI()
 
-        api.execute(
+        api.schema.execute(
             request: query,
+            resolver: TestResolver(),
             context: NoContext(),
             on: group
         ).whenSuccess { result in
@@ -713,19 +734,19 @@ class StarWarsQueryTests : XCTestCase {
     func testSearchQuery() throws {
         let query = """
         query {
-            search(query: "o") {
-                ... on Planet {
-                    name
-                    diameter
-                }
-                ... on Human {
-                    name
-                }
-                ... on Droid {
-                    name
-                    primaryFunction
-                }
+          search(query: "o") {
+            ... on Planet {
+              name
+              diameter
             }
+            ... on Human {
+              name
+            }
+            ... on Droid {
+              name
+              primaryFunction
+            }
+          }
         }
         """
 
@@ -742,9 +763,10 @@ class StarWarsQueryTests : XCTestCase {
         
         let expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -761,13 +783,13 @@ class StarWarsQueryTests : XCTestCase {
         
         query = """
         query Hero {
-            hero {
-                name
+          hero {
+            name
 
-                friends @include(if: false) {
-                    name
-                }
+            friends @include(if: false) {
+              name
             }
+          }
         }
         """
 
@@ -781,9 +803,10 @@ class StarWarsQueryTests : XCTestCase {
         
         expectation = XCTestExpectation()
 
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -794,13 +817,13 @@ class StarWarsQueryTests : XCTestCase {
         
         query = """
         query Hero {
-            hero {
-                name
+          hero {
+            name
 
-                friends @include(if: true) {
-                    name
-                }
+            friends @include(if: true) {
+              name
             }
+          }
         }
         """
 
@@ -819,9 +842,10 @@ class StarWarsQueryTests : XCTestCase {
         
         expectation = XCTestExpectation()
         
-        api.execute(
+        api.schema.execute(
             request: query,
-            context: StarWarsContext(),
+            resolver: .live,
+            context: .live,
             on: group
         ).whenSuccess { result in
             XCTAssertEqual(result, expected)
@@ -832,7 +856,7 @@ class StarWarsQueryTests : XCTestCase {
     }
 }
 
-@available(OSX 10.15, *)
+@available(macOS 12, *)
 extension StarWarsQueryTests {
     static var allTests: [(String, (StarWarsQueryTests) -> () throws -> Void)] {
         return [

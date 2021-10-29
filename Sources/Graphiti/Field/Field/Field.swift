@@ -234,10 +234,10 @@ public extension Field {
 public typealias Resolve<Context, Arguments, ResolveType> = (
     _ context: Context,
     _ arguments: Arguments
-) async throws -> ResolveType where ResolveType: Encodable
+) async throws -> ResolveType
 
 @available(macOS 12, *)
-public extension Field where FieldType: Encodable {
+public extension Field {
     convenience init(
         _ name: String,
         at keyPath: KeyPath<ObjectType, Resolve<Context, Arguments, FieldType>>,
@@ -284,7 +284,7 @@ public extension Field {
 }
 
 @available(macOS 12, *)
-public extension Field where Arguments == NoArguments, FieldType: Encodable {
+public extension Field where Arguments == NoArguments {
     convenience init(
         _ name: String,
         at keyPath: KeyPath<ObjectType, Resolve<Context, Void, FieldType>>
@@ -311,7 +311,7 @@ public extension Field where Arguments == NoArguments {
         _ name: String,
         at keyPath: KeyPath<ObjectType, Resolve<Context, Void, ResolveType>>,
         as: FieldType.Type
-    ) where ResolveType: Encodable {
+    ) {
         let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, _, group in
                 let promise = group.next().makePromise(of: ResolveType.self)

@@ -1,67 +1,83 @@
 import Graphiti
 
+@available(macOS 12.0.0, *)
 extension Character {
     public var secretBackstory: String? {
         nil
     }
-    
-    public func getFriends(context: StarWarsContext, arguments: NoArguments) -> [Character] {
-        []
-    }
 }
 
+@available(macOS 12.0.0, *)
 extension Human {
-    public func getFriends(context: StarWarsContext, arguments: NoArguments) -> [Character] {
-        context.getFriends(of: self)
+    public var getFriends: (StarWarsContext, Void) async throws -> [Character] {
+        return { context, _ in
+            await context.getFriends(of: self)
+        }
     }
     
-    public func getSecretBackstory(context: StarWarsContext, arguments: NoArguments) throws -> String? {
-        try context.getSecretBackStory()
+    public var getSecretBackstory: (StarWarsContext, Void) async throws -> String? {
+        return { context, _ in
+            try await context.getSecretBackStory()
+        }
     }
 }
 
+@available(macOS 12.0.0, *)
 extension Droid {
-    public func getFriends(context: StarWarsContext, arguments: NoArguments) -> [Character] {
-        context.getFriends(of: self)
+    public var getFriends: (StarWarsContext, Void) async throws -> [Character] {
+        return { context, _ in
+            await context.getFriends(of: self)
+        }
     }
     
-    public func getSecretBackstory(context: StarWarsContext, arguments: NoArguments) throws -> String? {
-        try context.getSecretBackStory()
+    public var getSecretBackstory: (StarWarsContext, Void) async throws -> String? {
+        return { context, _ in
+            try await context.getSecretBackStory()
+        }
     }
 }
 
+@available(macOS 12.0.0, *)
 public struct StarWarsResolver {
-    public init() {}
-    
-    public struct HeroArguments : Codable {
+    public struct HeroArguments: Codable {
         public let episode: Episode?
     }
 
-    public func hero(context: StarWarsContext, arguments: HeroArguments) -> Character {
-        context.getHero(of: arguments.episode)
-    }
+    public var hero: (StarWarsContext, HeroArguments) async throws -> Character
 
-    public struct HumanArguments : Codable {
+    public struct HumanArguments: Codable {
         public let id: String
     }
     
-    public func human(context: StarWarsContext, arguments: HumanArguments) -> Human? {
-        context.getHuman(id: arguments.id)
-    }
+    public var human: (StarWarsContext, HumanArguments) async throws -> Human?
 
-    public struct DroidArguments : Codable {
+    public struct DroidArguments: Codable {
         public let id: String
     }
 
-    public func droid(context: StarWarsContext, arguments: DroidArguments) -> Droid? {
-        context.getDroid(id: arguments.id)
-    }
+    public var droid: (StarWarsContext, DroidArguments) async throws -> Droid?
     
-    public struct SearchArguments : Codable {
+    public struct SearchArguments: Codable {
         public let query: String
     }
     
-    public func search(context: StarWarsContext, arguments: SearchArguments) -> [SearchResult] {
-        context.search(query: arguments.query)
-    }
+    public var search: (StarWarsContext, SearchArguments) async throws -> [SearchResult]
+}
+
+@available(macOS 12.0.0, *)
+public extension StarWarsResolver {
+    static let live = StarWarsResolver(
+        hero: { context, arguments in
+            await context.getHero(of: arguments.episode)
+        },
+        human: { context, arguments in
+            await context.getHuman(id: arguments.id)
+        },
+        droid: { context, arguments in
+            await context.getDroid(id: arguments.id)
+        },
+        search: { context, arguments in
+            await context.search(query: arguments.query)
+        }
+    )
 }

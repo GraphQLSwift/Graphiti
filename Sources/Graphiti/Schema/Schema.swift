@@ -49,7 +49,7 @@ public extension Schema {
         )
     }
    
-    @available(*, deprecated, message: "Use the signature where the label for eventLoopGroup is `on`.")
+    @available(*, deprecated, message: "Use the function where the label for the eventLoopGroup parameter is namded `on`.")
     func execute(
         request: String,
         resolver: Resolver,
@@ -110,7 +110,7 @@ public extension Schema {
         }
     }
    
-    @available(*, deprecated, message: "Use the signature where the label for eventLoopGroup is `on`.")
+    @available(*, deprecated, message: "Use the function where the label for the eventLoopGroup parameter is named `on`.")
     func subscribe(
         request: String,
         resolver: Resolver,

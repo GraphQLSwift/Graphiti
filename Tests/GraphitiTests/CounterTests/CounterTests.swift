@@ -108,6 +108,15 @@ extension CounterResolver {
     )
 }
 
+extension GraphQLResult: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        let data = try! encoder.encode(self)
+        return String(data: data, encoding: .utf8)!
+    }
+}
+
 @available(macOS 12, *)
 class CounterTests: XCTestCase {
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
@@ -118,7 +127,15 @@ class CounterTests: XCTestCase {
     
     func testCounter() throws {
         let api = CounterAPI()
-        var query = "query { counter { count } }"
+        
+        var query = """
+        query {
+          counter {
+            count
+          }
+        }
+        """
+        
         var expected = GraphQLResult(data: ["counter": ["count": 0]])
         
         var result = try api.schema.execute(
@@ -127,10 +144,17 @@ class CounterTests: XCTestCase {
             context: .live,
             on: group
         ).wait()
-        
+       
+        debugPrint(result)
         XCTAssertEqual(result, expected)
         
-        query = "mutation { increment { count } }"
+        query = """
+        mutation {
+          increment {
+            count
+          }
+        }
+        """
         expected = GraphQLResult(data: ["increment": ["count": 1]])
         
         result = try api.schema.execute(
@@ -139,10 +163,17 @@ class CounterTests: XCTestCase {
             context: .live,
             on: group
         ).wait()
-        
+       
+        debugPrint(result)
         XCTAssertEqual(result, expected)
         
-        query = "mutation { decrement { count } }"
+        query = """
+        mutation {
+          decrement {
+            count
+          }
+        }
+        """
         expected = GraphQLResult(data: ["decrement": ["count": 0]])
         
         result = try api.schema.execute(
@@ -152,9 +183,16 @@ class CounterTests: XCTestCase {
             on: group
         ).wait()
             
+        debugPrint(result)
         XCTAssertEqual(result, expected)
     
-        query = "mutation { incrementBy(count: 5) { count } }"
+        query = """
+        mutation {
+          incrementBy(count: 5) {
+              count
+          }
+        }
+        """
         expected = GraphQLResult(data: ["incrementBy": ["count": 5]])
         
         result = try api.schema.execute(
@@ -164,9 +202,16 @@ class CounterTests: XCTestCase {
             on: group
         ).wait()
          
+        debugPrint(result)
         XCTAssertEqual(result, expected)
         
-        query = "mutation { decrementBy(count: 5) { count } }"
+        query = """
+        mutation {
+          decrementBy(count: 5) {
+            count
+          }
+        }
+        """
         expected = GraphQLResult(data: ["decrementBy": ["count": 0]])
         
         result = try api.schema.execute(
@@ -176,6 +221,7 @@ class CounterTests: XCTestCase {
             on: group
         ).wait()
          
+        debugPrint(result)
         XCTAssertEqual(result, expected)
     }
 }
