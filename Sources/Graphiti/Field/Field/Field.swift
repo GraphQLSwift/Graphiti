@@ -227,11 +227,6 @@ public extension Field {
     }
 }
 
-public typealias Resolve<Context, Arguments, ResolveType> = (
-        _ context: Context,
-        _ arguments: Arguments
-) async throws -> ResolveType
-
 #if compiler(>=5.5) && canImport(_Concurrency)
 
 // MARK: Keypath Initializers

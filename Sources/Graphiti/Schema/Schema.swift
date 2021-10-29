@@ -58,7 +58,7 @@ public extension Schema {
         variables: [String: Map] = [:],
         operationName: String? = nil
     ) -> EventLoopFuture<GraphQLResult> {
-        self.execute(
+        execute(
             request: request,
             resolver: resolver,
             context: context,
@@ -67,7 +67,26 @@ public extension Schema {
             operationName: operationName
         )
     }
-    
+
+    @available(macOS 12, *)
+    func execute(
+            request: String,
+            resolver: Resolver,
+            context: Context,
+            on eventLoopGroup: EventLoopGroup,
+            variables: [String: Map] = [:],
+            operationName: String? = nil
+    ) async throws -> GraphQLResult {
+        try await execute(
+            request: request,
+            resolver: resolver,
+            context: context,
+            on: eventLoopGroup,
+            variables: variables,
+            operationName: operationName
+        ).get()
+    }
+
     func execute(
         request: String,
         resolver: Resolver,
@@ -100,7 +119,7 @@ public extension Schema {
         variables: [String: Map] = [:],
         operationName: String? = nil
     ) -> EventLoopFuture<SubscriptionResult> {
-        self.subscribe(
+        subscribe(
             request: request,
             resolver: resolver,
             context: context,
@@ -109,7 +128,26 @@ public extension Schema {
             operationName: operationName
         )
     }
-    
+
+    @available(macOS 12, *)
+    func subscribe(
+            request: String,
+            resolver: Resolver,
+            context: Context,
+            on eventLoopGroup: EventLoopGroup,
+            variables: [String: Map] = [:],
+            operationName: String? = nil
+    ) async throws -> SubscriptionResult {
+        try await self.subscribe(
+            request: request,
+            resolver: resolver,
+            context: context,
+            on: eventLoopGroup,
+            variables: variables,
+            operationName: operationName
+        ).get()
+    }
+
     func subscribe(
         request: String,
         resolver: Resolver,

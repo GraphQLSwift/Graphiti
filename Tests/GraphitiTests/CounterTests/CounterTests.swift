@@ -8,6 +8,7 @@ struct Counter: Encodable {
     var count: Int
 }
 
+@available(macOS 12, *)
 actor CounterContext {
     var counter: Counter
     
@@ -86,6 +87,7 @@ extension CounterContext {
     static let live = CounterContext(counter: Counter(count: 0))
 }
 
+@available(macOS 12, *)
 extension CounterResolver {
     static let live = CounterResolver(
         counter: { context, _ in
@@ -116,7 +118,6 @@ class CounterTests: XCTestCase {
     
     func testCounter() throws {
         let api = CounterAPI()
-        
         var query = "query { counter { count } }"
         var expected = GraphQLResult(data: ["counter": ["count": 0]])
         
