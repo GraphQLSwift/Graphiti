@@ -115,14 +115,14 @@ struct CounterResolver {
 ⭐️ Notice that this step does not require importing `Graphiti`. However, all resolver functions must take the following shape:
 
 ```swift
-(Context, Arguments) async thows -> Output where Arguments: Decodable
+(Context, Arguments) async throws -> Output where Arguments: Decodable
 ```
 
 In case your resolve function does not use any arguments you can use the following shape:
 
 
 ```swift
-(Context, Void) async thows -> Output
+(Context, Void) async throws -> Output
 ```
 
 Our `CounterResolver` looks very similar to our `CounterContext`. First thing we notice is that we're using a struct with mutable closure properties again. We do this for the same reason we do it for `CounterContext`. To allow us to easily swap implementations in different environments. The closures themselves are also almost identical. The difference is that resolver functions need to follow the specific shapes we mentioned above. We do it this way because `Graphiti` needs a predictable structure to be able to decode arguments and execute the resolver function. Most of the time, the resolver function's role is to extract the parameters and forward the business logic to the context.
