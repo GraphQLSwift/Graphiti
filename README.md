@@ -164,6 +164,30 @@ struct CounterAPI {
 
 ⭐️ Now we finally need to import Graphiti. 😄
 
+The schema above is equivalent to the SDL:
+
+```graphql
+type Count {
+  value: Int!
+}
+
+type Query {
+  count: Count!
+}
+
+type Mutation {
+  increment: Count!
+  decrement: Count!
+  incrementBy(amount: Int!): Count!
+  decrementBy(amount: Int!): Count!
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+```
+
 #### Querying
 
 To query the schema, we first need to create a live instance of the context:
