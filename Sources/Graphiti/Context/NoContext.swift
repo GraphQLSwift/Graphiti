@@ -1,2 +1,2 @@
-@available(*, deprecated, message: "Use the Void directly.")
+@available(*, deprecated, message: "Use Void directly.")
 public typealias NoContext = Void

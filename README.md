@@ -26,106 +26,122 @@ through that README and the corresponding tests in parallel.
 Add Graphiti to your `Package.swift`. Graphiti provides two important capabilities: building a type schema, and
 serving queries against that type schema.
 
-#### Defining entities
+### Defining entities
 
-First, we declare our regular Swift entities. For our example, we are using the quintessential counter. The only requirements are that GraphQL output types must conform to `Encodable` and GraphQL input types must conform to `Decodable`.
+First, we create our regular Swift entities. For our example, we are using the quintessential counter. The only requirements are that GraphQL output types must conform to `Encodable` and GraphQL input types must conform to `Decodable`.
 
 ```swift
-struct Counter: Encodable {
-    var count: Int
+struct Count: Encodable {
+    var value: Int
 }
 ```
 
 ⭐️ Notice that this step does not require importing `Graphiti`. One of the main design decisions behind Graphiti is **not** to pollute your entities declarations. This way you can bring your entities to any other environment with ease.
 
-#### Defining the context
+#### Defining the business logic
 
-Second step is to create your API's **context** actor. The context will be passed to all of your field resolver functions. This allows you to apply dependency injection to your API. This is the place where you can put code that derives your entities from a database or another service.
+Then, we create the business logic of our API. The best suited type for this is an actor. Within this actor we define our state and all the different ways this state can be accessed and updated. This is the place where you put code that derives your entities from a database or any other service. You have complete design freedom here.
 
-```swift
-actor CounterContext {
-    var counter: Counter
+```
+actor CounterState {
+    var count: Count
     
-    init(counter: Counter) {
-        self.counter = counter
+    init(count: Count) {
+        self.count = count
     }
     
-    func increment() -> Counter {
-        counter.count += 1
-        return counter
+    func increment() -> Count {
+        count.value += 1
+        return count
     }
     
-    func decrement() -> Counter {
-        counter.count -= 1
-        return counter
+    func decrement() -> Count {
+        count.value -= 1
+        return count
     }
     
-    func increment(by count: Int) -> Counter {
-        counter.count += count
-        return counter
+    func increment(by amount: Int) -> Count {
+        count.value += amount
+        return count
     }
     
-    func decrement(by count: Int) -> Counter {
-        counter.count -= count
-        return counter
+    func decrement(by amount: Int) -> Count {
+        count.value -= amount
+        return count
     }
 }
 ```
 
-⭐️ Notice that this step does not require importing `Graphiti`. It is purely your API's business logic.
+#### Defining the context
+
+Third step is to create the GraphQL API context. The context will be passed to all of your field resolver functions. This allows you to apply dependency injection to your API. The context's role is  to give the GraphQL resolvers access to your APIs business logic. You can model the context however you like. You could bypass the creation of a separate type and use your APIs actor directly as the GraphQL context. However, we do not encourage this, since it makes your API less testable. You could, for example, use a delegate protocol that would allow you to have different implementations in different environments. Nonetheless, we prefer structs with mutable closure properties, because we can easily create different versions of a context by swapping specific closures, instead of having to create a complete type conforming to a delegate protocol every time we need a new behavior. With this design we can easily create a mocked version of our context when testing, for example. 
+
+```swift
+struct CounterContext {
+    var count: () async -> Count
+    var increment: () async -> Count
+    var decrement: () async -> Count
+    var incrementBy: (_ amount: Int) async -> Count
+    var decrementBy: (_ amount: Int) async -> Count
+}
+```
 
 #### Defining the GraphQL API resolver
 
-Now that we have our entities and context we can declare the GraphQL API resolver. These resolver functions will be used to resolve the queries and mutations defined in the schema.
+Now we can create the GraphQL API root resolver. These root resolver functions will be used to resolve the queries and mutations defined in the schema.
 
 ```swift
 struct CounterResolver {
-    var counter: (CounterContext, Void) async throws -> Counter
-    var increment: (CounterContext, Void) async throws -> Counter
-    var decrement: (CounterContext, Void) async throws -> Counter
+    var count: (CounterContext, Void) async throws -> Count
+    var increment: (CounterContext, Void) async throws -> Count
+    var decrement: (CounterContext, Void) async throws -> Count
    
     struct IncrementByArguments: Decodable {
-        let count: Int
+        let amount: Int
     }
     
-    var incrementBy: (CounterContext, IncrementByArguments) async throws -> Counter
+    var incrementBy: (CounterContext, IncrementByArguments) async throws -> Count
     
     struct DecrementByArguments: Decodable {
-        let count: Int
+        let amount: Int
     }
     
-    var decrementBy: (CounterContext, DecrementByArguments) async throws -> Counter
+    var decrementBy: (CounterContext, DecrementByArguments) async throws -> Count
 }
 ```
 
 ⭐️ Notice that this step does not require importing `Graphiti`. However, all resolver functions must take the following shape:
 
 ```swift
-(Context, Arguments) async thows -> Output where Arguments: Decodable, Output: Encodable
+(Context, Arguments) async thows -> Output where Arguments: Decodable
 ```
 
 In case your resolve function does not use any arguments you can use the following shape:
 
 
 ```swift
-(Context, Void) async thows -> Output where Output: Encodable
+(Context, Void) async thows -> Output
 ```
+
+Our `CounterResolver` looks very similar to our `CounterContext`. First thing we notice is that we're using a struct with mutable closure properties again. We do this for the same reason we do it for `CounterContext`. To allow us to easily swap implementations in different environments. The closures themselves are also almost identical. The difference is that resolver functions need to follow the specific shapes we mentioned above. We do it this way because `Graphiti` needs a predictable structure to be able to decode arguments and execute the resolver function. Most of the time, the resolver function's role is to extract the parameters and forward the business logic to the context.
+
+Notice too that in this example there's a one-to-one mapping of the context's properties and the resolver's properties. This only happens for small applications. In a complex application, the root resolver might map to only a subset of the context's properties, because the context might contain additional logic that could be accessed by other resolver functions defined in custom GraphQL types, for example.
 
 #### Defining the GraphQL API schema
 
-Now we can finally define the GraphQL API with its schema.
+At last, we define the GraphQL API with its schema.
 
 ```swift
 import Graphiti
 
 struct CounterAPI {
     let schema = Schema<CounterResolver, CounterContext> {
-        Type(Counter.self) {
-            Field("count", at: \.count)
+        Type(Count.self) {
+            Field("value", at: \.value)
         }
         
         Query {
-            Field("counter", at: \.counter)
+            Field("count", at: \.count)
         }
 
         Mutation {
@@ -133,18 +149,18 @@ struct CounterAPI {
             Field("decrement", at: \.decrement)
             
             Field("incrementBy", at: \.incrementBy) {
-                Argument("count", at: \.count)
+                Argument("amount", at: \.amount)
             }
             
             Field("decrementBy", at: \.decrementBy) {
-                Argument("count", at: \.count)
+                Argument("amount", at: \.amount)
             }
         }
     }
 }
 ```
 
-⭐️ Now we finally import Graphiti. Notice that `Schema` allows dependency injection. You could pass mocks of `resolver` and `context` to `Schema.execute` when testing, for example.
+⭐️ Now we finally need to import Graphiti. 😄
 
 #### Querying
 
@@ -152,7 +168,28 @@ To query the schema, we first need to create a live instance of the context:
 
 ```swift
 extension CounterContext {
-    static let live = CounterContext(counter: Counter(count: 0))
+    static let live: CounterContext = {
+        let count = Count(value: 0)
+        let application = CounterState(count: count)
+        
+        return CounterContext(
+            count: {
+                await application.count
+            },
+            increment: {
+                await application.increment()
+            },
+            decrement: {
+                await application.decrement()
+            },
+            incrementBy: { count in
+                await application.increment(by: count)
+            },
+            decrementBy: { count in
+                await application.decrement(by: count)
+            }
+        )
+    }()
 }
 ```
 
@@ -161,8 +198,8 @@ Now we create a live instance of the resolver:
 ```swift
 extension CounterResolver {
     static let live = CounterResolver(
-        counter: { context, _ in
-            await context.counter
+        count: { context, _ in
+            await context.count()
         },
         increment: { context, _ in
             await context.increment()
@@ -171,10 +208,10 @@ extension CounterResolver {
             await context.decrement()
         },
         incrementBy: { context, arguments in
-            await context.increment(by: arguments.count)
+            await context.incrementBy(arguments.amount)
         },
         decrementBy: { context, arguments in
-            await context.decrement(by: arguments.count)
+            await context.decrementBy(arguments.amount)
         }
     )
 }
@@ -195,8 +232,8 @@ let api = CounterAPI()
 
 let countQuery = """
 query {
-  counter {
-    count
+  count {
+    value
   }
 }
 """
@@ -216,8 +253,8 @@ The output will be:
 ```json
 {
   "data" : {
-    "counter" : {
-      "count" : 0
+    "count" : {
+      "value" : 0
     }
   }
 }
@@ -229,7 +266,7 @@ For the increment mutation:
 let incrementMutation = """
 mutation {
   increment {
-    count
+    value
   }
 }
 """
@@ -250,7 +287,7 @@ The output will be:
 {
   "data" : {
     "increment" : {
-      "count" : 1
+      "value" : 1
     }
   }
 }
@@ -262,7 +299,7 @@ For the decrement mutation:
 let decrementMutation = """
 mutation {
   decrement {
-    count
+    value
   }
 }
 """
@@ -283,7 +320,7 @@ The output will be:
 {
   "data" : {
     "decrement" : {
-      "count" : 0
+      "value" : 0
     }
   }
 }
@@ -295,7 +332,7 @@ For the incrementBy mutation:
 let incrementByMutation = """
 mutation {
   incrementBy(count: 5) {
-    count
+    value
   }
 }
 """
@@ -316,7 +353,7 @@ The output will be:
 {
   "data" : {
     "incrementBy" : {
-      "count" : 5
+      "value" : 5
     }
   }
 }
@@ -328,7 +365,7 @@ For the decrementBy mutation:
 let decrementByMutation = """
 mutation {
   decrementBy(count: 5) {
-    count
+    value
   }
 }
 """
@@ -349,7 +386,7 @@ The output will be:
 {
   "data" : {
     "decrementBy" : {
-      "count" : 0
+      "value" : 0
     }
   }
 }

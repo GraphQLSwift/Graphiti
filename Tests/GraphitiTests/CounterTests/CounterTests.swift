@@ -4,67 +4,76 @@ import NIO
 @testable import Graphiti
 
 @available(macOS 12, *)
-struct Counter: Encodable {
-    var count: Int
+struct Count: Encodable {
+    var value: Int
 }
 
 @available(macOS 12, *)
-actor CounterContext {
-    var counter: Counter
+actor CounterState {
+    var count: Count
     
-    init(counter: Counter) {
-        self.counter = counter
+    init(count: Count) {
+        self.count = count
     }
     
-    func increment() -> Counter {
-        counter.count += 1
-        return counter
+    func increment() -> Count {
+        count.value += 1
+        return count
     }
     
-    func decrement() -> Counter {
-        counter.count -= 1
-        return counter
+    func decrement() -> Count {
+        count.value -= 1
+        return count
     }
     
-    func increment(by count: Int) -> Counter {
-        counter.count += count
-        return counter
+    func increment(by amount: Int) -> Count {
+        count.value += amount
+        return count
     }
     
-    func decrement(by count: Int) -> Counter {
-        counter.count -= count
-        return counter
+    func decrement(by amount: Int) -> Count {
+        count.value -= amount
+        return count
     }
+}
+
+@available(macOS 12, *)
+struct CounterContext {
+    var count: () async -> Count
+    var increment: () async -> Count
+    var decrement: () async -> Count
+    var incrementBy: (_ amount: Int) async -> Count
+    var decrementBy: (_ amount: Int) async -> Count
 }
 
 @available(macOS 12, *)
 struct CounterResolver {
-    var counter: (CounterContext, Void) async throws -> Counter
-    var increment: (CounterContext, Void) async throws -> Counter
-    var decrement: (CounterContext, Void) async throws -> Counter
+    var count: (CounterContext, Void) async throws -> Count
+    var increment: (CounterContext, Void) async throws -> Count
+    var decrement: (CounterContext, Void) async throws -> Count
    
     struct IncrementByArguments: Decodable {
-        let count: Int
+        let amount: Int
     }
     
-    var incrementBy: (CounterContext, IncrementByArguments) async throws -> Counter
+    var incrementBy: (CounterContext, IncrementByArguments) async throws -> Count
     
     struct DecrementByArguments: Decodable {
-        let count: Int
+        let amount: Int
     }
     
-    var decrementBy: (CounterContext, DecrementByArguments) async throws -> Counter
+    var decrementBy: (CounterContext, DecrementByArguments) async throws -> Count
 }
 
 @available(macOS 12, *)
 struct CounterAPI {
     let schema = Schema<CounterResolver, CounterContext> {
-        Type(Counter.self) {
-            Field("count", at: \.count)
+        Type(Count.self) {
+            Field("value", at: \.value)
         }
         
         Query {
-            Field("counter", at: \.counter)
+            Field("count", at: \.count)
         }
 
         Mutation {
@@ -72,11 +81,11 @@ struct CounterAPI {
             Field("decrement", at: \.decrement)
             
             Field("incrementBy", at: \.incrementBy) {
-                Argument("count", at: \.count)
+                Argument("amount", at: \.amount)
             }
             
             Field("decrementBy", at: \.decrementBy) {
-                Argument("count", at: \.count)
+                Argument("amount", at: \.amount)
             }
         }
     }
@@ -84,14 +93,35 @@ struct CounterAPI {
 
 @available(macOS 12, *)
 extension CounterContext {
-    static let live = CounterContext(counter: Counter(count: 0))
+    static let live: CounterContext = {
+        let count = Count(value: 0)
+        let application = CounterState(count: count)
+        
+        return CounterContext(
+            count: {
+                await application.count
+            },
+            increment: {
+                await application.increment()
+            },
+            decrement: {
+                await application.decrement()
+            },
+            incrementBy: { count in
+                await application.increment(by: count)
+            },
+            decrementBy: { count in
+                await application.decrement(by: count)
+            }
+        )
+    }()
 }
 
 @available(macOS 12, *)
 extension CounterResolver {
     static let live = CounterResolver(
-        counter: { context, _ in
-            await context.counter
+        count: { context, _ in
+            await context.count()
         },
         increment: { context, _ in
             await context.increment()
@@ -100,14 +130,15 @@ extension CounterResolver {
             await context.decrement()
         },
         incrementBy: { context, arguments in
-            await context.increment(by: arguments.count)
+            await context.incrementBy(arguments.amount)
         },
         decrementBy: { context, arguments in
-            await context.decrement(by: arguments.count)
+            await context.decrementBy(arguments.amount)
         }
     )
 }
 
+#warning("TODO: Move this to GraphQL")
 extension GraphQLResult: CustomDebugStringConvertible {
     public var debugDescription: String {
         let encoder = JSONEncoder()
@@ -130,13 +161,13 @@ class CounterTests: XCTestCase {
         
         var query = """
         query {
-          counter {
-            count
+          count {
+            value
           }
         }
         """
         
-        var expected = GraphQLResult(data: ["counter": ["count": 0]])
+        var expected = GraphQLResult(data: ["count": ["value": 0]])
         
         var result = try api.schema.execute(
             request: query,
@@ -151,11 +182,11 @@ class CounterTests: XCTestCase {
         query = """
         mutation {
           increment {
-            count
+            value
           }
         }
         """
-        expected = GraphQLResult(data: ["increment": ["count": 1]])
+        expected = GraphQLResult(data: ["increment": ["value": 1]])
         
         result = try api.schema.execute(
             request: query,
@@ -170,11 +201,11 @@ class CounterTests: XCTestCase {
         query = """
         mutation {
           decrement {
-            count
+            value
           }
         }
         """
-        expected = GraphQLResult(data: ["decrement": ["count": 0]])
+        expected = GraphQLResult(data: ["decrement": ["value": 0]])
         
         result = try api.schema.execute(
             request: query,
@@ -188,12 +219,12 @@ class CounterTests: XCTestCase {
     
         query = """
         mutation {
-          incrementBy(count: 5) {
-              count
+          incrementBy(amount: 5) {
+              value
           }
         }
         """
-        expected = GraphQLResult(data: ["incrementBy": ["count": 5]])
+        expected = GraphQLResult(data: ["incrementBy": ["value": 5]])
         
         result = try api.schema.execute(
             request: query,
@@ -207,12 +238,12 @@ class CounterTests: XCTestCase {
         
         query = """
         mutation {
-          decrementBy(count: 5) {
-            count
+          decrementBy(amount: 5) {
+            value
           }
         }
         """
-        expected = GraphQLResult(data: ["decrementBy": ["count": 0]])
+        expected = GraphQLResult(data: ["decrementBy": ["value": 0]])
         
         result = try api.schema.execute(
             request: query,
