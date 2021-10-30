@@ -95,23 +95,23 @@ struct CounterAPI {
 extension CounterContext {
     static let live: CounterContext = {
         let count = Count(value: 0)
-        let application = CounterState(count: count)
+        let state = CounterState(count: count)
         
         return CounterContext(
             count: {
-                await application.count
+                await state.count
             },
             increment: {
-                await application.increment()
+                await state.increment()
             },
             decrement: {
-                await application.decrement()
+                await state.decrement()
             },
             incrementBy: { count in
-                await application.increment(by: count)
+                await state.increment(by: count)
             },
             decrementBy: { count in
-                await application.decrement(by: count)
+                await state.decrement(by: count)
             }
         )
     }()
