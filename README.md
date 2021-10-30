@@ -74,7 +74,7 @@ actor CounterState {
 
 #### Defining the context
 
-Third step is to create the GraphQL API context. The context will be passed to all of your field resolver functions. This allows you to apply dependency injection to your API. The context's role is  to give the GraphQL resolvers access to your APIs business logic. You can model the context however you like. You could bypass the creation of a separate type and use your APIs actor directly as the GraphQL context. However, we do not encourage this, since it makes your API less testable. You could, for example, use a delegate protocol that would allow you to have different implementations in different environments. Nonetheless, we prefer structs with mutable closure properties, because we can easily create different versions of a context by swapping specific closures, instead of having to create a complete type conforming to a delegate protocol every time we need a new behavior. With this design we can easily create a mocked version of our context when testing, for example. 
+Third step is to create the GraphQL API context. The context will be passed to all of your field resolver functions. This allows you to apply dependency injection to your API. The context's role is  to give the GraphQL resolvers access to your APIs business logic. 
 
 ```swift
 struct CounterContext {
@@ -85,6 +85,8 @@ struct CounterContext {
     var decrementBy: (_ amount: Int) async -> Count
 }
 ```
+
+You can model the context however you like. You could bypass the creation of a separate type and use your APIs actor directly as the GraphQL context. However, we do not encourage this, since it makes your API less testable. You could, for example, use a delegate protocol that would allow you to have different implementations in different environments. Nonetheless, we prefer structs with mutable closure properties, because we can easily create different versions of a context by swapping specific closures, instead of having to create a complete type conforming to a delegate protocol every time we need a new behavior. With this design we can easily create a mocked version of our context when testing, for example. 
 
 #### Defining the GraphQL API resolver
 
