@@ -36,13 +36,13 @@ struct Count: Encodable {
 }
 ```
 
-⭐️ Notice that this step does not require importing `Graphiti`. One of the main design decisions behind Graphiti is **not** to pollute your entities declarations. This way you can bring your entities to any other environment with ease.
+⭐️ Notice that this step does not require importing `Graphiti`. One of the main design decisions behind Graphiti is to **not** pollute your entities declarations. This way you can bring your entities to any other environment with ease.
 
 #### Defining the business logic
 
 Then, we create the business logic of our API. The best suited type for this is an actor. Within this actor we define our state and all the different ways this state can be accessed and updated. This is the place where you put code that derives your entities from a database or any other service. You have complete design freedom here.
 
-```
+```swift
 actor CounterState {
     var count: Count
     
