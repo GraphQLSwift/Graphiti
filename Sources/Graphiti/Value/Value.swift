@@ -1,3 +1,4 @@
+#warning("TODO: Rename to EnumValue")
 public final class Value<EnumType : Encodable & RawRepresentable>: ExpressibleByStringLiteral where EnumType.RawValue == String {
     let value: EnumType
     var description: String?

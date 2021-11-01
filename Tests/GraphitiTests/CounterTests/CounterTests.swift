@@ -149,12 +149,105 @@ extension GraphQLResult: CustomDebugStringConvertible {
     }
 }
 
+
+
 @available(macOS 12, *)
 class CounterTests: XCTestCase {
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
     
     deinit {
         try? self.group.syncShutdownGracefully()
+    }
+    
+    func testDirective() throws {
+        struct User: Encodable {
+            let name: String
+        }
+        
+        struct Resolver {
+            let user: User
+        }
+        
+        #warning("TODO: Move Decodable requirement from ArgumentComponent to Argument")
+        struct Lowercased: Decodable, FieldDefinitionDirective {
+            var fieldDefinition: (inout FieldConfiguration) -> Void {
+                { fieldDefinition in
+                    let resolve = fieldDefinition.resolve
+                    
+                    fieldDefinition.resolve = { object in
+                        { context, arguments, group in
+                            try resolve(object)(context, arguments, group).map { value in
+                                guard let string = value as? String else {
+                                    return value
+                                }
+                                
+                                return string.lowercased()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        struct Uppercased: Decodable, FieldDefinitionDirective {
+            var fieldDefinition: (inout FieldConfiguration) -> Void {
+                { fieldDefinition in
+                    let resolve = fieldDefinition.resolve
+                    
+                    fieldDefinition.resolve = { object in
+                        { context, arguments, group in
+                            try resolve(object)(context, arguments, group).map { value in
+                                guard let string = value as? String else {
+                                    return value
+                                }
+                                
+                                return string.uppercased()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+     
+        let schema = Schema<Resolver, Void> {
+    //        Directive(DeprecatedBy.self) {
+    //            Argument("reason", of: String.self, at: \.reason)
+    //                 .defaultValue("No longer supported")
+    //        } on: {
+    //            DirectiveLocation(\.fieldDefinition)
+    //        }
+            
+            Directive(Lowercased.self) {
+                DirectiveLocation(\.fieldDefinition)
+            }
+            
+            Directive(Uppercased.self) {
+                DirectiveLocation(\.fieldDefinition)
+            }
+            
+            Type(User.self) {
+                Field("name", of: String.self, at: \.name)
+                    .directive(Uppercased())
+                    .directive(Lowercased())
+            }
+            
+            Query {
+                Field("user", of: User.self, at: \.user)
+            }
+        }
+        
+        #warning("TODO: Add directives property to all types and print them in printSchema")
+        debugPrint(schema)
+        
+        let result = try schema.execute(
+            request: "query { user { name } }",
+            resolver: Resolver(user: User(name: "Paulo")),
+            context: (),
+            on: group
+        ).wait()
+        
+        
+        debugPrint(result)
     }
     
     func testCounter() throws {

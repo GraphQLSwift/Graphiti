@@ -4,14 +4,18 @@ import NIO
 public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<ObjectType, Context> where Arguments: Decodable {
     let name: String
     let arguments: [ArgumentComponent<Arguments>]
-    let resolve: AsyncResolve<ObjectType, Context, Arguments, Any?>
+    var resolve: AsyncResolve<ObjectType, Context, Arguments, Any?>
+    private var directives: [FieldDefinitionDirective] = []
     
     override func field(typeProvider: TypeProvider, coders: Coders) throws -> (String, GraphQLField) {
+        let arguments = try arguments(typeProvider: typeProvider, coders: coders)
+        applyDirectives(typeProdiver: typeProvider, arguments: arguments)
+        
         let field = GraphQLField(
             type: try typeProvider.getOutputType(from: FieldType.self, field: name),
             description: description,
             deprecationReason: deprecationReason,
-            args: try arguments(typeProvider: typeProvider, coders: coders),
+            args: arguments,
             resolve: { source, arguments, context, eventLoopGroup, _ in
                 guard let source = source as? ObjectType else {
                     throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
@@ -38,6 +42,46 @@ public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<Ob
         }
         
         return map
+    }
+    
+    func applyDirectives(typeProdiver: TypeProvider, arguments: GraphQLArgumentConfigMap) {
+        for directive in directives {
+            #warning("TODO: Check if directive exists schema")
+            #warning("TODO: Check for repeatable")
+            
+            let oldResolve = self.resolve
+            
+            var fieldConfiguration = FieldConfiguration(
+                name: name,
+                description: description,
+                deprecationReason: deprecationReason,
+                arguments: arguments.map { name, argument in
+                    ArgumentConfiguration(
+                        name: name,
+                        defaultValue: argument.defaultValue
+                    )
+                },
+                resolve: { object in
+                    { context, arguments, group in
+                        try oldResolve(object as! ObjectType)(context as! Context, arguments as! Arguments, group)
+                    }
+                }
+            )
+            
+            directive.fieldDefinition(&fieldConfiguration)
+            
+            self.description = fieldConfiguration.description
+            self.deprecationReason = fieldConfiguration.deprecationReason
+            #warning("TODO: update arguments")
+            
+            let newResolve = fieldConfiguration.resolve
+            
+            self.resolve = { object in
+                { context, arguments, group in
+                    try newResolve(object)(context, arguments, group)
+                }
+            }
+        }
     }
     
     init(
@@ -347,7 +391,7 @@ public extension Field where Arguments == NoArguments {
 public extension Field where Arguments == NoArguments, FieldType: Encodable {
     convenience init(
         _ name: String,
-        of: FieldType.Type = FieldType.self,
+        of type: FieldType.Type = FieldType.self,
         at keyPath: KeyPath<ObjectType, FieldType>
     ) {
         let syncResolve: SyncResolve<ObjectType, Context, Arguments, FieldType> = { type in
@@ -378,7 +422,7 @@ public extension Field where Arguments == NoArguments {
     
     convenience init<ResolveType>(
         _ name: String,
-        of: FieldType.Type,
+        of type: FieldType.Type,
         at keyPath: KeyPath<ObjectType, ResolveType>
     ) where ResolveType: Encodable {
         let syncResolve: SyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
@@ -388,5 +432,14 @@ public extension Field where Arguments == NoArguments {
         }
         
         self.init(name: name, arguments: [], syncResolve: syncResolve)
+    }
+}
+
+// MARK: Directive
+
+extension Field {
+    func directive<Directive>(_ directive: Directive) -> Field where Directive: FieldDefinitionDirective {
+        directives.append(directive)
+        return self
     }
 }
