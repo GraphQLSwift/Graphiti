@@ -361,10 +361,25 @@ public extension Field where Arguments == NoArguments, FieldType: Encodable {
 }
 
 public extension Field where Arguments == NoArguments {
+    @available(*, deprecated, message: "Use the Field.init(_:of:at:) instead.")
     convenience init<ResolveType>(
         _ name: String,
         at keyPath: KeyPath<ObjectType, ResolveType>,
         as: FieldType.Type
+    ) where ResolveType: Encodable {
+        let syncResolve: SyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+            { _, _ in
+                type[keyPath: keyPath]
+            }
+        }
+        
+        self.init(name: name, arguments: [], syncResolve: syncResolve)
+    }
+    
+    convenience init<ResolveType>(
+        _ name: String,
+        of: FieldType.Type,
+        at keyPath: KeyPath<ObjectType, ResolveType>
     ) where ResolveType: Encodable {
         let syncResolve: SyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { _, _ in

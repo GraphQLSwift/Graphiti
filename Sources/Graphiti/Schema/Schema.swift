@@ -15,7 +15,9 @@ public final class Schema<Resolver, Context> {
         }
         
         guard let query = typeProvider.query else {
-            fatalError("Query type is required.")
+            throw GraphQLError(
+                message: "Query type is required."
+            )
         }
         
         self.schema = try GraphQLSchema(

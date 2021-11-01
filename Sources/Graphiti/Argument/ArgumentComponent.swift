@@ -23,6 +23,7 @@ public class ArgumentComponent<ArgumentsType : Decodable>: ExpressibleByStringLi
 }
 
 public extension ArgumentComponent {
+    @available(*, deprecated, message: "Use a string literal above a component to give it a description.")
     func description(_ description: String) -> Self {
         self.description = description
         return self

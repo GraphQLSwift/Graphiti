@@ -8,6 +8,12 @@ public final class Query<Resolver, Context> : Component<Resolver, Context> {
     }
     
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
+        guard typeProvider.query == nil else {
+            throw GraphQLError(
+                message: "Duplicate Query type. There can only be a single Query type in a Schema."
+            )
+        }
+        
         typeProvider.query = try GraphQLObjectType(
             name: name,
             description: description,

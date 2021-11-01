@@ -24,7 +24,7 @@ public struct StarWarsAPI {
             Field("name", of: String.self, at: \.name)
 
             "The friends of the character, or an empty list if they have none."
-            Field("friends", at: \.friends, as: [TypeReference<Character>].self)
+            Field("friends", of: [TypeReference<Character>].self, at: \.friends)
 
             "Which movies they appear in."
             Field("appearsIn", of: [Episode].self, at: \.appearsIn)
@@ -35,12 +35,12 @@ public struct StarWarsAPI {
 
         "A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY."
         Type(Planet.self) {
-            Field("id", at: \.id)
-            Field("name", at: \.name)
-            Field("diameter", at: \.diameter)
-            Field("rotationPeriod", at: \.rotationPeriod)
-            Field("orbitalPeriod", at: \.orbitalPeriod)
-            Field("residents", at: \.residents, as: [TypeReference<Human>].self)
+            Field("id", of: String.self, at: \.id)
+            Field("name", of: String.self, at: \.name)
+            Field("diameter", of: Int.self, at: \.diameter)
+            Field("rotationPeriod", of: Int.self, at: \.rotationPeriod)
+            Field("orbitalPeriod", of: Int.self, at: \.orbitalPeriod)
+            Field.init("residents", of: [TypeReference<Human>].self, at: \.residents)
         }
 
         "A humanoid creature in the Star Wars universe."
