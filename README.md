@@ -162,9 +162,14 @@ struct CounterAPI {
 }
 ```
 
-⭐️ Now we finally need to import Graphiti. 😄
+⭐️ Now we finally need to import Graphiti 😄. To check the equivalent GraphQL SDL use:
 
-The schema above is equivalent to the following GraphQL SDL:
+```swift
+let api = CounterAPI()
+debugPrint(api.schema)
+```
+
+The output will be:
 
 ```graphql
 type Count {
@@ -180,11 +185,6 @@ type Mutation {
   decrement: Count!
   incrementBy(amount: Int!): Count!
   decrementBy(amount: Int!): Count!
-}
-
-schema {
-  query: Query
-  mutation: Mutation
 }
 ```
 

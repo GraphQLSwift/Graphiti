@@ -23,7 +23,18 @@ public final class Union<Resolver, Context, UnionType> : Component<Resolver, Con
     ) {
         self.members = members
         super.init(name: name ?? Reflection.name(for: UnionType.self))
-        
+    }
+    
+    public required init(extendedGraphemeClusterLiteral string: String) {
+        fatalError("init(extendedGraphemeClusterLiteral:) has not been implemented")
+    }
+    
+    public required init(stringLiteral string: StringLiteralType) {
+        fatalError("init(stringLiteral:) has not been implemented")
+    }
+    
+    public required init(unicodeScalarLiteral string: String) {
+        fatalError("init(unicodeScalarLiteral:) has not been implemented")
     }
 }
 

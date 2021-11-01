@@ -16,6 +16,19 @@ public class Argument<ArgumentsType : Decodable, ArgumentType> : ArgumentCompone
     
     init(name: String) {
         self.name = name
+        super.init()
+    }
+    
+    public required init(extendedGraphemeClusterLiteral string: String) {
+        fatalError("init(extendedGraphemeClusterLiteral:) has not been implemented")
+    }
+    
+    public required init(stringLiteral string: StringLiteralType) {
+        fatalError("init(stringLiteral:) has not been implemented")
+    }
+    
+    public required init(unicodeScalarLiteral string: String) {
+        fatalError("init(unicodeScalarLiteral:) has not been implemented")
     }
 }
 

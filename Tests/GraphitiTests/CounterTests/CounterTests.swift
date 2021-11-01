@@ -68,6 +68,7 @@ struct CounterResolver {
 @available(macOS 12, *)
 struct CounterAPI {
     let schema = Schema<CounterResolver, CounterContext> {
+        "Description"
         Type(Count.self) {
             Field("value", at: \.value)
         }

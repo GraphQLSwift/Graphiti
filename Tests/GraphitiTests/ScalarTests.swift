@@ -200,6 +200,7 @@ class ScalarTests: XCTestCase {
                 Field("date", at: TestResolver.date)
             }
         }
+
         let api = TestAPI<TestResolver, NoContext> (
             resolver: TestResolver(),
             schema: testSchema

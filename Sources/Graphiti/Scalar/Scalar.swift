@@ -1,14 +1,7 @@
 import GraphQL
 import OrderedCollections
 
-/// Represents a scalar type in the schema.
-///
-/// It is **highly** recommended that you do not subclass this type.
-/// Instead, modify the encoding/decoding behavior through the `MapEncoder`/`MapDecoder` options available through
-/// `Coders` or a custom encoding/decoding on the `ScalarType` itself.
-open class Scalar<Resolver, Context, ScalarType : Codable> : Component<Resolver, Context> {
-    // TODO: Change this no longer be an open class
-    
+public final class Scalar<Resolver, Context, ScalarType : Codable> : Component<Resolver, Context> {
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         let scalarType = try GraphQLScalarType(
             name: name,
@@ -34,11 +27,11 @@ open class Scalar<Resolver, Context, ScalarType : Codable> : Component<Resolver,
         try typeProvider.map(ScalarType.self, to: scalarType)
     }
     
-    open func serialize(scalar: ScalarType, encoder: MapEncoder) throws -> Map {
+    public func serialize(scalar: ScalarType, encoder: MapEncoder) throws -> Map {
         try encoder.encode(scalar)
     }
     
-    open func parse(map: Map, decoder: MapDecoder) throws -> ScalarType {
+    public func parse(map: Map, decoder: MapDecoder) throws -> ScalarType {
         try decoder.decode(ScalarType.self, from: map)
     }
     
@@ -47,6 +40,18 @@ open class Scalar<Resolver, Context, ScalarType : Codable> : Component<Resolver,
         name: String?
     ) {
         super.init(name: name ?? Reflection.name(for: ScalarType.self))
+    }
+    
+    public required init(extendedGraphemeClusterLiteral string: String) {
+        fatalError("init(extendedGraphemeClusterLiteral:) has not been implemented")
+    }
+    
+    public required init(stringLiteral string: StringLiteralType) {
+        fatalError("init(stringLiteral:) has not been implemented")
+    }
+    
+    public required init(unicodeScalarLiteral string: String) {
+        fatalError("init(unicodeScalarLiteral:) has not been implemented")
     }
 }
 

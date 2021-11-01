@@ -34,6 +34,18 @@ public final class Query<Resolver, Context> : Component<Resolver, Context> {
         self.fields = fields
         super.init(name: name)
     }
+    
+    public required init(extendedGraphemeClusterLiteral string: String) {
+        fatalError("init(extendedGraphemeClusterLiteral:) has not been implemented")
+    }
+    
+    public required init(stringLiteral string: StringLiteralType) {
+        fatalError("init(stringLiteral:) has not been implemented")
+    }
+    
+    public required init(unicodeScalarLiteral string: String) {
+        fatalError("init(unicodeScalarLiteral:) has not been implemented")
+    }
 }
 
 public extension Query {

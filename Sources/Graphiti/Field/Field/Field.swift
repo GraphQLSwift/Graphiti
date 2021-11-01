@@ -13,16 +13,16 @@ public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<Ob
             deprecationReason: deprecationReason,
             args: try arguments(typeProvider: typeProvider, coders: coders),
             resolve: { source, arguments, context, eventLoopGroup, _ in
-                guard let s = source as? ObjectType else {
+                guard let source = source as? ObjectType else {
                     throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
                 }
     
-                guard let c = context as? Context else {
+                guard let context = context as? Context else {
                     throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
                 }
     
-                let a = try coders.decoder.decode(Arguments.self, from: arguments)
-                return  try self.resolve(s)(c, a, eventLoopGroup)
+                let arguments = try coders.decoder.decode(Arguments.self, from: arguments)
+                return try self.resolve(source)(context, arguments, eventLoopGroup)
             }
         )
         
@@ -48,6 +48,7 @@ public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<Ob
         self.name = name
         self.arguments = arguments
         self.resolve = resolve
+        super.init()
     }
 
     convenience init<ResolveType>(
@@ -60,6 +61,7 @@ public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<Ob
                 return try asyncResolve(type)(context, arguments, eventLoopGroup).map { $0 as Any? }
             }
         }
+        
         self.init(name: name, arguments: arguments, resolve: resolve)
     }
     
@@ -92,6 +94,18 @@ public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<Ob
         }
         
         self.init(name: name, arguments: arguments, asyncResolve: asyncResolve)
+    }
+    
+    public required init(extendedGraphemeClusterLiteral string: String) {
+        fatalError("init(extendedGraphemeClusterLiteral:) has not been implemented")
+    }
+    
+    public required init(unicodeScalarLiteral string: String) {
+        fatalError("init(unicodeScalarLiteral:) has not been implemented")
+    }
+    
+    public required init(stringLiteral string: StringLiteralType) {
+        fatalError("init(stringLiteral:) has not been implemented")
     }
 }
 
@@ -333,6 +347,7 @@ public extension Field where Arguments == NoArguments {
 public extension Field where Arguments == NoArguments, FieldType: Encodable {
     convenience init(
         _ name: String,
+        of: FieldType.Type = FieldType.self,
         at keyPath: KeyPath<ObjectType, FieldType>
     ) {
         let syncResolve: SyncResolve<ObjectType, Context, Arguments, FieldType> = { type in

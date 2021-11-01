@@ -1,4 +1,4 @@
-public final class Value<EnumType : Encodable & RawRepresentable> where EnumType.RawValue == String {
+public final class Value<EnumType : Encodable & RawRepresentable>: ExpressibleByStringLiteral where EnumType.RawValue == String {
     let value: EnumType
     var description: String?
     var deprecationReason: String?
@@ -7,6 +7,21 @@ public final class Value<EnumType : Encodable & RawRepresentable> where EnumType
         value: EnumType
     ) {
         self.value = value
+    }
+    
+    public required init(unicodeScalarLiteral string: String) {
+        self.value = EnumType(rawValue: "")!
+        self.description = string
+    }
+    
+    public required init(extendedGraphemeClusterLiteral string: String) {
+        self.value = EnumType(rawValue: "")!
+        self.description = string
+    }
+    
+    public required init(stringLiteral string: StringLiteralType) {
+        self.value = EnumType(rawValue: "")!
+        self.description = string
     }
 }
 
@@ -21,8 +36,15 @@ public extension Value {
         return self
     }
     
+    @available(*, deprecated, message: "Use deprecated(reason:).")
     @discardableResult
     func deprecationReason(_ deprecationReason: String) -> Self {
+        self.deprecationReason = deprecationReason
+        return self
+    }
+    
+    @discardableResult
+    func deprecated(reason deprecationReason: String) -> Self {
         self.deprecationReason = deprecationReason
         return self
     }

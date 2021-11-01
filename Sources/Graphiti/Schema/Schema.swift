@@ -25,8 +25,12 @@ public final class Schema<Resolver, Context> {
             types: typeProvider.types,
             directives: typeProvider.directives
         )
-        
-        print(self.schema)
+    }
+}
+
+extension Schema: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        printSchema(schema: schema)
     }
 }
 

@@ -27,6 +27,18 @@ public final class Enum<Resolver, Context, EnumType : Encodable & RawRepresentab
         self.values = values
         super.init(name: name ?? Reflection.name(for: EnumType.self))
     }
+    
+    public required init(extendedGraphemeClusterLiteral string: String) {
+        fatalError("init(extendedGraphemeClusterLiteral:) has not been implemented")
+    }
+    
+    public required init(stringLiteral string: StringLiteralType) {
+        fatalError("init(stringLiteral:) has not been implemented")
+    }
+    
+    public required init(unicodeScalarLiteral string: String) {
+        fatalError("init(unicodeScalarLiteral:) has not been implemented")
+    }
 }
 
 public extension Enum {

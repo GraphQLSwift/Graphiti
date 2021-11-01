@@ -32,6 +32,18 @@ public final class Input<Resolver, Context, InputObjectType : Decodable> : Compo
         self.fields = fields
         super.init(name: name  ?? Reflection.name(for: InputObjectType.self))
     }
+    
+    public required init(extendedGraphemeClusterLiteral string: String) {
+        fatalError("init(extendedGraphemeClusterLiteral:) has not been implemented")
+    }
+    
+    public required init(stringLiteral string: StringLiteralType) {
+        fatalError("init(stringLiteral:) has not been implemented")
+    }
+    
+    public required init(unicodeScalarLiteral string: String) {
+        fatalError("init(unicodeScalarLiteral:) has not been implemented")
+    }
 }
 
 public extension Input {

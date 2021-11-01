@@ -1,6 +1,6 @@
 import GraphQL
 
-open class Component<Resolver, Context> {
+open class Component<Resolver, Context>: ExpressibleByStringLiteral {
     let name: String
     var description: String? = nil
     
@@ -8,6 +8,20 @@ open class Component<Resolver, Context> {
         self.name = name
     }
     
+    public required init(unicodeScalarLiteral string: String) {
+        self.name = ""
+        self.description = string
+    }
+    
+    public required init(extendedGraphemeClusterLiteral string: String) {
+        self.name = ""
+        self.description = string
+    }
+    
+    public required init(stringLiteral string: StringLiteralType) {
+        self.name = ""
+        self.description = string
+    }
     
     func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {}
 }

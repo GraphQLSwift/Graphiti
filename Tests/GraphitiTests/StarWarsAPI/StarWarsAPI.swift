@@ -3,36 +3,37 @@ import Graphiti
 @available(macOS 12, *)
 public struct StarWarsAPI {
     public let schema = Schema<StarWarsResolver, StarWarsContext> {
+        "One of the films in the Star Wars Trilogy."
         Enum(Episode.self) {
+            "Released in 1977."
             Value(.newHope)
-                .description("Released in 1977.")
 
+            "Released in 1980."
             Value(.empire)
-                .description("Released in 1980.")
 
+            "Released in 1983."
             Value(.jedi)
-                .description("Released in 1983.")
         }
-        .description("One of the films in the Star Wars Trilogy.")
 
+        "A character in the Star Wars Trilogy."
         Interface(Character.self) {
-            Field("id", at: \.id)
-                .description("The id of the character.")
+            "The id of the character."
+            Field("id", of: String.self, at: \.id)
 
-            Field("name", at: \.name)
-                .description("The name of the character.")
+            "The name of the character."
+            Field("name", of: String.self, at: \.name)
 
+            "The friends of the character, or an empty list if they have none."
             Field("friends", at: \.friends, as: [TypeReference<Character>].self)
-                .description("The friends of the character, or an empty list if they have none.")
 
-            Field("appearsIn", at: \.appearsIn)
-                .description("Which movies they appear in.")
+            "Which movies they appear in."
+            Field("appearsIn", of: [Episode].self, at: \.appearsIn)
 
-            Field("secretBackstory", at: \.secretBackstory)
-                .description("All secrets about their past.")
+            "All secrets about their past."
+            Field("secretBackstory", of: String?.self, at: \.secretBackstory)
         }
-        .description("A character in the Star Wars Trilogy.")
 
+        "A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY."
         Type(Planet.self) {
             Field("id", at: \.id)
             Field("name", at: \.name)
@@ -41,54 +42,55 @@ public struct StarWarsAPI {
             Field("orbitalPeriod", at: \.orbitalPeriod)
             Field("residents", at: \.residents, as: [TypeReference<Human>].self)
         }
-        .description("A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY.")
 
+        "A humanoid creature in the Star Wars universe."
         Type(Human.self, implements: Character.self) {
-            Field("id", at: \.id)
-            Field("name", at: \.name)
-            Field("appearsIn", at: \.appearsIn)
-            Field("homePlanet", at: \.homePlanet)
+            Field("id", of: String.self, at: \.id)
+            Field("name", of: String.self, at: \.name)
+            Field("appearsIn", of: [Episode].self, at: \.appearsIn)
+            Field("homePlanet", of: Planet.self, at: \.homePlanet)
 
-            Field.init("friends", at: \.getFriends)
-                .description("The friends of the human, or an empty list if they have none.")
-
-            Field("secretBackstory", at: \.getSecretBackstory)
-                .description("Where are they from and how they came to be who they are.")
-        }
-        .description("A humanoid creature in the Star Wars universe.")
-
-        Type(Droid.self, implements: Character.self) {
-            Field("id", at: \.id)
-            Field("name", at: \.name)
-            Field("appearsIn", at: \.appearsIn)
-            Field("primaryFunction", at: \.primaryFunction)
-
+            "The friends of the human, or an empty list if they have none."
             Field("friends", at: \.getFriends)
-                .description("The friends of the droid, or an empty list if they have none.")
 
+            "Where are they from and how they came to be who they are."
             Field("secretBackstory", at: \.getSecretBackstory)
-                .description("Where are they from and how they came to be who they are.")
         }
-        .description("A mechanical creature in the Star Wars universe.")
+
+        "A mechanical creature in the Star Wars universe."
+        Type(Droid.self, implements: Character.self) {
+            Field("id", of: String.self, at: \.id)
+            Field("name", of: String.self, at: \.name)
+            Field("appearsIn", of: [Episode].self, at: \.appearsIn)
+            Field("primaryFunction", of: String.self, at: \.primaryFunction)
+
+            "The friends of the droid, or an empty list if they have none."
+            Field("friends", at: \.getFriends)
+
+            "Where are they from and how they came to be who they are."
+            Field("secretBackstory", at: \.getSecretBackstory)
+        }
 
         Union(SearchResult.self, members: Planet.self, Human.self, Droid.self)
 
         Query {
+            "Returns a hero based on the given episode."
             Field("hero", at: \.hero) {
+                """
+                If omitted, returns the hero of the whole saga.
+                If provided, returns the hero of that particular episode.
+                """
                 Argument("episode", at: \.episode)
-                    .description("If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode.")
             }
-            .description("Returns a hero based on the given episode.")
-
 
             Field("human", at: \.human) {
+                "Id of the human."
                 Argument("id", at: \.id)
-                    .description("Id of the human.")
             }
 
             Field("droid", at: \.droid) {
+                "Id of the droid."
                 Argument("id", at: \.id)
-                    .description("Id of the droid.")
             }
 
             Field("search", at: \.search) {
@@ -97,6 +99,8 @@ public struct StarWarsAPI {
             }
         }
 
-        Types(Human.self, Droid.self)
+        #warning("TODO: Automatically add all types instead of having to manually define them here.")
+        Types(Human.self, Droid.self, Planet.self)
     }
 }
+
