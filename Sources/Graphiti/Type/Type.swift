@@ -1,25 +1,27 @@
 import GraphQL
 
-public final class Type<Resolver, Context, ObjectType : Encodable> : Component<Resolver, Context> {
+public final class Type<Resolver, Context, ObjectType> : Component<Resolver, Context> where ObjectType: Encodable {
     let interfaces: [Any.Type]
     let fields: [FieldComponent<ObjectType, Context>]
+    private var directives: [ObjectDirective] = []
     
     let isTypeOf: GraphQLIsTypeOf = { source, _, _ in
-        return source is ObjectType
+        source is ObjectType
     }
     
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         let objectType = try GraphQLObjectType(
             name: name,
             description: description,
-            fields: fields(typeProvider: typeProvider, coders: coders),
-            interfaces: interfaces.map {
+            fields: try fields(typeProvider: typeProvider, coders: coders),
+            interfaces: try interfaces.map {
                 try typeProvider.getInterfaceType(from: $0)
             },
             isTypeOf: isTypeOf
         )
         
-        try typeProvider.map(ObjectType.self, to: objectType)
+        let mappedObjectType = applyDirectives(objectType: objectType)
+        try typeProvider.map(ObjectType.self, to: mappedObjectType)
     }
     
     func fields(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLFieldMap {
@@ -31,6 +33,18 @@ public final class Type<Resolver, Context, ObjectType : Encodable> : Component<R
         }
         
         return map
+    }
+    
+    func applyDirectives(objectType: GraphQLObjectType) -> GraphQLObjectType {
+//        var objectType = objectType
+//        
+//        for directive in directives {
+//            var objectConfiguration = ObjectConfiguration(objectType)
+//            directive.object.configure(&objectConfiguration)
+//            objectType = GraphQLObjectType(objectConfiguration)
+//        }
+//        
+        return objectType
     }
     
     private init(
@@ -116,5 +130,14 @@ public extension Type {
             interfaces: interfaces,
             fields: fields()
         )
+    }
+}
+
+// MARK: Directive
+
+extension Type {
+    func directive<Directive>(_ directive: Directive) -> Type where Directive: ObjectDirective {
+        directives.append(directive)
+        return self
     }
 }

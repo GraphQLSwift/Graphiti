@@ -168,61 +168,84 @@ class CounterTests: XCTestCase {
             let user: User
         }
         
+        struct DelegateField: Decodable, ObjectDirective {
+            let name: String
+            
+            var object: ConfigureObject {
+                ConfigureObject { configuration in
+//                    configuration.fields.append(
+//                        FieldConfiguration(
+//                            name: name,
+//                            description: nil,
+//                            deprecationReason: nil,
+//                            arguments: [],
+//                            resolve: { object in
+//                                { _, _, group in
+//                                    group.next().makeCompletedFuture(.success("Yo"))
+//                                }
+//                            }
+//                        )
+//                    )
+                }
+            }
+        }
+        
         #warning("TODO: Move Decodable requirement from ArgumentComponent to Argument")
         struct Lowercased: Decodable, FieldDefinitionDirective {
-            var fieldDefinition: (inout FieldConfiguration) -> Void {
-                { fieldDefinition in
-                    let resolve = fieldDefinition.resolve
-                    
-                    fieldDefinition.resolve = { object in
-                        { context, arguments, group in
-                            try resolve(object)(context, arguments, group).map { value in
-                                guard let string = value as? String else {
-                                    return value
-                                }
-                                
-                                return string.lowercased()
-                            }
-                        }
-                    }
+            var fieldDefinition: ConfigureFieldDefinition {
+                ConfigureFieldDefinition { fieldDefinition in
+//                    let resolve = fieldDefinition.resolve
+//
+//                    fieldDefinition.resolve = { object in
+//                        { context, arguments, group in
+//                            try resolve(object)(context, arguments, group).map { value in
+//                                guard let string = value as? String else {
+//                                    return value
+//                                }
+//
+//                                return string.lowercased()
+//                            }
+//                        }
+//                    }
                 }
             }
         }
         
         struct Uppercased: Decodable, FieldDefinitionDirective {
-            var fieldDefinition: (inout FieldConfiguration) -> Void {
-                { fieldDefinition in
-                    let resolve = fieldDefinition.resolve
-                    
-                    fieldDefinition.resolve = { object in
-                        { context, arguments, group in
-                            try resolve(object)(context, arguments, group).map { value in
-                                guard let string = value as? String else {
-                                    return value
-                                }
-                                
-                                return string.uppercased()
-                            }
-                        }
-                    }
+            var fieldDefinition: ConfigureFieldDefinition {
+                ConfigureFieldDefinition { fieldDefinition in
+//                    let resolve = fieldDefinition.resolve
+//                    
+//                    fieldDefinition.resolve = { object in
+//                        { context, arguments, group in
+//                            try resolve(object)(context, arguments, group).map { value in
+//                                guard let string = value as? String else {
+//                                    return value
+//                                }
+//                                
+//                                return string.uppercased()
+//                            }
+//                        }
+//                    }
                 }
             }
         }
      
         let schema = Schema<Resolver, Void> {
-    //        Directive(DeprecatedBy.self) {
-    //            Argument("reason", of: String.self, at: \.reason)
-    //                 .defaultValue("No longer supported")
-    //        } on: {
-    //            DirectiveLocation(\.fieldDefinition)
-    //        }
+            Directive(DelegateField.self) {
+                Argument("name", of: String.self, at: \.name)
+            } on: {
+                DirectiveLocation(.object, at: \.object)
+//                DirectiveLocation(.interface, at: \.interface)
+            }
+//            .repeatable()
             
             Directive(Lowercased.self) {
-                DirectiveLocation(\.fieldDefinition)
+                DirectiveLocation(.fieldDefinition, at: \.fieldDefinition)
             }
             
             Directive(Uppercased.self) {
-                DirectiveLocation(\.fieldDefinition)
+                DirectiveLocation(.fieldDefinition, at: \.fieldDefinition)
             }
             
             Type(User.self) {
@@ -230,9 +253,10 @@ class CounterTests: XCTestCase {
                     .directive(Uppercased())
                     .directive(Lowercased())
             }
+            .directive(DelegateField(name: "salute"))
             
             Query {
-                Field("user", of: User.self, at: \.user)
+                Field.init("user", of: User.self, at: \.user)
             }
         }
         

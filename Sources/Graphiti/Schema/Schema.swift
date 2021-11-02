@@ -1,6 +1,7 @@
 import GraphQL
 import NIO
 
+#warning("TODO: Deal with schema composition. To do that we'll probably need to remove `Resolver` from Component? We'll need Resolvers for each type of operation, Query, Mutation and Subscription. The type of the Resolver will be defined in these Operations themselves, not in the schema.")
 public final class Schema<Resolver, Context> {
     public let schema: GraphQLSchema
 

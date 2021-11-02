@@ -1,5 +1,6 @@
 import GraphQL
 
+#warning("TODO: Allow custom metadata to the types? How could this custom metadata change behavior? Expose an additional parameter in the resolve functions?")
 public final class Directive<Resolver, Context, DirectiveType>: Component<Resolver, Context> where DirectiveType: Decodable {
     private let locations: [GraphQL.DirectiveLocation]
     private let arguments: [ArgumentComponent<DirectiveType>]

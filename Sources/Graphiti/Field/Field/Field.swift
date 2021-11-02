@@ -9,7 +9,7 @@ public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<Ob
     
     override func field(typeProvider: TypeProvider, coders: Coders) throws -> (String, GraphQLField) {
         let arguments = try arguments(typeProvider: typeProvider, coders: coders)
-        applyDirectives(typeProdiver: typeProvider, arguments: arguments)
+        applyDirectives(arguments: arguments)
         
         let field = GraphQLField(
             type: try typeProvider.getOutputType(from: FieldType.self, field: name),
@@ -44,44 +44,44 @@ public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<Ob
         return map
     }
     
-    func applyDirectives(typeProdiver: TypeProvider, arguments: GraphQLArgumentConfigMap) {
-        for directive in directives {
-            #warning("TODO: Check if directive exists schema")
-            #warning("TODO: Check for repeatable")
-            
-            let oldResolve = self.resolve
-            
-            var fieldConfiguration = FieldConfiguration(
-                name: name,
-                description: description,
-                deprecationReason: deprecationReason,
-                arguments: arguments.map { name, argument in
-                    ArgumentConfiguration(
-                        name: name,
-                        defaultValue: argument.defaultValue
-                    )
-                },
-                resolve: { object in
-                    { context, arguments, group in
-                        try oldResolve(object as! ObjectType)(context as! Context, arguments as! Arguments, group)
-                    }
-                }
-            )
-            
-            directive.fieldDefinition(&fieldConfiguration)
-            
-            self.description = fieldConfiguration.description
-            self.deprecationReason = fieldConfiguration.deprecationReason
-            #warning("TODO: update arguments")
-            
-            let newResolve = fieldConfiguration.resolve
-            
-            self.resolve = { object in
-                { context, arguments, group in
-                    try newResolve(object)(context, arguments, group)
-                }
-            }
-        }
+    func applyDirectives(arguments: GraphQLArgumentConfigMap) {
+//        for directive in directives {
+//            #warning("TODO: Check if directive exists schema")
+//            #warning("TODO: Check for repeatable")
+//
+//            let oldResolve = self.resolve
+//
+//            var fieldConfiguration = FieldConfiguration(
+//                name: name,
+//                description: description,
+//                deprecationReason: deprecationReason,
+//                arguments: arguments.map { name, argument in
+//                    ArgumentConfiguration(
+//                        name: name,
+//                        defaultValue: argument.defaultValue
+//                    )
+//                },
+//                resolve: { object in
+//                    { context, arguments, group in
+//                        try oldResolve(object as! ObjectType)(context as! Context, arguments as! Arguments, group)
+//                    }
+//                }
+//            )
+//
+//            directive.fieldDefinition.configure(&fieldConfiguration)
+//
+//            self.description = fieldConfiguration.description
+//            self.deprecationReason = fieldConfiguration.deprecationReason
+//            #warning("TODO: update arguments")
+//
+//            let newResolve = fieldConfiguration.resolve
+//
+//            self.resolve = { object in
+//                { context, arguments, group in
+//                    try newResolve(object)(context, arguments, group)
+//                }
+//            }
+//        }
     }
     
     init(
