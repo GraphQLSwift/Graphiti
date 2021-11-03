@@ -164,94 +164,103 @@ class CounterTests: XCTestCase {
             let name: String
         }
         
+        struct Context {
+            
+        }
+        
         struct Resolver {
             let user: User
         }
         
-        struct DelegateField: Decodable, ObjectDirective {
+        struct DelegateField: Decodable, ObjectDirective, InterfaceDirective {
             let name: String
             
-            var object: ConfigureObject {
-                ConfigureObject { configuration in
-//                    configuration.fields.append(
-//                        FieldConfiguration(
-//                            name: name,
-//                            description: nil,
-//                            deprecationReason: nil,
-//                            arguments: [],
-//                            resolve: { object in
-//                                { _, _, group in
-//                                    group.next().makeCompletedFuture(.success("Yo"))
-//                                }
-//                            }
-//                        )
-//                    )
-                }
+            func object<Resolver, Context, ObjectType>(object: Object<Resolver, Context, ObjectType>) where ObjectType: Encodable {
+//                object.fields.append(Graphiti.Field<ObjectType, Context, String, NoArguments>.init(
+//                    name: name,
+//                    arguments: [],
+//                    resolve: { object in
+//                        { _, _, group in
+//                            group.next().makeCompletedFuture(.success("Yo"))
+//                        }
+//                    }
+//                ))
+            }
+            
+            func interface<Resolver, Context, InterfaceType>(interface: Interface<Resolver, Context, InterfaceType>) {
+                
             }
         }
         
         #warning("TODO: Move Decodable requirement from ArgumentComponent to Argument")
-        struct Lowercased: Decodable, FieldDefinitionDirective {
-            var fieldDefinition: ConfigureFieldDefinition {
-                ConfigureFieldDefinition { fieldDefinition in
-//                    let resolve = fieldDefinition.resolve
-//
-//                    fieldDefinition.resolve = { object in
-//                        { context, arguments, group in
-//                            try resolve(object)(context, arguments, group).map { value in
-//                                guard let string = value as? String else {
-//                                    return value
-//                                }
-//
-//                                return string.lowercased()
-//                            }
-//                        }
-//                    }
+        struct Lowercased: Decodable, FieldDefinitionDirective, FieldDirective {
+            func fieldDefinition<ObjectType, Context, FieldType, Arguments>(field: Graphiti.Field<ObjectType, Context, FieldType, Arguments>) where Arguments: Decodable {
+                let resolve = field.resolve
+
+                field.resolve = { object in
+                    { context, arguments, group in
+                        try resolve(object)(context, arguments, group).map { value in
+                            guard let string = value as? String else {
+                                return value
+                            }
+
+                            return string.lowercased()
+                        }
+                    }
                 }
+            }
+            
+            func field() {
+                print("lowercased")
             }
         }
         
-        struct Uppercased: Decodable, FieldDefinitionDirective {
-            var fieldDefinition: ConfigureFieldDefinition {
-                ConfigureFieldDefinition { fieldDefinition in
-//                    let resolve = fieldDefinition.resolve
-//                    
-//                    fieldDefinition.resolve = { object in
-//                        { context, arguments, group in
-//                            try resolve(object)(context, arguments, group).map { value in
-//                                guard let string = value as? String else {
-//                                    return value
-//                                }
-//                                
-//                                return string.uppercased()
-//                            }
-//                        }
-//                    }
+        struct Uppercased: Decodable, FieldDefinitionDirective, FieldDirective {
+            func fieldDefinition<ObjectType, Context, FieldType, Arguments>(field: Graphiti.Field<ObjectType, Context, FieldType, Arguments>) where Arguments: Decodable {
+                let resolve = field.resolve
+
+                field.resolve = { object in
+                    { context, arguments, group in
+                        try resolve(object)(context, arguments, group).map { value in
+                            guard let string = value as? String else {
+                                return value
+                            }
+
+                            return string.uppercased()
+                        }
+                    }
                 }
+            }
+            
+            func field() {
+                print("uppercased")
             }
         }
      
-        let schema = Schema<Resolver, Void> {
+        let schema = Schema<Resolver, Context> {
             Directive(DelegateField.self) {
                 Argument("name", of: String.self, at: \.name)
             } on: {
-                DirectiveLocation(.object, at: \.object)
-//                DirectiveLocation(.interface, at: \.interface)
+                DirectiveLocation(.object)
+                DirectiveLocation(.interface)
             }
+            #warning("TODO: Implement repeatable directives")
 //            .repeatable()
             
             Directive(Lowercased.self) {
-                DirectiveLocation(.fieldDefinition, at: \.fieldDefinition)
+                DirectiveLocation(.fieldDefinition)
+                DirectiveLocation(.field)
             }
             
             Directive(Uppercased.self) {
-                DirectiveLocation(.fieldDefinition, at: \.fieldDefinition)
+                DirectiveLocation(.fieldDefinition)
+                DirectiveLocation(.field)
             }
             
             Type(User.self) {
                 Field("name", of: String.self, at: \.name)
-                    .directive(Uppercased())
-                    .directive(Lowercased())
+//                    .directive(Lowercased())
+//                    .directive(Uppercased())
             }
             .directive(DelegateField(name: "salute"))
             
@@ -264,9 +273,9 @@ class CounterTests: XCTestCase {
         debugPrint(schema)
         
         let result = try schema.execute(
-            request: "query { user { name } }",
+            request: "query { user { name @lowercased } }",
             resolver: Resolver(user: User(name: "Paulo")),
-            context: (),
+            context: Context(),
             on: group
         ).wait()
         

@@ -4,7 +4,7 @@ public class FieldComponent<ObjectType, Context>: ExpressibleByStringLiteral {
     var description: String? = nil
     var deprecationReason: String? = nil
     
-    func field(typeProvider: TypeProvider, coders: Coders) throws -> (String, GraphQLField) {
+    func field(typeProvider: SchemaTypeProvider, coders: Coders) throws -> (String, GraphQLField) {
         fatalError()
     }
     

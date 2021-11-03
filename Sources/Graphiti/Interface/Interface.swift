@@ -2,8 +2,11 @@ import GraphQL
 
 public final class Interface<Resolver, Context, InterfaceType> : Component<Resolver, Context> {
     let fields: [FieldComponent<InterfaceType, Context>]
+    private var directives: [InterfaceDirective] = []
     
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
+        applyDirectives()
+        
         let interfaceType = try GraphQLInterfaceType(
             name: name,
             description: description,
@@ -14,7 +17,13 @@ public final class Interface<Resolver, Context, InterfaceType> : Component<Resol
         try typeProvider.map(InterfaceType.self, to: interfaceType)
     }
     
-    func fields(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLFieldMap {
+    func applyDirectives() {
+        for directive in directives {
+            directive.interface(interface: self)
+        }
+    }
+    
+    func fields(typeProvider: SchemaTypeProvider, coders: Coders) throws -> GraphQLFieldMap {
         var map: GraphQLFieldMap = [:]
         
         for field in fields {
@@ -70,5 +79,14 @@ public extension Interface {
             name: name,
             fields: fields()
         )
+    }
+}
+
+// MARK: Directive
+
+extension Interface {
+    func directive<Directive>(_ directive: Directive) -> Interface where Directive: InterfaceDirective {
+        directives.append(directive)
+        return self
     }
 }

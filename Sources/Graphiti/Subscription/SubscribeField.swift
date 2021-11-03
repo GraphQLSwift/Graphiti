@@ -9,7 +9,7 @@ public class SubscriptionField<SourceEventType, ObjectType, Context, FieldType, 
     let resolve: AsyncResolve<SourceEventType, Context, Arguments, Any?>
     let subscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>>
     
-    override func field(typeProvider: TypeProvider, coders: Coders) throws -> (String, GraphQLField) {
+    override func field(typeProvider: SchemaTypeProvider, coders: Coders) throws -> (String, GraphQLField) {
         let field = GraphQLField(
             type: try typeProvider.getOutputType(from: FieldType.self, field: name),
             description: description,

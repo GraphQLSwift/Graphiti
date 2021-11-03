@@ -10,6 +10,8 @@ public final class Type<Resolver, Context, ObjectType> : Component<Resolver, Con
     }
     
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
+        applyDirectives()
+        
         let objectType = try GraphQLObjectType(
             name: name,
             description: description,
@@ -20,11 +22,10 @@ public final class Type<Resolver, Context, ObjectType> : Component<Resolver, Con
             isTypeOf: isTypeOf
         )
         
-        let mappedObjectType = applyDirectives(objectType: objectType)
-        try typeProvider.map(ObjectType.self, to: mappedObjectType)
+        try typeProvider.map(ObjectType.self, to: objectType)
     }
     
-    func fields(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLFieldMap {
+    func fields(typeProvider: SchemaTypeProvider, coders: Coders) throws -> GraphQLFieldMap {
         var map: GraphQLFieldMap = [:]
         
         for field in fields {
@@ -35,16 +36,10 @@ public final class Type<Resolver, Context, ObjectType> : Component<Resolver, Con
         return map
     }
     
-    func applyDirectives(objectType: GraphQLObjectType) -> GraphQLObjectType {
-//        var objectType = objectType
-//        
-//        for directive in directives {
-//            var objectConfiguration = ObjectConfiguration(objectType)
-//            directive.object.configure(&objectConfiguration)
-//            objectType = GraphQLObjectType(objectConfiguration)
-//        }
-//        
-        return objectType
+    func applyDirectives() {
+        for directive in directives {
+            directive.object(object: self)
+        }
     }
     
     private init(

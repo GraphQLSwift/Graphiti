@@ -16,7 +16,7 @@ public final class Mutation<Resolver, Context> : Component<Resolver, Context> {
         )
     }
     
-    func fields(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLFieldMap {
+    func fields(typeProvider: SchemaTypeProvider, coders: Coders) throws -> GraphQLFieldMap {
         var map: GraphQLFieldMap = [:]
         
         for field in fields {

@@ -19,6 +19,7 @@ public final class Directive<Resolver, Context, DirectiveType>: Component<Resolv
         )
         
         #warning("TODO: Guarantee there is no other directive with same name")
+        #warning("TODO: Map DirectiveType to GraphQLDirective")
         typeProvider.directives.append(directive)
     }
     

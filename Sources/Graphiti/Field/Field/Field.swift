@@ -7,16 +7,21 @@ public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<Ob
     var resolve: AsyncResolve<ObjectType, Context, Arguments, Any?>
     private var directives: [FieldDefinitionDirective] = []
     
-    override func field(typeProvider: TypeProvider, coders: Coders) throws -> (String, GraphQLField) {
-        let arguments = try arguments(typeProvider: typeProvider, coders: coders)
-        applyDirectives(arguments: arguments)
+    override func field(typeProvider: SchemaTypeProvider, coders: Coders) throws -> (String, GraphQLField) {
+        applyDirectives()
         
         let field = GraphQLField(
             type: try typeProvider.getOutputType(from: FieldType.self, field: name),
             description: description,
             deprecationReason: deprecationReason,
-            args: arguments,
-            resolve: { source, arguments, context, eventLoopGroup, _ in
+            args: try arguments(typeProvider: typeProvider, coders: coders),
+            resolve: { source, arguments, context, eventLoopGroup, info in
+                for directive in typeProvider.directives {
+                    if info.fieldASTs[0].directives.contains(where: { $0.name.value == directive.name }) {
+                        print("Found directive \(directive.name)")
+                    }
+                }
+                
                 guard let source = source as? ObjectType else {
                     throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
                 }
@@ -44,44 +49,12 @@ public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<Ob
         return map
     }
     
-    func applyDirectives(arguments: GraphQLArgumentConfigMap) {
-//        for directive in directives {
-//            #warning("TODO: Check if directive exists schema")
-//            #warning("TODO: Check for repeatable")
-//
-//            let oldResolve = self.resolve
-//
-//            var fieldConfiguration = FieldConfiguration(
-//                name: name,
-//                description: description,
-//                deprecationReason: deprecationReason,
-//                arguments: arguments.map { name, argument in
-//                    ArgumentConfiguration(
-//                        name: name,
-//                        defaultValue: argument.defaultValue
-//                    )
-//                },
-//                resolve: { object in
-//                    { context, arguments, group in
-//                        try oldResolve(object as! ObjectType)(context as! Context, arguments as! Arguments, group)
-//                    }
-//                }
-//            )
-//
-//            directive.fieldDefinition.configure(&fieldConfiguration)
-//
-//            self.description = fieldConfiguration.description
-//            self.deprecationReason = fieldConfiguration.deprecationReason
-//            #warning("TODO: update arguments")
-//
-//            let newResolve = fieldConfiguration.resolve
-//
-//            self.resolve = { object in
-//                { context, arguments, group in
-//                    try newResolve(object)(context, arguments, group)
-//                }
-//            }
-//        }
+    func applyDirectives() {
+        for directive in directives {
+            #warning("TODO: Check if directive exists schema")
+            #warning("TODO: Check for repeatable")
+            directive.fieldDefinition(field: self)
+        }
     }
     
     init(
