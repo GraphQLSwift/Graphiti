@@ -1,103 +1,106 @@
 import Graphiti
 
-public struct StarWarsAPI : API {
-    public let resolver = StarWarsResolver()
-    
-    public let schema = try! Schema<StarWarsResolver, StarWarsContext> {
+@available(macOS 12, *)
+public struct StarWarsAPI {
+    public let schema = Schema<StarWarsResolver, StarWarsContext> {
+        "One of the films in the Star Wars Trilogy."
         Enum(Episode.self) {
+            "Released in 1977."
             Value(.newHope)
-                .description("Released in 1977.")
 
+            "Released in 1980."
             Value(.empire)
-                .description("Released in 1980.")
 
+            "Released in 1983."
             Value(.jedi)
-                .description("Released in 1983.")
         }
-        .description("One of the films in the Star Wars Trilogy.")
 
+        "A character in the Star Wars Trilogy."
         Interface(Character.self) {
-            Field("id", at: \.id)
-                .description("The id of the character.")
+            "The id of the character."
+            Field("id", of: String.self, at: \.id)
 
-            Field("name", at: \.name)
-                .description("The name of the character.")
+            "The name of the character."
+            Field("name", of: String.self, at: \.name)
 
-            Field("friends", at: \.friends, as: [TypeReference<Character>].self)
-                .description("The friends of the character, or an empty list if they have none.")
+            "The friends of the character, or an empty list if they have none."
+            Field("friends", of: [TypeReference<Character>].self, at: \.friends)
 
-            Field("appearsIn", at: \.appearsIn)
-                .description("Which movies they appear in.")
+            "Which movies they appear in."
+            Field("appearsIn", of: [Episode].self, at: \.appearsIn)
 
-            Field("secretBackstory", at: \.secretBackstory)
-                .description("All secrets about their past.")
+            "All secrets about their past."
+            Field("secretBackstory", of: String?.self, at: \.secretBackstory)
         }
-        .description("A character in the Star Wars Trilogy.")
 
+        "A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY."
         Type(Planet.self) {
-            Field("id", at: \.id)
-            Field("name", at: \.name)
-            Field("diameter", at: \.diameter)
-            Field("rotationPeriod", at: \.rotationPeriod)
-            Field("orbitalPeriod", at: \.orbitalPeriod)
-            Field("residents", at: \.residents, as: [TypeReference<Human>].self)
+            Field("id", of: String.self, at: \.id)
+            Field("name", of: String.self, at: \.name)
+            Field("diameter", of: Int.self, at: \.diameter)
+            Field("rotationPeriod", of: Int.self, at: \.rotationPeriod)
+            Field("orbitalPeriod", of: Int.self, at: \.orbitalPeriod)
+            Field.init("residents", of: [TypeReference<Human>].self, at: \.residents)
         }
-        .description("A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY.")
 
-        Type(Human.self, interfaces: [Character.self]) {
-            Field("id", at: \.id)
-            Field("name", at: \.name)
-            Field("appearsIn", at: \.appearsIn)
-            Field("homePlanet", at: \.homePlanet)
+        "A humanoid creature in the Star Wars universe."
+        Type(Human.self, implements: Character.self) {
+            Field("id", of: String.self, at: \.id)
+            Field("name", of: String.self, at: \.name)
+            Field("appearsIn", of: [Episode].self, at: \.appearsIn)
+            Field("homePlanet", of: Planet.self, at: \.homePlanet)
 
-            Field("friends", at: Human.getFriends, as: [Character].self)
-                .description("The friends of the human, or an empty list if they have none.")
+            "The friends of the human, or an empty list if they have none."
+            Field("friends", at: \.getFriends)
 
-            Field("secretBackstory", at: Human.getSecretBackstory)
-                .description("Where are they from and how they came to be who they are.")
+            "Where are they from and how they came to be who they are."
+            Field("secretBackstory", at: \.getSecretBackstory)
         }
-        .description("A humanoid creature in the Star Wars universe.")
 
-        Type(Droid.self, interfaces: [Character.self]) {
-            Field("id", at: \.id)
-            Field("name", at: \.name)
-            Field("appearsIn", at: \.appearsIn)
-            Field("primaryFunction", at: \.primaryFunction)
+        "A mechanical creature in the Star Wars universe."
+        Type(Droid.self, implements: Character.self) {
+            Field("id", of: String.self, at: \.id)
+            Field("name", of: String.self, at: \.name)
+            Field("appearsIn", of: [Episode].self, at: \.appearsIn)
+            Field("primaryFunction", of: String.self, at: \.primaryFunction)
 
-            Field("friends", at: Droid.getFriends, as: [Character].self)
-                .description("The friends of the droid, or an empty list if they have none.")
+            "The friends of the droid, or an empty list if they have none."
+            Field("friends", at: \.getFriends)
 
-            Field("secretBackstory", at: Droid.getSecretBackstory)
-                .description("Where are they from and how they came to be who they are.")
+            "Where are they from and how they came to be who they are."
+            Field("secretBackstory", at: \.getSecretBackstory)
         }
-        .description("A mechanical creature in the Star Wars universe.")
 
         Union(SearchResult.self, members: Planet.self, Human.self, Droid.self)
 
         Query {
-            Field("hero", at: StarWarsResolver.hero, as: Character.self) {
+            "Returns a hero based on the given episode."
+            Field("hero", at: \.hero) {
+                """
+                If omitted, returns the hero of the whole saga.
+                If provided, returns the hero of that particular episode.
+                """
                 Argument("episode", at: \.episode)
-                    .description("If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode.")
             }
-            .description("Returns a hero based on the given episode.")
 
-
-            Field("human", at: StarWarsResolver.human) {
+            Field("human", at: \.human) {
+                "Id of the human."
                 Argument("id", at: \.id)
-                    .description("Id of the human.")
             }
 
-            Field("droid", at: StarWarsResolver.droid) {
+            Field("droid", at: \.droid) {
+                "Id of the droid."
                 Argument("id", at: \.id)
-                    .description("Id of the droid.")
             }
 
-            Field("search", at: StarWarsResolver.search, as: [SearchResult].self) {
+            Field("search", at: \.search) {
                 Argument("query", at: \.query)
                     .defaultValue("R2-D2")
             }
         }
 
-        Types(Human.self, Droid.self)
+        #warning("TODO: Automatically add all types instead of having to manually define them here.")
+        Types(Human.self, Droid.self, Planet.self)
     }
 }
+

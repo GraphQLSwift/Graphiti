@@ -1,28 +1,55 @@
 import GraphQL
 import NIO
 
-public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : FieldComponent<ObjectType, Context> {
+public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<ObjectType, Context> where Arguments: Decodable {
     let name: String
     let arguments: [ArgumentComponent<Arguments>]
-    let resolve: AsyncResolve<ObjectType, Context, Arguments, Any?>
+    var resolve: AsyncResolve<ObjectType, Context, Arguments, Any?>
+    private var directives: [FieldDefinitionDirective] = []
     
-    override func field(typeProvider: TypeProvider, coders: Coders) throws -> (String, GraphQLField) {
+    override func field(typeProvider: SchemaTypeProvider, coders: Coders) throws -> (String, GraphQLField) {
+        applyDirectives()
+        
         let field = GraphQLField(
             type: try typeProvider.getOutputType(from: FieldType.self, field: name),
             description: description,
             deprecationReason: deprecationReason,
             args: try arguments(typeProvider: typeProvider, coders: coders),
-            resolve: { source, arguments, context, eventLoopGroup, _ in
-                guard let s = source as? ObjectType else {
+            resolve: { source, arguments, context, eventLoopGroup, info in
+                var resolve = self.resolve
+                
+                for fieldDirective in info.fieldASTs[0].directives {
+                    for (schemaDirective, decodeDirective) in typeProvider.directives {
+                        if fieldDirective.name.value == schemaDirective.name {
+                            print("Found directive \(schemaDirective.name)")
+                            
+                            let directiveMap = try getArgumentValues(
+                                argDefs: schemaDirective.args,
+                                argASTs: fieldDirective.arguments,
+                                variables: info.variableValues
+                            )
+                            
+                            let directive = try decodeDirective(directiveMap, coders)
+                            
+                            guard let fieldDirective = directive as? FieldDirective else {
+                                fatalError("Unreachable")
+                            }
+                            
+                            resolve = fieldDirective.field(resolve: resolve)
+                        }
+                    }
+                }
+                
+                guard let source = source as? ObjectType else {
                     throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
                 }
     
-                guard let c = context as? Context else {
+                guard let context = context as? Context else {
                     throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
                 }
     
-                let a = try coders.decoder.decode(Arguments.self, from: arguments)
-                return  try self.resolve(s)(c, a, eventLoopGroup)
+                let arguments = try coders.decoder.decode(Arguments.self, from: arguments)
+                return try resolve(source)(context, arguments, eventLoopGroup)
             }
         )
         
@@ -40,6 +67,14 @@ public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : Fiel
         return map
     }
     
+    func applyDirectives() {
+        for directive in directives {
+            #warning("TODO: Check if directive exists schema")
+            #warning("TODO: Check for repeatable")
+            directive.fieldDefinition(field: self)
+        }
+    }
+    
     init(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
@@ -48,6 +83,7 @@ public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : Fiel
         self.name = name
         self.arguments = arguments
         self.resolve = resolve
+        super.init()
     }
 
     convenience init<ResolveType>(
@@ -60,6 +96,7 @@ public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : Fiel
                 return try asyncResolve(type)(context, arguments, eventLoopGroup).map { $0 as Any? }
             }
         }
+        
         self.init(name: name, arguments: arguments, resolve: resolve)
     }
     
@@ -93,11 +130,16 @@ public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : Fiel
         
         self.init(name: name, arguments: arguments, asyncResolve: asyncResolve)
     }
+    
+    public required init(stringLiteral string: StringLiteralType) {
+        fatalError("init(stringLiteral:) has not been implemented")
+    }
 }
 
 // MARK: AsyncResolve Initializers
 
 public extension Field where FieldType : Encodable {
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -106,6 +148,7 @@ public extension Field where FieldType : Encodable {
         self.init(name: name, arguments: [argument()], asyncResolve: function)
     }
     
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -116,6 +159,7 @@ public extension Field where FieldType : Encodable {
 }
 
 public extension Field {
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncResolve<ObjectType, Context, Arguments, ResolveType>,
@@ -125,6 +169,7 @@ public extension Field {
         self.init(name: name, arguments: [argument()], asyncResolve: function)
     }
     
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncResolve<ObjectType, Context, Arguments, ResolveType>,
@@ -138,6 +183,7 @@ public extension Field {
 // MARK: SimpleAsyncResolve Initializers
 
 public extension Field where FieldType : Encodable {
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -146,6 +192,7 @@ public extension Field where FieldType : Encodable {
         self.init(name: name, arguments: [argument()], simpleAsyncResolve: function)
     }
     
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -156,6 +203,7 @@ public extension Field where FieldType : Encodable {
 }
 
 public extension Field {
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, ResolveType>,
@@ -165,6 +213,7 @@ public extension Field {
         self.init(name: name, arguments: [argument()], simpleAsyncResolve: function)
     }
     
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, ResolveType>,
@@ -178,6 +227,7 @@ public extension Field {
 // MARK: SyncResolve Initializers
 
 public extension Field where FieldType : Encodable {
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -185,7 +235,8 @@ public extension Field where FieldType : Encodable {
     ) {
         self.init(name: name, arguments: [argument()], syncResolve: function)
     }
-    
+        
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -196,6 +247,7 @@ public extension Field where FieldType : Encodable {
 }
 
 public extension Field {
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, ResolveType>,
@@ -205,6 +257,7 @@ public extension Field {
         self.init(name: name, arguments: [argument()], syncResolve: function)
     }
     
+    @available(*, deprecated, message: "Use the initializer that takes a key path to a `Resolve` function instead.")
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, ResolveType>,
@@ -215,15 +268,117 @@ public extension Field {
     }
 }
 
+#if compiler(>=5.5) && canImport(_Concurrency)
+
 // MARK: Keypath Initializers
 
+public typealias Resolve<Context, Arguments, ResolveType> = (
+    _ context: Context,
+    _ arguments: Arguments
+) async throws -> ResolveType
+
+@available(macOS 12, *)
+public extension Field {
+    convenience init(
+        _ name: String,
+        at keyPath: KeyPath<ObjectType, Resolve<Context, Arguments, FieldType>>,
+        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>]
+    ) {
+        let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, FieldType> = { type in
+            { context, arguments, group in
+                let promise = group.next().makePromise(of: FieldType.self)
+                
+                promise.completeWithTask {
+                    try await type[keyPath: keyPath](context, arguments)
+                }
+                    
+                return promise.futureResult
+            }
+        }
+        
+        self.init(name: name, arguments: arguments(), asyncResolve: asyncResolve)
+    }
+}
+
+@available(macOS 12, *)
+public extension Field {
+    convenience init<ResolveType>(
+        _ name: String,
+        at keyPath: KeyPath<ObjectType, Resolve<Context, Arguments, ResolveType>>,
+        as: FieldType.Type,
+        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>]
+    ) where ResolveType: Encodable {
+        let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+            { context, arguments, group in
+                let promise = group.next().makePromise(of: ResolveType.self)
+                
+                promise.completeWithTask {
+                    try await type[keyPath: keyPath](context, arguments)
+                }
+                    
+                return promise.futureResult
+            }
+        }
+        
+        self.init(name: name, arguments: arguments(), asyncResolve: asyncResolve)
+    }
+}
+
+@available(macOS 12, *)
 public extension Field where Arguments == NoArguments {
     convenience init(
         _ name: String,
+        at keyPath: KeyPath<ObjectType, Resolve<Context, Void, FieldType>>
+    ) {
+        let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, FieldType> = { type in
+            { context, _, group in
+                let promise = group.next().makePromise(of: FieldType.self)
+                
+                promise.completeWithTask {
+                    try await type[keyPath: keyPath](context, ())
+                }
+                    
+                return promise.futureResult
+            }
+        }
+        
+        self.init(name: name, arguments: [], asyncResolve: asyncResolve)
+    }
+}
+
+@available(macOS 12, *)
+public extension Field where Arguments == NoArguments {
+    convenience init<ResolveType>(
+        _ name: String,
+        at keyPath: KeyPath<ObjectType, Resolve<Context, Void, ResolveType>>,
+        as: FieldType.Type
+    ) {
+        let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+            { context, _, group in
+                let promise = group.next().makePromise(of: ResolveType.self)
+                
+                promise.completeWithTask {
+                    try await type[keyPath: keyPath](context, ())
+                }
+                    
+                return promise.futureResult
+            }
+        }
+        
+        self.init(name: name, arguments: [], asyncResolve: asyncResolve)
+    }
+}
+
+#endif
+
+public extension Field where Arguments == NoArguments, FieldType: Encodable {
+    convenience init(
+        _ name: String,
+        of type: FieldType.Type = FieldType.self,
         at keyPath: KeyPath<ObjectType, FieldType>
     ) {
-        let syncResolve: SyncResolve<ObjectType, Context, NoArguments, FieldType> = { type in
-            { context, _ in
+        let syncResolve: SyncResolve<ObjectType, Context, Arguments, FieldType> = { type in
+            { _, _ in
                 type[keyPath: keyPath]
             }
         }
@@ -233,17 +388,41 @@ public extension Field where Arguments == NoArguments {
 }
 
 public extension Field where Arguments == NoArguments {
+    @available(*, deprecated, message: "Use the Field.init(_:of:at:) instead.")
     convenience init<ResolveType>(
         _ name: String,
         at keyPath: KeyPath<ObjectType, ResolveType>,
         as: FieldType.Type
-    ) {
-        let syncResolve: SyncResolve<ObjectType, Context, NoArguments, ResolveType> = { type in
-            return { context, _ in
-                return type[keyPath: keyPath]
+    ) where ResolveType: Encodable {
+        let syncResolve: SyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+            { _, _ in
+                type[keyPath: keyPath]
             }
         }
         
         self.init(name: name, arguments: [], syncResolve: syncResolve)
+    }
+    
+    convenience init<ResolveType>(
+        _ name: String,
+        of type: FieldType.Type,
+        at keyPath: KeyPath<ObjectType, ResolveType>
+    ) where ResolveType: Encodable {
+        let syncResolve: SyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+            { _, _ in
+                type[keyPath: keyPath]
+            }
+        }
+        
+        self.init(name: name, arguments: [], syncResolve: syncResolve)
+    }
+}
+
+// MARK: Directive
+
+extension Field {
+    func directive<Directive>(_ directive: Directive) -> Field where Directive: FieldDefinitionDirective {
+        directives.append(directive)
+        return self
     }
 }

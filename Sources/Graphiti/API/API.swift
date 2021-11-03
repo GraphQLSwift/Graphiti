@@ -1,6 +1,7 @@
 import GraphQL
 import NIO
 
+@available(*, deprecated, message: "Use the schema directly.")
 public protocol API {
     associatedtype Resolver
     associatedtype ContextType
@@ -16,11 +17,11 @@ extension API {
         variables: [String: Map] = [:],
         operationName: String? = nil
     ) -> EventLoopFuture<GraphQLResult> {
-        return schema.execute(
+        schema.execute(
             request: request,
             resolver: resolver,
             context: context,
-            eventLoopGroup: eventLoopGroup,
+            on: eventLoopGroup,
             variables: variables,
             operationName: operationName
         )
@@ -33,11 +34,11 @@ extension API {
         variables: [String: Map] = [:],
         operationName: String? = nil
     ) -> EventLoopFuture<SubscriptionResult> {
-        return schema.subscribe(
+        schema.subscribe(
             request: request,
             resolver: resolver,
             context: context,
-            eventLoopGroup: eventLoopGroup,
+            on: eventLoopGroup,
             variables: variables,
             operationName: operationName
         )

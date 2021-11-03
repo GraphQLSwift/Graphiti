@@ -4,38 +4,40 @@ import Foundation
 import NIO
 @testable import Graphiti
 
-class ScalarTests : XCTestCase {
+@available(macOS 12, *)
+class ScalarTests: XCTestCase {
     // MARK: Test UUID converts to String as expected
     func testUUIDOutput() throws {
-        struct UUIDOutput : Codable {
+        struct UUIDOutput: Codable {
             let value: UUID
         }
         
-        struct TestResolver {
-            func uuid(context: NoContext, arguments: NoArguments) -> UUIDOutput {
-                return UUIDOutput(value: UUID(uuidString: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F")!)
+        struct Resolver {
+            let uuid: (Void, Void) async throws -> UUIDOutput = { _, _ in
+                UUIDOutput(value: UUID(uuidString: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F")!)
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let schema = Schema<Resolver, Void> {
             Scalar(UUID.self, as: "UUID")
+            
             Type(UUIDOutput.self) {
                 Field("value", at: \.value)
             }
+            
             Query {
-                Field("uuid", at: TestResolver.uuid)
+                Field("uuid", at: \.uuid)
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
-            resolver: TestResolver(),
-            schema: testSchema
-        )
         
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
+        
+        defer {
+            try? group.syncShutdownGracefully()
+        }
         
         XCTAssertEqual(
-            try api.execute(
+            try schema.execute(
                 request: """
                 query {
                   uuid {
@@ -43,7 +45,8 @@ class ScalarTests : XCTestCase {
                   }
                 }
                 """,
-                context: NoContext(),
+                resolver: Resolver(),
+                context: (),
                 on: group
             ).wait(),
             GraphQLResult(data: [
@@ -55,41 +58,39 @@ class ScalarTests : XCTestCase {
     }
     
     func testUUIDArg() throws {
-        struct UUIDOutput : Codable {
+        struct UUIDOutput: Codable {
             let value: UUID
         }
         
-        struct Arguments : Codable {
+        struct Arguments: Codable {
             let value: UUID
         }
         
-        struct TestResolver {
-            func uuid(context: NoContext, arguments: Arguments) -> UUIDOutput {
-                return UUIDOutput(value: arguments.value)
+        struct Resolver {
+            let uuid: (Void, Arguments) async throws -> UUIDOutput = { _, arguments in
+                UUIDOutput(value: arguments.value)
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let schema = Schema<Resolver, Void> {
             Scalar(UUID.self, as: "UUID")
+            
             Type(UUIDOutput.self) {
                 Field("value", at: \.value)
             }
+            
             Query {
-                Field("uuid", at: TestResolver.uuid) {
+                Field("uuid", at: \.uuid) {
                     Argument("value", at: \.value)
                 }
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
-            resolver: TestResolver(),
-            schema: testSchema
-        )
         
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
         
         XCTAssertEqual(
-            try api.execute(
+            try schema.execute(
                 request: """
                 query {
                   uuid (value: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F") {
@@ -97,7 +98,8 @@ class ScalarTests : XCTestCase {
                   }
                 }
                 """,
-                context: NoContext(),
+                resolver: Resolver(),
+                context: (),
                 on: group
             ).wait(),
             GraphQLResult(data: [
@@ -109,48 +111,50 @@ class ScalarTests : XCTestCase {
     }
     
     func testUUIDInput() throws {
-        struct UUIDOutput : Codable {
+        struct UUIDOutput: Codable {
             let value: UUID
         }
         
-        struct UUIDInput : Codable {
+        struct UUIDInput: Codable {
             let value: UUID
         }
         
-        struct Arguments : Codable {
+        struct Arguments: Codable {
             let input: UUIDInput
         }
         
-        struct TestResolver {
-            func uuid(context: NoContext, arguments: Arguments) -> UUIDOutput {
-                return UUIDOutput(value: arguments.input.value)
+        struct Resolver {
+            let uuid: (Void, Arguments) async throws -> UUIDOutput = { _, arguments in
+                UUIDOutput(value: arguments.input.value)
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let schema = Schema<Resolver, Void> {
             Scalar(UUID.self, as: "UUID")
+            
             Type(UUIDOutput.self) {
                 Field("value", at: \.value)
             }
+            
             Input(UUIDInput.self) {
                 InputField("value", at: \.value)
             }
+            
             Query {
-                Field("uuid", at: TestResolver.uuid) {
+                Field("uuid", at: \.uuid) {
                     Argument("input", at: \.input)
                 }
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
-            resolver: TestResolver(),
-            schema: testSchema
-        )
         
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
+        
+        defer {
+            try? group.syncShutdownGracefully()
+        }
         
         XCTAssertEqual(
-            try api.execute(
+            try schema.execute(
                 request: """
                 query {
                   uuid (input: {value: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"}) {
@@ -158,7 +162,8 @@ class ScalarTests : XCTestCase {
                   }
                 }
                 """,
-                context: NoContext(),
+                resolver: Resolver(),
+                context: (),
                 on: group
             ).wait(),
             GraphQLResult(data: [
@@ -184,7 +189,7 @@ class ScalarTests : XCTestCase {
         let coders = Coders()
         coders.decoder.dateDecodingStrategy = .iso8601
         coders.encoder.dateEncodingStrategy = .iso8601
-        let testSchema = try Schema<TestResolver, NoContext>(
+        let testSchema = Schema<TestResolver, NoContext>(
             coders: coders
         ) {
             Scalar(Date.self, as: "Date")
@@ -195,6 +200,7 @@ class ScalarTests : XCTestCase {
                 Field("date", at: TestResolver.date)
             }
         }
+
         let api = TestAPI<TestResolver, NoContext> (
             resolver: TestResolver(),
             schema: testSchema
@@ -241,7 +247,7 @@ class ScalarTests : XCTestCase {
         let coders = Coders()
         coders.decoder.dateDecodingStrategy = .iso8601
         coders.encoder.dateEncodingStrategy = .iso8601
-        let testSchema = try Schema<TestResolver, NoContext>(
+        let testSchema = Schema<TestResolver, NoContext>(
             coders: coders
         ) {
             Scalar(Date.self, as: "Date")
@@ -304,7 +310,7 @@ class ScalarTests : XCTestCase {
         let coders = Coders()
         coders.decoder.dateDecodingStrategy = .iso8601
         coders.encoder.dateEncodingStrategy = .iso8601
-        let testSchema = try Schema<TestResolver, NoContext>(
+        let testSchema = Schema<TestResolver, NoContext>(
             coders: coders
         ) {
             Scalar(Date.self, as: "Date")
@@ -360,7 +366,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(StringCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
                 Field("value", at: \.value)
@@ -412,7 +418,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(StringCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
                 Field("value", at: \.value)
@@ -470,7 +476,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(StringCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
                 Field("value", at: \.value)
@@ -524,7 +530,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(DictCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
                 Field("value", at: \.value)
@@ -580,7 +586,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(DictCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
                 Field("value", at: \.value)
@@ -642,7 +648,7 @@ class ScalarTests : XCTestCase {
             }
         }
         
-        let testSchema = try Schema<TestResolver, NoContext> {
+        let testSchema = Schema<TestResolver, NoContext> {
             Scalar(DictCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
                 Field("value", at: \.value)
@@ -689,7 +695,7 @@ class ScalarTests : XCTestCase {
     }
 }
 
-fileprivate class TestAPI<Resolver, ContextType> : API {
+fileprivate class TestAPI<Resolver, ContextType>: API {
     public let resolver: Resolver
     public let schema: Schema<Resolver, ContextType>
     

@@ -9,7 +9,7 @@ public class SubscriptionField<SourceEventType, ObjectType, Context, FieldType, 
     let resolve: AsyncResolve<SourceEventType, Context, Arguments, Any?>
     let subscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>>
     
-    override func field(typeProvider: TypeProvider, coders: Coders) throws -> (String, GraphQLField) {
+    override func field(typeProvider: SchemaTypeProvider, coders: Coders) throws -> (String, GraphQLField) {
         let field = GraphQLField(
             type: try typeProvider.getOutputType(from: FieldType.self, field: name),
             description: description,
@@ -65,6 +65,7 @@ public class SubscriptionField<SourceEventType, ObjectType, Context, FieldType, 
         self.arguments = arguments
         self.resolve = resolve
         self.subscribe = subscribe
+        super.init()
     }
 
     convenience init<ResolveType>(
@@ -170,6 +171,18 @@ public class SubscriptionField<SourceEventType, ObjectType, Context, FieldType, 
             }
         }
         self.init(name: name, arguments: arguments, as: `as`, asyncSubscribe: asyncSubscribe)
+    }
+    
+    public required init(extendedGraphemeClusterLiteral string: String) {
+        fatalError("init(extendedGraphemeClusterLiteral:) has not been implemented")
+    }
+    
+    public required init(unicodeScalarLiteral string: String) {
+        fatalError("init(unicodeScalarLiteral:) has not been implemented")
+    }
+    
+    public required init(stringLiteral string: StringLiteralType) {
+        fatalError("init(stringLiteral:) has not been implemented")
     }
 }
 

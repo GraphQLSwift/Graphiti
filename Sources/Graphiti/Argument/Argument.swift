@@ -16,12 +16,26 @@ public class Argument<ArgumentsType : Decodable, ArgumentType> : ArgumentCompone
     
     init(name: String) {
         self.name = name
+        super.init()
+    }
+
+    public required init(stringLiteral string: StringLiteralType) {
+        fatalError("init(stringLiteral:) has not been implemented")
     }
 }
 
 public extension Argument {
+    @available(*, deprecated, message: "Use Argument.init(_:of:at:) instead.")
     convenience init(
         _ name: String,
+        at keyPath: KeyPath<ArgumentsType, ArgumentType>
+    ) {
+        self.init(name:name)
+    }
+    
+    convenience init(
+        _ name: String,
+        of type: ArgumentType.Type,
         at keyPath: KeyPath<ArgumentsType, ArgumentType>
     ) {
         self.init(name:name)

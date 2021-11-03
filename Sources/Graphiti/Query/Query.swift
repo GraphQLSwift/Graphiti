@@ -8,6 +8,12 @@ public final class Query<Resolver, Context> : Component<Resolver, Context> {
     }
     
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
+        guard typeProvider.query == nil else {
+            throw GraphQLError(
+                message: "Duplicate Query type. There can only be a single Query type in a Schema."
+            )
+        }
+        
         typeProvider.query = try GraphQLObjectType(
             name: name,
             description: description,
@@ -16,7 +22,7 @@ public final class Query<Resolver, Context> : Component<Resolver, Context> {
         )
     }
     
-    func fields(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLFieldMap {
+    func fields(typeProvider: SchemaTypeProvider, coders: Coders) throws -> GraphQLFieldMap {
         var map: GraphQLFieldMap = [:]
         
         for field in fields {
@@ -33,6 +39,18 @@ public final class Query<Resolver, Context> : Component<Resolver, Context> {
     ) {
         self.fields = fields
         super.init(name: name)
+    }
+    
+    public required init(extendedGraphemeClusterLiteral string: String) {
+        fatalError("init(extendedGraphemeClusterLiteral:) has not been implemented")
+    }
+    
+    public required init(stringLiteral string: StringLiteralType) {
+        fatalError("init(stringLiteral:) has not been implemented")
+    }
+    
+    public required init(unicodeScalarLiteral string: String) {
+        fatalError("init(unicodeScalarLiteral:) has not been implemented")
     }
 }
 
