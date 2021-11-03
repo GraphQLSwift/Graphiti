@@ -9,14 +9,6 @@ public class ArgumentComponent<ArgumentsType : Decodable>: ExpressibleByStringLi
         fatalError()
     }
     
-    public required init(unicodeScalarLiteral string: String) {
-        self.description = string
-    }
-    
-    public required init(extendedGraphemeClusterLiteral string: String) {
-        self.description = string
-    }
-    
     public required init(stringLiteral string: StringLiteralType) {
         self.description = string
     }

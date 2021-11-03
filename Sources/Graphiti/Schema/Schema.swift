@@ -26,7 +26,7 @@ public final class Schema<Resolver, Context> {
             mutation: typeProvider.mutation,
             subscription: typeProvider.subscription,
             types: typeProvider.types,
-            directives: typeProvider.directives
+            directives: typeProvider.directives.map(\.0)
         )
     }
 }

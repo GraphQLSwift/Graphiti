@@ -12,6 +12,6 @@ final class SchemaTypeProvider: TypeProvider {
     var mutation: GraphQLObjectType? = nil
     var subscription: GraphQLObjectType? = nil
     var types: [GraphQLNamedType] = []
-    var directives: [GraphQLDirective] = []
+    var directives: [(GraphQLDirective, (Map, Coders) throws -> Any)] = []
 }
 

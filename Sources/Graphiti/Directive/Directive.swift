@@ -20,7 +20,11 @@ public final class Directive<Resolver, Context, DirectiveType>: Component<Resolv
         
         #warning("TODO: Guarantee there is no other directive with same name")
         #warning("TODO: Map DirectiveType to GraphQLDirective")
-        typeProvider.directives.append(directive)
+        typeProvider.directives.append((directive, decodeDirective))
+    }
+    
+    func decodeDirective(map: Map, coders: Coders) throws -> Any {
+        try coders.decoder.decode(DirectiveType.self, from: map)
     }
     
     func arguments(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLArgumentConfigMap {

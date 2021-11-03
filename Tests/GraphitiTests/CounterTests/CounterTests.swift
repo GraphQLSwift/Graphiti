@@ -210,8 +210,18 @@ class CounterTests: XCTestCase {
                 }
             }
             
-            func field() {
-                print("lowercased")
+            func field<ObjectType, Context, Arguments>(resolve: @escaping AsyncResolve<ObjectType, Context, Arguments, Any?>) -> AsyncResolve<ObjectType, Context, Arguments, Any?> {
+                { object in
+                    { context, arguments, group in
+                        try resolve(object)(context, arguments, group).map { value in
+                            guard let string = value as? String else {
+                                return value
+                            }
+
+                            return string.lowercased()
+                        }
+                    }
+                }
             }
         }
         
@@ -232,8 +242,18 @@ class CounterTests: XCTestCase {
                 }
             }
             
-            func field() {
-                print("uppercased")
+            func field<ObjectType, Context, Arguments>(resolve: @escaping AsyncResolve<ObjectType, Context, Arguments, Any?>) -> AsyncResolve<ObjectType, Context, Arguments, Any?> {
+                { object in
+                    { context, arguments, group in
+                        try resolve(object)(context, arguments, group).map { value in
+                            guard let string = value as? String else {
+                                return value
+                            }
+
+                            return string.uppercased()
+                        }
+                    }
+                }
             }
         }
      
@@ -273,7 +293,7 @@ class CounterTests: XCTestCase {
         debugPrint(schema)
         
         let result = try schema.execute(
-            request: "query { user { name @lowercased } }",
+            request: "query { user { name @lowercased @uppercased } }",
             resolver: Resolver(user: User(name: "Paulo")),
             context: Context(),
             on: group

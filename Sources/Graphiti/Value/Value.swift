@@ -1,28 +1,29 @@
+import GraphQL
+
 #warning("TODO: Rename to EnumValue")
-public final class Value<EnumType : Encodable & RawRepresentable>: ExpressibleByStringLiteral where EnumType.RawValue == String {
+public final class Value<EnumType>: EnumValueComponent<EnumType> where EnumType: Encodable & RawRepresentable, EnumType.RawValue == String {
     let value: EnumType
-    var description: String?
     var deprecationReason: String?
+    
+    override func enumValue(typeProvider: SchemaTypeProvider, coders: Coders) throws -> (String, GraphQLEnumValue) {
+        let enumValue = GraphQLEnumValue(
+            value: try MapEncoder().encode(value),
+            description: description,
+            deprecationReason: deprecationReason
+        )
+        
+        return (value.rawValue, enumValue)
+    }
     
     init(
         value: EnumType
     ) {
         self.value = value
+        super.init()
     }
-    
-    public required init(unicodeScalarLiteral string: String) {
-        self.value = EnumType(rawValue: "")!
-        self.description = string
-    }
-    
-    public required init(extendedGraphemeClusterLiteral string: String) {
-        self.value = EnumType(rawValue: "")!
-        self.description = string
-    }
-    
+        
     public required init(stringLiteral string: StringLiteralType) {
-        self.value = EnumType(rawValue: "")!
-        self.description = string
+        fatalError("init(stringLiteral:) has not been implemented")
     }
 }
 

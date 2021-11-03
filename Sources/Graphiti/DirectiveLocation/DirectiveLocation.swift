@@ -21,7 +21,7 @@ public struct FieldDirectiveLocation {
 }
 
 public protocol FieldDirective {
-    func field()
+    func field<ObjectType, Context, Arguments>(resolve: @escaping AsyncResolve<ObjectType, Context, Arguments, Any?>) -> AsyncResolve<ObjectType, Context, Arguments, Any?>
 }
 
 public extension DirectiveLocation {

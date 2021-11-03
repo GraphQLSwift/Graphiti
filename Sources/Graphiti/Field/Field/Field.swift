@@ -16,9 +16,27 @@ public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<Ob
             deprecationReason: deprecationReason,
             args: try arguments(typeProvider: typeProvider, coders: coders),
             resolve: { source, arguments, context, eventLoopGroup, info in
-                for directive in typeProvider.directives {
-                    if info.fieldASTs[0].directives.contains(where: { $0.name.value == directive.name }) {
-                        print("Found directive \(directive.name)")
+                var resolve = self.resolve
+                
+                for fieldDirective in info.fieldASTs[0].directives {
+                    for (schemaDirective, decodeDirective) in typeProvider.directives {
+                        if fieldDirective.name.value == schemaDirective.name {
+                            print("Found directive \(schemaDirective.name)")
+                            
+                            let directiveMap = try getArgumentValues(
+                                argDefs: schemaDirective.args,
+                                argASTs: fieldDirective.arguments,
+                                variables: info.variableValues
+                            )
+                            
+                            let directive = try decodeDirective(directiveMap, coders)
+                            
+                            guard let fieldDirective = directive as? FieldDirective else {
+                                fatalError("Unreachable")
+                            }
+                            
+                            resolve = fieldDirective.field(resolve: resolve)
+                        }
                     }
                 }
                 
@@ -31,7 +49,7 @@ public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<Ob
                 }
     
                 let arguments = try coders.decoder.decode(Arguments.self, from: arguments)
-                return try self.resolve(source)(context, arguments, eventLoopGroup)
+                return try resolve(source)(context, arguments, eventLoopGroup)
             }
         )
         
@@ -111,14 +129,6 @@ public class Field<ObjectType, Context, FieldType, Arguments>: FieldComponent<Ob
         }
         
         self.init(name: name, arguments: arguments, asyncResolve: asyncResolve)
-    }
-    
-    public required init(extendedGraphemeClusterLiteral string: String) {
-        fatalError("init(extendedGraphemeClusterLiteral:) has not been implemented")
-    }
-    
-    public required init(unicodeScalarLiteral string: String) {
-        fatalError("init(unicodeScalarLiteral:) has not been implemented")
     }
     
     public required init(stringLiteral string: StringLiteralType) {

@@ -8,16 +8,6 @@ open class Component<Resolver, Context>: ExpressibleByStringLiteral {
         self.name = name
     }
     
-    public required init(unicodeScalarLiteral string: String) {
-        self.name = ""
-        self.description = string
-    }
-    
-    public required init(extendedGraphemeClusterLiteral string: String) {
-        self.name = ""
-        self.description = string
-    }
-    
     public required init(stringLiteral string: StringLiteralType) {
         self.name = ""
         self.description = string

@@ -9,15 +9,7 @@ public class FieldComponent<ObjectType, Context>: ExpressibleByStringLiteral {
     }
     
     init() {}
-    
-    public required init(unicodeScalarLiteral string: String) {
-        self.description = string
-    }
-    
-    public required init(extendedGraphemeClusterLiteral string: String) {
-        self.description = string
-    }
-    
+
     public required init(stringLiteral string: StringLiteralType) {
         self.description = string
     }
