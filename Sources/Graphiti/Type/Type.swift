@@ -1,6 +1,8 @@
 import GraphQL
 
-public final class Type<Resolver, Context, ObjectType : Encodable> : Component<Resolver, Context> {
+public typealias Type = _Type
+
+public final class _Type<Resolver, Context, ObjectType : Encodable> : Component<Resolver, Context> {
     let interfaces: [Any.Type]
     let fields: [FieldComponent<ObjectType, Context>]
     
