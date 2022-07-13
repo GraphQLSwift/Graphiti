@@ -357,6 +357,109 @@ public extension SubscriptionField {
     }
 }
 
+#if compiler(>=5.5) && canImport(_Concurrency)
+
+public extension SubscriptionField {
+    
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    convenience init<ResolveType>(
+        name: String,
+        arguments: [ArgumentComponent<Arguments>],
+        concurrentResolve: @escaping ConcurrentResolve<SourceEventType, Context, Arguments, ResolveType>,
+        concurrentSubscribe: @escaping ConcurrentResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>>
+    ) {
+        let asyncResolve: AsyncResolve<SourceEventType, Context, Arguments, ResolveType> = { type in
+            { context, arguments, eventLoopGroup in
+                let promise = eventLoopGroup.next().makePromise(of: ResolveType.self)
+                promise.completeWithTask {
+                    try await concurrentResolve(type)(context, arguments)
+                }
+                return promise.futureResult
+            }
+        }
+        let asyncSubscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>> = { type in
+            { context, arguments, eventLoopGroup in
+                let promise = eventLoopGroup.next().makePromise(of: EventStream<SourceEventType>.self)
+                promise.completeWithTask {
+                    try await concurrentSubscribe(type)(context, arguments)
+                }
+                return promise.futureResult
+            }
+        }
+        self.init(name: name, arguments: arguments, asyncResolve: asyncResolve, asyncSubscribe: asyncSubscribe)
+    }
+    
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    convenience init(
+        name: String,
+        arguments: [ArgumentComponent<Arguments>],
+        as: FieldType.Type,
+        concurrentSubscribe: @escaping ConcurrentResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>>
+    ) {
+        let asyncSubscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>> = { type in
+            { context, arguments, eventLoopGroup in
+                let promise = eventLoopGroup.next().makePromise(of: EventStream<SourceEventType>.self)
+                promise.completeWithTask {
+                    try await concurrentSubscribe(type)(context, arguments)
+                }
+                return promise.futureResult
+            }
+        }
+        self.init(name: name, arguments: arguments, as: `as`, asyncSubscribe: asyncSubscribe)
+    }
+}
+
+// MARK: ConcurrentResolve Initializers
+
+public extension SubscriptionField where FieldType : Encodable {
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    convenience init(
+        _ name: String,
+        at function: @escaping ConcurrentResolve<SourceEventType, Context, Arguments, FieldType>,
+        atSub subFunc: @escaping ConcurrentResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>>,
+        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
+    ) {
+        self.init(name: name, arguments: [argument()], concurrentResolve: function, concurrentSubscribe: subFunc)
+    }
+    
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    convenience init(
+        _ name: String,
+        at function: @escaping ConcurrentResolve<SourceEventType, Context, Arguments, FieldType>,
+        atSub subFunc: @escaping ConcurrentResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>>,
+        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+    ) {
+        self.init(name: name, arguments: arguments(), concurrentResolve: function, concurrentSubscribe: subFunc)
+    }
+}
+
+public extension SubscriptionField {
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    convenience init<ResolveType>(
+        _ name: String,
+        at function: @escaping ConcurrentResolve<SourceEventType, Context, Arguments, ResolveType>,
+        as: FieldType.Type,
+        atSub subFunc: @escaping ConcurrentResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>>,
+        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
+    ) {
+        self.init(name: name, arguments: [argument()], concurrentResolve: function, concurrentSubscribe: subFunc)
+    }
+    
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    convenience init<ResolveType>(
+        _ name: String,
+        at function: @escaping ConcurrentResolve<SourceEventType, Context, Arguments, ResolveType>,
+        as: FieldType.Type,
+        atSub subFunc: @escaping ConcurrentResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>>,
+        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+    ) {
+        self.init(name: name, arguments: arguments(), concurrentResolve: function, concurrentSubscribe: subFunc)
+    }
+}
+
+#endif
+
+
 // TODO Determine if we can use keypaths to initialize
 
 // MARK: Keypath Initializers
