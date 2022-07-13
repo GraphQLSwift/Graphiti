@@ -7,7 +7,7 @@ let package = Package(
         .library(name: "Graphiti", targets: ["Graphiti"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/GraphQLSwift/GraphQL.git", .upToNextMajor(from: "2.0.0"))
+        .package(url: "https://github.com/GraphQLSwift/GraphQL.git", from: "2.4.0")
     ],
     targets: [
         .target(name: "Graphiti", dependencies: ["GraphQL"]),
