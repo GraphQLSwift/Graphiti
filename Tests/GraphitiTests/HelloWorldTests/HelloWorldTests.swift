@@ -68,7 +68,7 @@ struct HelloResolver {
         context.hello()
     }
     
-    func asyncHello(
+    func futureHello(
         context: HelloContext,
         arguments: NoArguments,
         group: EventLoopGroup
@@ -134,7 +134,7 @@ struct HelloAPI : API {
         
         Query {
             Field("hello", at: HelloResolver.hello)
-            Field("asyncHello", at: HelloResolver.asyncHello)
+            Field("futureHello", at: HelloResolver.futureHello)
             
             Field("float", at: HelloResolver.getFloat) {
                 Argument("float", at: \.float)
@@ -181,9 +181,9 @@ class HelloWorldTests : XCTestCase {
         wait(for: [expectation], timeout: 10)
     }
     
-    func testHelloAsync() throws {
-        let query = "{ asyncHello }"
-        let expected = GraphQLResult(data: ["asyncHello": "world"])
+    func testFutureHello() throws {
+        let query = "{ futureHello }"
+        let expected = GraphQLResult(data: ["futureHello": "world"])
         
         let expectation = XCTestExpectation()
         
@@ -381,214 +381,10 @@ extension HelloWorldTests {
     static var allTests: [(String, (HelloWorldTests) -> () throws -> Void)] {
         return [
             ("testHello", testHello),
-            ("testHelloAsync", testHelloAsync),
+            ("testFutureHello", testFutureHello),
             ("testBoyhowdy", testBoyhowdy),
             ("testScalar", testScalar),
             ("testInput", testInput),
         ]
     }
 }
-
-#if compiler(>=5.5) && canImport(_Concurrency)
-
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-let pubsub = SimplePubSub<User>()
-
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-extension HelloResolver {
-    func subscribeUser(context: HelloContext, arguments: NoArguments) -> EventStream<User> {
-        pubsub.subscribe()
-    }
-}
-
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-// Same as the one above, except with a few subscription fields
-struct HelloSubscribeAPI : API {
-    let resolver = HelloResolver()
-    let context = HelloContext()
-    
-    let schema = try! Schema<HelloResolver, HelloContext> {
-        Scalar(Float.self)
-            .description("The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).")
-
-        Scalar(ID.self)
-            .description("The `ID` scalar type represents a unique identifier.")
-        
-        Type(User.self) {
-            Field("id", at: \.id)
-            Field("name", at: \.name)
-            Field("friends", at: \.friends, as: [TypeReference<User>]?.self)
-        }
-
-        Input(UserInput.self) {
-            InputField("id", at: \.id)
-            InputField("name", at: \.name)
-            InputField("friends", at: \.friends, as: [TypeReference<UserInput>]?.self)
-        }
-        
-        Type(UserEvent.self) {
-            Field("user", at: \.user)
-        }
-        
-        Query {
-            Field("hello", at: HelloResolver.hello)
-            Field("asyncHello", at: HelloResolver.asyncHello)
-            
-            Field("float", at: HelloResolver.getFloat) {
-                Argument("float", at: \.float)
-            }
-            
-            Field("id", at: HelloResolver.getId) {
-                Argument("id", at: \.id)
-            }
-            
-            Field("user", at: HelloResolver.getUser)
-        }
-
-        Mutation {
-            Field("addUser", at: HelloResolver.addUser) {
-                Argument("user", at: \.user)
-            }
-        }
-        
-        Subscription {
-            SubscriptionField("subscribeUser", as: User.self, atSub: HelloResolver.subscribeUser)
-            SubscriptionField("subscribeUserEvent", at: User.toEvent, atSub: HelloResolver.subscribeUser)
-        }
-    }
-}
-
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-class HelloWorldSubscribeTests : XCTestCase {
-    private let api = HelloSubscribeAPI()
-    private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-    
-    /// Tests subscription when the sourceEventStream type matches the resolved type (i.e. the normal resolution function should just short-circuit to the sourceEventStream object)
-    func testSubscriptionSelf() async throws {
-        let request = """
-        subscription {
-            subscribeUser {
-                id
-                name
-            }
-        }
-        """
-        
-        let subscriptionResult = try api.subscribe(
-            request: request,
-            context: api.context,
-            on: group
-        ).wait()
-        guard let subscription = subscriptionResult.stream else {
-            XCTFail(subscriptionResult.errors.description)
-            return
-        }
-        guard let stream = subscription as? ConcurrentEventStream else {
-            XCTFail("stream isn't ConcurrentEventStream")
-            return
-        }
-        var iterator = stream.stream.makeAsyncIterator()
-        
-        pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
-        
-        let result = try await iterator.next()?.get()
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "subscribeUser": [
-                    "id": "124",
-                    "name": "Jerry"
-                ]
-            ])
-        )
-    }
-    
-    /// Tests subscription when the sourceEventStream type does not match the resolved type (i.e. there is a non-trivial resolution function that transforms the sourceEventStream object)
-    func testSubscriptionEvent() async throws {
-        let request = """
-        subscription {
-            subscribeUserEvent {
-                user {
-                    id
-                    name
-                }
-            }
-        }
-        """
-        
-        let subscriptionResult = try api.subscribe(
-            request: request,
-            context: api.context,
-            on: group
-        ).wait()
-        guard let subscription = subscriptionResult.stream else {
-            XCTFail(subscriptionResult.errors.description)
-            return
-        }
-        guard let stream = subscription as? ConcurrentEventStream else {
-            XCTFail("stream isn't ConcurrentEventStream")
-            return
-        }
-        var iterator = stream.stream.makeAsyncIterator()
-        
-        pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
-        
-        let result = try await iterator.next()?.get()
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "subscribeUserEvent": [
-                    "user": [
-                        "id": "124",
-                        "name": "Jerry"
-                    ]
-                ]
-            ])
-        )
-    }
-}
-
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-/// A very simple publish/subscriber used for testing
-class SimplePubSub<T> {
-    private var subscribers: [Subscriber<T>]
-    
-    init() {
-        subscribers = []
-    }
-    
-    func publish(event: T) {
-        for subscriber in subscribers {
-            subscriber.callback(event)
-        }
-    }
-    
-    func cancel() {
-        for subscriber in subscribers {
-            subscriber.cancel()
-        }
-    }
-    
-    func subscribe() -> ConcurrentEventStream<T> {
-        let asyncStream = AsyncThrowingStream<T, Error> { continuation in
-            let subscriber = Subscriber<T>(
-                callback: { newValue in
-                    continuation.yield(newValue)
-                },
-                cancel: {
-                    continuation.finish()
-                }
-            )
-            subscribers.append(subscriber)
-            return
-        }
-        return ConcurrentEventStream<T>.init(asyncStream)
-    }
-}
-
-struct Subscriber<T> {
-    let callback: (T) -> Void
-    let cancel: () -> Void
-}
-
-#endif
