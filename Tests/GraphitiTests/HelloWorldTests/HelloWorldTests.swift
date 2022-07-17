@@ -68,7 +68,7 @@ struct HelloResolver {
         context.hello()
     }
     
-    func asyncHello(
+    func futureHello(
         context: HelloContext,
         arguments: NoArguments,
         group: EventLoopGroup
@@ -134,7 +134,7 @@ struct HelloAPI : API {
         
         Query {
             Field("hello", at: HelloResolver.hello)
-            Field("asyncHello", at: HelloResolver.asyncHello)
+            Field("futureHello", at: HelloResolver.futureHello)
             
             Field("float", at: HelloResolver.getFloat) {
                 Argument("float", at: \.float)
@@ -181,9 +181,9 @@ class HelloWorldTests : XCTestCase {
         wait(for: [expectation], timeout: 10)
     }
     
-    func testHelloAsync() throws {
-        let query = "{ asyncHello }"
-        let expected = GraphQLResult(data: ["asyncHello": "world"])
+    func testFutureHello() throws {
+        let query = "{ futureHello }"
+        let expected = GraphQLResult(data: ["futureHello": "world"])
         
         let expectation = XCTestExpectation()
         
@@ -381,7 +381,7 @@ extension HelloWorldTests {
     static var allTests: [(String, (HelloWorldTests) -> () throws -> Void)] {
         return [
             ("testHello", testHello),
-            ("testHelloAsync", testHelloAsync),
+            ("testFutureHello", testFutureHello),
             ("testBoyhowdy", testBoyhowdy),
             ("testScalar", testScalar),
             ("testInput", testInput),

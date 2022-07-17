@@ -247,3 +247,72 @@ public extension Field where Arguments == NoArguments {
         self.init(name: name, arguments: [], syncResolve: syncResolve)
     }
 }
+
+#if compiler(>=5.5) && canImport(_Concurrency)
+
+public extension Field {
+    
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    convenience init<ResolveType>(
+        name: String,
+        arguments: [ArgumentComponent<Arguments>],
+        concurrentResolve: @escaping ConcurrentResolve<ObjectType, Context, Arguments, ResolveType>
+    ) {
+        let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+            { context, arguments, eventLoopGroup in
+                let promise = eventLoopGroup.next().makePromise(of: ResolveType.self)
+                promise.completeWithTask {
+                    try await concurrentResolve(type)(context, arguments)
+                }
+                return promise.futureResult
+            }
+        }
+        self.init(name: name, arguments: arguments, asyncResolve: asyncResolve)
+    }
+}
+
+// MARK: ConcurrentResolve Initializers
+
+public extension Field where FieldType : Encodable {
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    convenience init(
+        _ name: String,
+        at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, FieldType>,
+        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
+    ) {
+        self.init(name: name, arguments: [argument()], concurrentResolve: function)
+    }
+    
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    convenience init(
+        _ name: String,
+        at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, FieldType>,
+        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+    ) {
+        self.init(name: name, arguments: arguments(), concurrentResolve: function)
+    }
+}
+
+public extension Field {
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    convenience init<ResolveType>(
+        _ name: String,
+        at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, ResolveType>,
+        as: FieldType.Type,
+        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
+    ) {
+        self.init(name: name, arguments: [argument()], concurrentResolve: function)
+    }
+    
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    convenience init<ResolveType>(
+        _ name: String,
+        at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, ResolveType>,
+        as: FieldType.Type,
+        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+    ) {
+        self.init(name: name, arguments: arguments(), concurrentResolve: function)
+    }
+}
+
+#endif

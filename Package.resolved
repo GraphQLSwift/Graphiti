@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/GraphQLSwift/GraphQL.git",
         "state": {
           "branch": null,
-          "revision": "283cc4de56b994a00b2724328221b7a1bc846ddc",
-          "version": "2.2.1"
+          "revision": "ebd2ea40676f8bcbdfd6088c408f3ed321c1a905",
+          "version": "2.4.0"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "d6e3762e0a5f7ede652559f53623baf11006e17c",
-          "version": "2.39.0"
+          "revision": "124119f0bb12384cef35aa041d7c3a686108722d",
+          "version": "2.40.0"
         }
       }
     ]
