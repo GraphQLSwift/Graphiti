@@ -431,6 +431,28 @@ public extension SubscriptionField where FieldType : Encodable {
     ) {
         self.init(name: name, arguments: arguments(), concurrentResolve: function, concurrentSubscribe: subFunc)
     }
+
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    convenience init(
+        _ name: String,
+        as: FieldType.Type,
+        atSub subFunc: @escaping ConcurrentResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>>,
+        @ArgumentComponentBuilder<Arguments> _ arguments: () -> ArgumentComponent<Arguments>
+    ) {
+
+        self.init(name: name, arguments: [arguments()], as: `as`, concurrentSubscribe: subFunc)
+    }
+
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    convenience init(
+        _ name: String,
+        as: FieldType.Type,
+        atSub subFunc: @escaping ConcurrentResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>>,
+        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+    ) {
+
+        self.init(name: name, arguments: arguments(), as: `as`, concurrentSubscribe: subFunc)
+    }
 }
 
 public extension SubscriptionField {
@@ -455,6 +477,7 @@ public extension SubscriptionField {
     ) {
         self.init(name: name, arguments: arguments(), concurrentResolve: function, concurrentSubscribe: subFunc)
     }
+
 }
 
 #endif
