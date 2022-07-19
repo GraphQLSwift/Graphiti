@@ -37,10 +37,12 @@ extension HelloResolver {
 @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
 // Same as the HelloAPI, except with an async query and a few subscription fields
 struct HelloAsyncAPI : API {
-    let resolver = HelloResolver()
-    let context = HelloContext()
+    typealias ContextType = HelloContext
+
+    let resolver: HelloResolver = HelloResolver()
+    let context: HelloContext = HelloContext()
     
-    let schema = try! Schema<HelloResolver, HelloContext> {
+    let schema: Schema<HelloResolver, HelloContext> = try! Schema<HelloResolver, HelloContext> {
         Scalar(Float.self)
             .description("The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).")
 
@@ -91,7 +93,7 @@ struct HelloAsyncAPI : API {
             SubscriptionField("subscribeUserEvent", at: User.toEvent, atSub: HelloResolver.subscribeUser)
             
             SubscriptionField("futureSubscribeUser", as: User.self, atSub: HelloResolver.subscribeUser)
-            SubscriptionField("asyncSubscribeUser", as: User.self, atSub: HelloResolver.subscribeUser)
+            SubscriptionField("asyncSubscribeUser", as: User.self, atSub: HelloResolver.asyncSubscribeUser)
         }
     }
 }
