@@ -13,13 +13,15 @@ class StarWarsIntrospectionTests: XCTestCase {
     }
 
     func testIntrospectionTypeQuery() throws {
-        let query = "query IntrospectionTypeQuery {" +
-            "    __schema {" +
-            "        types {" +
-            "            name" +
-            "        }" +
-            "    }" +
-            "}"
+        let query = """
+        query IntrospectionTypeQuery {
+            __schema {
+                types {
+                    name
+                }
+            }
+        }
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -99,13 +101,15 @@ class StarWarsIntrospectionTests: XCTestCase {
     }
 
     func testIntrospectionQueryTypeQuery() throws {
-        let query = "query IntrospectionQueryTypeQuery {" +
-            "    __schema {" +
-            "        queryType {" +
-            "            name" +
-            "        }" +
-            "    }" +
-            "}"
+        let query = """
+        query IntrospectionQueryTypeQuery {
+            __schema {
+                queryType {
+                    name
+                }
+            }
+        }
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -132,11 +136,13 @@ class StarWarsIntrospectionTests: XCTestCase {
     }
 
     func testIntrospectionDroidTypeQuery() throws {
-        let query = "query IntrospectionDroidTypeQuery {" +
-            "    __type(name: \"Droid\") {" +
-            "        name" +
-            "    }" +
-            "}"
+        let query = """
+        query IntrospectionDroidTypeQuery {
+            __type(name: \"Droid\") {
+                name
+            }
+        }
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -161,12 +167,14 @@ class StarWarsIntrospectionTests: XCTestCase {
     }
 
     func testIntrospectionDroidKindQuery() throws {
-        let query = "query IntrospectionDroidKindQuery {" +
-            "    __type(name: \"Droid\") {" +
-            "        name" +
-            "        kind" +
-            "    }" +
-            "}"
+        let query = """
+        query IntrospectionDroidKindQuery {
+            __type(name: \"Droid\") {
+                name
+                kind
+            }
+        }
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -192,12 +200,14 @@ class StarWarsIntrospectionTests: XCTestCase {
     }
 
     func testIntrospectionCharacterKindQuery() throws {
-        let query = "query IntrospectionCharacterKindQuery {" +
-            "    __type(name: \"Character\") {" +
-            "        name" +
-            "        kind" +
-            "    }" +
-            "}"
+        let query = """
+        query IntrospectionCharacterKindQuery {
+            __type(name: \"Character\") {
+                name
+                kind
+            }
+        }
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -223,18 +233,20 @@ class StarWarsIntrospectionTests: XCTestCase {
     }
 
     func testIntrospectionDroidFieldsQuery() throws {
-        let query = "query IntrospectionDroidFieldsQuery {" +
-            "    __type(name: \"Droid\") {" +
-            "        name" +
-            "        fields {" +
-            "            name" +
-            "            type {" +
-            "                name" +
-            "                kind" +
-            "            }" +
-            "        }" +
-            "    }" +
-            "}"
+        let query = """
+        query IntrospectionDroidFieldsQuery {
+            __type(name: \"Droid\") {
+                name
+                fields {
+                    name
+                    type {
+                        name
+                        kind
+                    }
+                }
+            }
+        }
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -303,22 +315,24 @@ class StarWarsIntrospectionTests: XCTestCase {
     }
 
     func testIntrospectionDroidNestedFieldsQuery() throws {
-        let query = "query IntrospectionDroidNestedFieldsQuery {" +
-            "    __type(name: \"Droid\") {" +
-            "        name" +
-            "        fields {" +
-            "            name" +
-            "            type {" +
-            "                name" +
-            "                kind" +
-            "                ofType {" +
-            "                    name" +
-            "                    kind" +
-            "                }" +
-            "            }" +
-            "        }" +
-            "    }" +
-            "}"
+        let query = """
+        query IntrospectionDroidNestedFieldsQuery {
+            __type(name: \"Droid\") {
+                name
+                fields {
+                    name
+                    type {
+                        name
+                        kind
+                        ofType {
+                            name
+                            kind
+                        }
+                    }
+                }
+            }
+        }
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -408,28 +422,30 @@ class StarWarsIntrospectionTests: XCTestCase {
     }
 
     func testIntrospectionFieldArgsQuery() throws {
-        let query = "query IntrospectionFieldArgsQuery {" +
-            "    __schema {" +
-            "        queryType {" +
-            "            fields {" +
-            "                name" +
-            "                args {" +
-            "                    name" +
-            "                    description" +
-            "                    type {" +
-            "                        name" +
-            "                        kind" +
-            "                        ofType {" +
-            "                            name" +
-            "                            kind" +
-            "                        }" +
-            "                    }" +
-            "                    defaultValue" +
-            "                 }" +
-            "            }" +
-            "        }" +
-            "    }" +
-            "}"
+        let query = """
+        query IntrospectionFieldArgsQuery {
+            __schema {
+                queryType {
+                    fields {
+                        name
+                        args {
+                            name
+                            description
+                            type {
+                                name
+                                kind
+                                ofType {
+                                    name
+                                    kind
+                                }
+                            }
+                            defaultValue
+                         }
+                    }
+                }
+            }
+        }
+        """
 
         let expected = GraphQLResult(
             data: [
@@ -526,12 +542,14 @@ class StarWarsIntrospectionTests: XCTestCase {
     }
 
     func testIntrospectionDroidDescriptionQuery() throws {
-        let query = "query IntrospectionDroidDescriptionQuery {" +
-            "    __type(name: \"Droid\") {" +
-            "        name" +
-            "        description" +
-            "    }" +
-            "}"
+        let query = """
+        query IntrospectionDroidDescriptionQuery {
+            __type(name: \"Droid\") {
+                name
+                description
+            }
+        }
+        """
 
         let expected = GraphQLResult(
             data: [
