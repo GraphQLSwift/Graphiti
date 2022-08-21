@@ -1,25 +1,25 @@
-import XCTest
-import NIO
 import GraphQL
+import NIO
+import XCTest
 
 @testable import Graphiti
 
-class StarWarsIntrospectionTests : XCTestCase {
+class StarWarsIntrospectionTests: XCTestCase {
     private let api = StarWarsAPI()
     private let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-    
+
     deinit {
         try? group.syncShutdownGracefully()
     }
-    
+
     func testIntrospectionTypeQuery() throws {
         let query = "query IntrospectionTypeQuery {" +
-                    "    __schema {" +
-                    "        types {" +
-                    "            name" +
-                    "        }" +
-                    "    }" +
-                    "}"
+            "    __schema {" +
+            "        types {" +
+            "            name" +
+            "        }" +
+            "    }" +
+            "}"
 
         let expected = GraphQLResult(
             data: [
@@ -78,12 +78,12 @@ class StarWarsIntrospectionTests : XCTestCase {
                         ],
                         [
                             "name": "__TypeKind",
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ]
         )
-        
+
         let expectation = XCTestExpectation()
 
         api.execute(
@@ -94,29 +94,29 @@ class StarWarsIntrospectionTests : XCTestCase {
             XCTAssertEqual(result, expected)
             expectation.fulfill()
         }
-        
+
         wait(for: [expectation], timeout: 10)
     }
 
     func testIntrospectionQueryTypeQuery() throws {
         let query = "query IntrospectionQueryTypeQuery {" +
-                    "    __schema {" +
-                    "        queryType {" +
-                    "            name" +
-                    "        }" +
-                    "    }" +
-                    "}"
+            "    __schema {" +
+            "        queryType {" +
+            "            name" +
+            "        }" +
+            "    }" +
+            "}"
 
         let expected = GraphQLResult(
             data: [
                 "__schema": [
                     "queryType": [
                         "name": "Query",
-                    ]
-                ]
+                    ],
+                ],
             ]
         )
-        
+
         let expectation = XCTestExpectation()
 
         api.execute(
@@ -127,25 +127,25 @@ class StarWarsIntrospectionTests : XCTestCase {
             XCTAssertEqual(result, expected)
             expectation.fulfill()
         }
-        
+
         wait(for: [expectation], timeout: 10)
     }
 
     func testIntrospectionDroidTypeQuery() throws {
         let query = "query IntrospectionDroidTypeQuery {" +
-                    "    __type(name: \"Droid\") {" +
-                    "        name" +
-                    "    }" +
-                    "}"
+            "    __type(name: \"Droid\") {" +
+            "        name" +
+            "    }" +
+            "}"
 
         let expected = GraphQLResult(
             data: [
                 "__type": [
                     "name": "Droid",
-                ]
+                ],
             ]
         )
-        
+
         let expectation = XCTestExpectation()
 
         api.execute(
@@ -156,27 +156,27 @@ class StarWarsIntrospectionTests : XCTestCase {
             XCTAssertEqual(result, expected)
             expectation.fulfill()
         }
-        
+
         wait(for: [expectation], timeout: 10)
     }
 
     func testIntrospectionDroidKindQuery() throws {
         let query = "query IntrospectionDroidKindQuery {" +
-                    "    __type(name: \"Droid\") {" +
-                    "        name" +
-                    "        kind" +
-                    "    }" +
-                    "}"
+            "    __type(name: \"Droid\") {" +
+            "        name" +
+            "        kind" +
+            "    }" +
+            "}"
 
         let expected = GraphQLResult(
             data: [
                 "__type": [
                     "name": "Droid",
                     "kind": "OBJECT",
-                ]
+                ],
             ]
         )
-        
+
         let expectation = XCTestExpectation()
 
         api.execute(
@@ -187,27 +187,27 @@ class StarWarsIntrospectionTests : XCTestCase {
             XCTAssertEqual(result, expected)
             expectation.fulfill()
         }
-        
+
         wait(for: [expectation], timeout: 10)
     }
 
     func testIntrospectionCharacterKindQuery() throws {
         let query = "query IntrospectionCharacterKindQuery {" +
-                    "    __type(name: \"Character\") {" +
-                    "        name" +
-                    "        kind" +
-                    "    }" +
-                    "}"
+            "    __type(name: \"Character\") {" +
+            "        name" +
+            "        kind" +
+            "    }" +
+            "}"
 
         let expected = GraphQLResult(
             data: [
                 "__type": [
                     "name": "Character",
                     "kind": "INTERFACE",
-                ]
+                ],
             ]
         )
-        
+
         let expectation = XCTestExpectation()
 
         api.execute(
@@ -218,23 +218,23 @@ class StarWarsIntrospectionTests : XCTestCase {
             XCTAssertEqual(result, expected)
             expectation.fulfill()
         }
-        
+
         wait(for: [expectation], timeout: 10)
     }
 
     func testIntrospectionDroidFieldsQuery() throws {
         let query = "query IntrospectionDroidFieldsQuery {" +
-                    "    __type(name: \"Droid\") {" +
-                    "        name" +
-                    "        fields {" +
-                    "            name" +
-                    "            type {" +
-                    "                name" +
-                    "                kind" +
-                    "            }" +
-                    "        }" +
-                    "    }" +
-                    "}"
+            "    __type(name: \"Droid\") {" +
+            "        name" +
+            "        fields {" +
+            "            name" +
+            "            type {" +
+            "                name" +
+            "                kind" +
+            "            }" +
+            "        }" +
+            "    }" +
+            "}"
 
         let expected = GraphQLResult(
             data: [
@@ -246,48 +246,48 @@ class StarWarsIntrospectionTests : XCTestCase {
                             "type": [
                                 "name": nil,
                                 "kind": "NON_NULL",
-                            ]
+                            ],
                         ],
                         [
                             "name": "friends",
                             "type": [
                                 "name": nil,
                                 "kind": "NON_NULL",
-                            ]
+                            ],
                         ],
                         [
                             "name": "id",
                             "type": [
                                 "name": nil,
                                 "kind": "NON_NULL",
-                            ]
+                            ],
                         ],
                         [
                             "name": "name",
                             "type": [
                                 "name": nil,
                                 "kind": "NON_NULL",
-                            ]
+                            ],
                         ],
                         [
                             "name": "primaryFunction",
                             "type": [
                                 "name": nil,
                                 "kind": "NON_NULL",
-                            ]
+                            ],
                         ],
                         [
                             "name": "secretBackstory",
                             "type": [
                                 "name": "String",
                                 "kind": "SCALAR",
-                            ]
-                        ]
-                    ]
-                ]
+                            ],
+                        ],
+                    ],
+                ],
             ]
         )
-        
+
         let expectation = XCTestExpectation()
 
         api.execute(
@@ -298,27 +298,27 @@ class StarWarsIntrospectionTests : XCTestCase {
             XCTAssertEqual(result, expected)
             expectation.fulfill()
         }
-        
+
         wait(for: [expectation], timeout: 10)
     }
 
     func testIntrospectionDroidNestedFieldsQuery() throws {
         let query = "query IntrospectionDroidNestedFieldsQuery {" +
-                    "    __type(name: \"Droid\") {" +
-                    "        name" +
-                    "        fields {" +
-                    "            name" +
-                    "            type {" +
-                    "                name" +
-                    "                kind" +
-                    "                ofType {" +
-                    "                    name" +
-                    "                    kind" +
-                    "                }" +
-                    "            }" +
-                    "        }" +
-                    "    }" +
-                    "}"
+            "    __type(name: \"Droid\") {" +
+            "        name" +
+            "        fields {" +
+            "            name" +
+            "            type {" +
+            "                name" +
+            "                kind" +
+            "                ofType {" +
+            "                    name" +
+            "                    kind" +
+            "                }" +
+            "            }" +
+            "        }" +
+            "    }" +
+            "}"
 
         let expected = GraphQLResult(
             data: [
@@ -332,9 +332,9 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "kind": "NON_NULL",
                                 "ofType": [
                                     "name": nil,
-                                    "kind": "LIST"
-                                ]
-                            ]
+                                    "kind": "LIST",
+                                ],
+                            ],
                         ],
                         [
                             "name": "friends",
@@ -343,9 +343,9 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "kind": "NON_NULL",
                                 "ofType": [
                                     "name": nil,
-                                    "kind": "LIST"
-                                ]
-                            ]
+                                    "kind": "LIST",
+                                ],
+                            ],
                         ],
                         [
                             "name": "id",
@@ -355,8 +355,8 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "ofType": [
                                     "name": "String",
                                     "kind": "SCALAR",
-                                ]
-                            ]
+                                ],
+                            ],
                         ],
                         [
                             "name": "name",
@@ -366,8 +366,8 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "ofType": [
                                     "name": "String",
                                     "kind": "SCALAR",
-                                ]
-                            ]
+                                ],
+                            ],
                         ],
                         [
                             "name": "primaryFunction",
@@ -377,8 +377,8 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "ofType": [
                                     "name": "String",
                                     "kind": "SCALAR",
-                                ]
-                            ]
+                                ],
+                            ],
                         ],
                         [
                             "name": "secretBackstory",
@@ -386,13 +386,13 @@ class StarWarsIntrospectionTests : XCTestCase {
                                 "name": "String",
                                 "kind": "SCALAR",
                                 "ofType": nil,
-                            ]
-                        ]
-                    ]
-                ]
+                            ],
+                        ],
+                    ],
+                ],
             ]
         )
-        
+
         let expectation = XCTestExpectation()
 
         api.execute(
@@ -403,33 +403,33 @@ class StarWarsIntrospectionTests : XCTestCase {
             XCTAssertEqual(result, expected)
             expectation.fulfill()
         }
-        
+
         wait(for: [expectation], timeout: 10)
     }
 
     func testIntrospectionFieldArgsQuery() throws {
         let query = "query IntrospectionFieldArgsQuery {" +
-                    "    __schema {" +
-                    "        queryType {" +
-                    "            fields {" +
-                    "                name" +
-                    "                args {" +
-                    "                    name" +
-                    "                    description" +
-                    "                    type {" +
-                    "                        name" +
-                    "                        kind" +
-                    "                        ofType {" +
-                    "                            name" +
-                    "                            kind" +
-                    "                        }" +
-                    "                    }" +
-                    "                    defaultValue" +
-                    "                 }" +
-                    "            }" +
-                    "        }" +
-                    "    }" +
-                    "}"
+            "    __schema {" +
+            "        queryType {" +
+            "            fields {" +
+            "                name" +
+            "                args {" +
+            "                    name" +
+            "                    description" +
+            "                    type {" +
+            "                        name" +
+            "                        kind" +
+            "                        ofType {" +
+            "                            name" +
+            "                            kind" +
+            "                        }" +
+            "                    }" +
+            "                    defaultValue" +
+            "                 }" +
+            "            }" +
+            "        }" +
+            "    }" +
+            "}"
 
         let expected = GraphQLResult(
             data: [
@@ -448,11 +448,11 @@ class StarWarsIntrospectionTests : XCTestCase {
                                             "ofType": [
                                                 "name": "String",
                                                 "kind": "SCALAR",
-                                            ]
+                                            ],
                                         ],
                                         "defaultValue": nil,
-                                    ]
-                                ]
+                                    ],
+                                ],
                             ],
                             [
                                 "name": "hero",
@@ -463,11 +463,11 @@ class StarWarsIntrospectionTests : XCTestCase {
                                         "type": [
                                             "name": "Episode",
                                             "kind": "ENUM",
-                                            "ofType": nil
+                                            "ofType": nil,
                                         ],
                                         "defaultValue": nil,
-                                    ]
-                                ]
+                                    ],
+                                ],
                             ],
                             [
                                 "name": "human",
@@ -481,36 +481,36 @@ class StarWarsIntrospectionTests : XCTestCase {
                                             "ofType": [
                                                 "name": "String",
                                                 "kind": "SCALAR",
-                                            ]
+                                            ],
                                         ],
                                         "defaultValue": nil,
-                                    ]
-                                ]
+                                    ],
+                                ],
                             ],
                             [
                                 "name": "search",
                                 "args": [
                                     [
                                         "name": "query",
-                                        "description": nil, 
+                                        "description": nil,
                                         "type": [
                                             "name": nil,
                                             "kind": "NON_NULL",
                                             "ofType": [
                                                 "name": "String",
                                                 "kind": "SCALAR",
-                                            ]
+                                            ],
                                         ],
                                         "defaultValue": "\"R2-D2\"",
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ]
         )
-        
+
         let expectation = XCTestExpectation()
 
         api.execute(
@@ -521,17 +521,17 @@ class StarWarsIntrospectionTests : XCTestCase {
             XCTAssertEqual(result, expected)
             expectation.fulfill()
         }
-        
+
         wait(for: [expectation], timeout: 10)
     }
 
     func testIntrospectionDroidDescriptionQuery() throws {
         let query = "query IntrospectionDroidDescriptionQuery {" +
-                    "    __type(name: \"Droid\") {" +
-                    "        name" +
-                    "        description" +
-                    "    }" +
-                    "}"
+            "    __type(name: \"Droid\") {" +
+            "        name" +
+            "        description" +
+            "    }" +
+            "}"
 
         let expected = GraphQLResult(
             data: [
@@ -543,7 +543,7 @@ class StarWarsIntrospectionTests : XCTestCase {
         )
 
         let expectation = XCTestExpectation()
-        
+
         api.execute(
             request: query,
             context: StarWarsContext(),
@@ -552,7 +552,7 @@ class StarWarsIntrospectionTests : XCTestCase {
             XCTAssertEqual(result, expected)
             expectation.fulfill()
         }
-        
+
         wait(for: [expectation], timeout: 10)
     }
 }

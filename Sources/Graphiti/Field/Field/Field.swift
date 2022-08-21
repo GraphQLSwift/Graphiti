@@ -1,12 +1,18 @@
 import GraphQL
 import NIO
 
-public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : FieldComponent<ObjectType, Context> {
+public class Field<ObjectType, Context, FieldType, Arguments: Decodable>: FieldComponent<
+    ObjectType,
+    Context
+> {
     let name: String
     let arguments: [ArgumentComponent<Arguments>]
     let resolve: AsyncResolve<ObjectType, Context, Arguments, Any?>
-    
-    override func field(typeProvider: TypeProvider, coders: Coders) throws -> (String, GraphQLField) {
+
+    override func field(
+        typeProvider: TypeProvider,
+        coders: Coders
+    ) throws -> (String, GraphQLField) {
         let field = GraphQLField(
             type: try typeProvider.getOutputType(from: FieldType.self, field: name),
             description: description,
@@ -14,32 +20,36 @@ public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : Fiel
             args: try arguments(typeProvider: typeProvider, coders: coders),
             resolve: { source, arguments, context, eventLoopGroup, _ in
                 guard let s = source as? ObjectType else {
-                    throw GraphQLError(message: "Expected source type \(ObjectType.self) but got \(type(of: source))")
+                    throw GraphQLError(
+                        message: "Expected source type \(ObjectType.self) but got \(type(of: source))"
+                    )
                 }
-    
+
                 guard let c = context as? Context else {
-                    throw GraphQLError(message: "Expected context type \(Context.self) but got \(type(of: context))")
+                    throw GraphQLError(
+                        message: "Expected context type \(Context.self) but got \(type(of: context))"
+                    )
                 }
-    
+
                 let a = try coders.decoder.decode(Arguments.self, from: arguments)
-                return  try self.resolve(s)(c, a, eventLoopGroup)
+                return try self.resolve(s)(c, a, eventLoopGroup)
             }
         )
-        
+
         return (name, field)
     }
-    
+
     func arguments(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLArgumentConfigMap {
         var map: GraphQLArgumentConfigMap = [:]
-        
+
         for argument in arguments {
             let (name, argument) = try argument.argument(typeProvider: typeProvider, coders: coders)
             map[name] = argument
         }
-        
+
         return map
     }
-    
+
     init(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
@@ -57,16 +67,21 @@ public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : Fiel
     ) {
         let resolve: AsyncResolve<ObjectType, Context, Arguments, Any?> = { type in
             { context, arguments, eventLoopGroup in
-                return try asyncResolve(type)(context, arguments, eventLoopGroup).map { $0 as Any? }
+                try asyncResolve(type)(context, arguments, eventLoopGroup).map { $0 as Any? }
             }
         }
         self.init(name: name, arguments: arguments, resolve: resolve)
     }
-    
+
     convenience init<ResolveType>(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
-        simpleAsyncResolve: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, ResolveType>
+        simpleAsyncResolve: @escaping SimpleAsyncResolve<
+            ObjectType,
+            Context,
+            Arguments,
+            ResolveType
+        >
     ) {
         let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
             { context, arguments, group in
@@ -75,10 +90,10 @@ public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : Fiel
                 try simpleAsyncResolve(type)(context, arguments).hop(to: group.next())
             }
         }
-        
+
         self.init(name: name, arguments: arguments, asyncResolve: asyncResolve)
     }
-    
+
     convenience init<ResolveType>(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
@@ -90,14 +105,14 @@ public class Field<ObjectType, Context, FieldType, Arguments : Decodable> : Fiel
                 return group.next().makeSucceededFuture(result)
             }
         }
-        
+
         self.init(name: name, arguments: arguments, asyncResolve: asyncResolve)
     }
 }
 
 // MARK: AsyncResolve Initializers
 
-public extension Field where FieldType : Encodable {
+public extension Field where FieldType: Encodable {
     convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -105,11 +120,12 @@ public extension Field where FieldType : Encodable {
     ) {
         self.init(name: name, arguments: [argument()], asyncResolve: function)
     }
-    
+
     convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<ObjectType, Context, Arguments, FieldType>,
-        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+        @ArgumentComponentBuilder<Arguments> _ arguments: ()
+            -> [ArgumentComponent<Arguments>] = { [] }
     ) {
         self.init(name: name, arguments: arguments(), asyncResolve: function)
     }
@@ -124,12 +140,13 @@ public extension Field {
     ) {
         self.init(name: name, arguments: [argument()], asyncResolve: function)
     }
-    
+
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping AsyncResolve<ObjectType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
-        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+        @ArgumentComponentBuilder<Arguments> _ arguments: ()
+            -> [ArgumentComponent<Arguments>] = { [] }
     ) {
         self.init(name: name, arguments: arguments(), asyncResolve: function)
     }
@@ -137,7 +154,7 @@ public extension Field {
 
 // MARK: SimpleAsyncResolve Initializers
 
-public extension Field where FieldType : Encodable {
+public extension Field where FieldType: Encodable {
     convenience init(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -145,11 +162,12 @@ public extension Field where FieldType : Encodable {
     ) {
         self.init(name: name, arguments: [argument()], simpleAsyncResolve: function)
     }
-    
+
     convenience init(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, FieldType>,
-        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+        @ArgumentComponentBuilder<Arguments> _ arguments: ()
+            -> [ArgumentComponent<Arguments>] = { [] }
     ) {
         self.init(name: name, arguments: arguments(), simpleAsyncResolve: function)
     }
@@ -164,12 +182,13 @@ public extension Field {
     ) {
         self.init(name: name, arguments: [argument()], simpleAsyncResolve: function)
     }
-    
+
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
-        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+        @ArgumentComponentBuilder<Arguments> _ arguments: ()
+            -> [ArgumentComponent<Arguments>] = { [] }
     ) {
         self.init(name: name, arguments: arguments(), simpleAsyncResolve: function)
     }
@@ -177,7 +196,7 @@ public extension Field {
 
 // MARK: SyncResolve Initializers
 
-public extension Field where FieldType : Encodable {
+public extension Field where FieldType: Encodable {
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -185,11 +204,12 @@ public extension Field where FieldType : Encodable {
     ) {
         self.init(name: name, arguments: [argument()], syncResolve: function)
     }
-    
+
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, FieldType>,
-        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+        @ArgumentComponentBuilder<Arguments> _ arguments: ()
+            -> [ArgumentComponent<Arguments>] = { [] }
     ) {
         self.init(name: name, arguments: arguments(), syncResolve: function)
     }
@@ -204,12 +224,13 @@ public extension Field {
     ) {
         self.init(name: name, arguments: [argument()], syncResolve: function)
     }
-    
+
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, ResolveType>,
         as: FieldType.Type,
-        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
+        @ArgumentComponentBuilder<Arguments> _ arguments: ()
+            -> [ArgumentComponent<Arguments>] = { [] }
     ) {
         self.init(name: name, arguments: arguments(), syncResolve: function)
     }
@@ -223,11 +244,11 @@ public extension Field where Arguments == NoArguments {
         at keyPath: KeyPath<ObjectType, FieldType>
     ) {
         let syncResolve: SyncResolve<ObjectType, Context, NoArguments, FieldType> = { type in
-            { context, _ in
+            { _, _ in
                 type[keyPath: keyPath]
             }
         }
-        
+
         self.init(name: name, arguments: [], syncResolve: syncResolve)
     }
 }
@@ -236,83 +257,89 @@ public extension Field where Arguments == NoArguments {
     convenience init<ResolveType>(
         _ name: String,
         at keyPath: KeyPath<ObjectType, ResolveType>,
-        as: FieldType.Type
+        as _: FieldType.Type
     ) {
         let syncResolve: SyncResolve<ObjectType, Context, NoArguments, ResolveType> = { type in
-            return { context, _ in
-                return type[keyPath: keyPath]
+            { _, _ in
+                type[keyPath: keyPath]
             }
         }
-        
+
         self.init(name: name, arguments: [], syncResolve: syncResolve)
     }
 }
 
 #if compiler(>=5.5) && canImport(_Concurrency)
 
-public extension Field {
-    
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init<ResolveType>(
-        name: String,
-        arguments: [ArgumentComponent<Arguments>],
-        concurrentResolve: @escaping ConcurrentResolve<ObjectType, Context, Arguments, ResolveType>
-    ) {
-        let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
-            { context, arguments, eventLoopGroup in
-                let promise = eventLoopGroup.next().makePromise(of: ResolveType.self)
-                promise.completeWithTask {
-                    try await concurrentResolve(type)(context, arguments)
+    public extension Field {
+        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        convenience init<ResolveType>(
+            name: String,
+            arguments: [ArgumentComponent<Arguments>],
+            concurrentResolve: @escaping ConcurrentResolve<
+                ObjectType,
+                Context,
+                Arguments,
+                ResolveType
+            >
+        ) {
+            let asyncResolve: AsyncResolve<ObjectType, Context, Arguments, ResolveType> = { type in
+                { context, arguments, eventLoopGroup in
+                    let promise = eventLoopGroup.next().makePromise(of: ResolveType.self)
+                    promise.completeWithTask {
+                        try await concurrentResolve(type)(context, arguments)
+                    }
+                    return promise.futureResult
                 }
-                return promise.futureResult
             }
+            self.init(name: name, arguments: arguments, asyncResolve: asyncResolve)
         }
-        self.init(name: name, arguments: arguments, asyncResolve: asyncResolve)
     }
-}
 
-// MARK: ConcurrentResolve Initializers
+    // MARK: ConcurrentResolve Initializers
 
-public extension Field where FieldType : Encodable {
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init(
-        _ name: String,
-        at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, FieldType>,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(name: name, arguments: [argument()], concurrentResolve: function)
-    }
-    
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init(
-        _ name: String,
-        at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, FieldType>,
-        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
-    ) {
-        self.init(name: name, arguments: arguments(), concurrentResolve: function)
-    }
-}
+    public extension Field where FieldType: Encodable {
+        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        convenience init(
+            _ name: String,
+            at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, FieldType>,
+            @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
+        ) {
+            self.init(name: name, arguments: [argument()], concurrentResolve: function)
+        }
 
-public extension Field {
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init<ResolveType>(
-        _ name: String,
-        at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, ResolveType>,
-        as: FieldType.Type,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(name: name, arguments: [argument()], concurrentResolve: function)
+        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        convenience init(
+            _ name: String,
+            at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, FieldType>,
+            @ArgumentComponentBuilder<Arguments> _ arguments: ()
+                -> [ArgumentComponent<Arguments>] = { [] }
+        ) {
+            self.init(name: name, arguments: arguments(), concurrentResolve: function)
+        }
     }
-    
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init<ResolveType>(
-        _ name: String,
-        at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, ResolveType>,
-        as: FieldType.Type,
-        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {[]}
-    ) {
-        self.init(name: name, arguments: arguments(), concurrentResolve: function)
+
+    public extension Field {
+        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        convenience init<ResolveType>(
+            _ name: String,
+            at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, ResolveType>,
+            as: FieldType.Type,
+            @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
+        ) {
+            self.init(name: name, arguments: [argument()], concurrentResolve: function)
+        }
+
+        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        convenience init<ResolveType>(
+            _ name: String,
+            at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, ResolveType>,
+            as: FieldType.Type,
+            @ArgumentComponentBuilder<Arguments> _ arguments: ()
+                -> [ArgumentComponent<Arguments>] = { [] }
+        ) {
+            self.init(name: name, arguments: arguments(), concurrentResolve: function)
+        }
     }
-}
 
 #endif

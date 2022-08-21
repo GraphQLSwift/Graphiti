@@ -1,9 +1,12 @@
 import GraphQL
 
-public class ArgumentComponent<ArgumentsType : Decodable> {
+public class ArgumentComponent<ArgumentsType: Decodable> {
     var description: String? = nil
-    
-    func argument(typeProvider: TypeProvider, coders: Coders) throws -> (String, GraphQLArgument) {
+
+    func argument(
+        typeProvider _: TypeProvider,
+        coders _: Coders
+    ) throws -> (String, GraphQLArgument) {
         fatalError()
     }
 }

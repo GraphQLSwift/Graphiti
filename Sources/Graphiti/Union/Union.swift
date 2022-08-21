@@ -1,9 +1,9 @@
 import GraphQL
 
-public final class Union<Resolver, Context, UnionType> : Component<Resolver, Context> {
+public final class Union<Resolver, Context, UnionType>: Component<Resolver, Context> {
     private let members: [Any.Type]
-    
-    override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
+
+    override func update(typeProvider: SchemaTypeProvider, coders _: Coders) throws {
         let unionType = try GraphQLUnionType(
             name: name,
             description: description,
@@ -12,18 +12,17 @@ public final class Union<Resolver, Context, UnionType> : Component<Resolver, Con
                 try typeProvider.getObjectType(from: $0)
             }
         )
-        
+
         try typeProvider.map(UnionType.self, to: unionType)
     }
-    
+
     init(
-        type: UnionType.Type,
+        type _: UnionType.Type,
         name: String? = nil,
         members: [Any.Type]
     ) {
         self.members = members
         super.init(name: name ?? Reflection.name(for: UnionType.self))
-        
     }
 }
 

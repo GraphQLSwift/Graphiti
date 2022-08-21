@@ -1,5 +1,5 @@
-import XCTest
 @testable import GraphitiTests
+import XCTest
 
 XCTMain([
     testCase(HelloWorldTests.allTests),

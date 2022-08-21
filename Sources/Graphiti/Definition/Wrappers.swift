@@ -9,7 +9,7 @@ protocol Wrapper {
     static var modifier: WrapperModifier { get }
 }
 
-extension Optional : Wrapper {
+extension Optional: Wrapper {
     static var wrappedType: Any.Type {
         return Wrapped.self
     }
@@ -19,7 +19,7 @@ extension Optional : Wrapper {
     }
 }
 
-extension Array : Wrapper {
+extension Array: Wrapper {
     static var wrappedType: Any.Type {
         return Element.self
     }

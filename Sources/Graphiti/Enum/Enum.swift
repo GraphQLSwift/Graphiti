@@ -1,9 +1,16 @@
 import GraphQL
 
-public final class Enum<Resolver, Context, EnumType : Encodable & RawRepresentable> : Component<Resolver, Context> where EnumType.RawValue == String {
+public final class Enum<
+    Resolver,
+    Context,
+    EnumType: Encodable & RawRepresentable
+>: Component<
+    Resolver,
+    Context
+> where EnumType.RawValue == String {
     private let values: [Value<EnumType>]
-    
-    override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
+
+    override func update(typeProvider: SchemaTypeProvider, coders _: Coders) throws {
         let enumType = try GraphQLEnumType(
             name: name,
             description: description,
@@ -15,12 +22,12 @@ public final class Enum<Resolver, Context, EnumType : Encodable & RawRepresentab
                 )
             }
         )
-        
+
         try typeProvider.map(EnumType.self, to: enumType)
     }
-    
+
     private init(
-        type: EnumType.Type,
+        type _: EnumType.Type,
         name: String?,
         values: [Value<EnumType>]
     ) {
@@ -37,7 +44,7 @@ public extension Enum {
     ) {
         self.init(type: type, name: name, values: [values()])
     }
-    
+
     convenience init(
         _ type: EnumType.Type,
         as name: String? = nil,

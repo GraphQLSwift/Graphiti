@@ -1,5 +1,7 @@
 @resultBuilder
-public struct ValueBuilder<EnumType : Encodable & RawRepresentable> where EnumType.RawValue == String {
+public struct ValueBuilder<
+    EnumType: Encodable & RawRepresentable
+> where EnumType.RawValue == String {
     public static func buildExpression(_ value: Value<EnumType>) -> Value<EnumType> {
         value
     }

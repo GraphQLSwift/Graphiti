@@ -1,12 +1,12 @@
 import GraphQL
 
-public final class Query<Resolver, Context> : Component<Resolver, Context> {
+public final class Query<Resolver, Context>: Component<Resolver, Context> {
     let fields: [FieldComponent<Resolver, Context>]
-    
+
     let isTypeOf: GraphQLIsTypeOf = { source, _, _ in
-        return source is Resolver
+        source is Resolver
     }
-    
+
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         typeProvider.query = try GraphQLObjectType(
             name: name,
@@ -15,18 +15,18 @@ public final class Query<Resolver, Context> : Component<Resolver, Context> {
             isTypeOf: isTypeOf
         )
     }
-    
+
     func fields(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLFieldMap {
         var map: GraphQLFieldMap = [:]
-        
+
         for field in fields {
             let (name, field) = try field.field(typeProvider: typeProvider, coders: coders)
             map[name] = field
         }
-        
+
         return map
     }
-    
+
     private init(
         name: String,
         fields: [FieldComponent<Resolver, Context>]
@@ -43,10 +43,11 @@ public extension Query {
     ) {
         self.init(name: name, fields: [fields()])
     }
-    
+
     convenience init(
         as name: String = "Query",
-        @FieldComponentBuilder<Resolver, Context> _ fields: () -> [FieldComponent<Resolver, Context>]
+        @FieldComponentBuilder<Resolver, Context> _ fields: ()
+            -> [FieldComponent<Resolver, Context>]
     ) {
         self.init(name: name, fields: fields())
     }

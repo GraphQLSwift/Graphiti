@@ -9,16 +9,16 @@ public final class Schema<Resolver, Context> {
         components: [Component<Resolver, Context>]
     ) throws {
         let typeProvider = SchemaTypeProvider()
-        
+
         for component in components {
             try component.update(typeProvider: typeProvider, coders: coders)
         }
-        
+
         guard let query = typeProvider.query else {
             fatalError("Query type is required.")
         }
-        
-        self.schema = try GraphQLSchema(
+
+        schema = try GraphQLSchema(
             query: query,
             mutation: typeProvider.mutation,
             subscription: typeProvider.subscription,
@@ -38,7 +38,7 @@ public extension Schema {
             components: [components()]
         )
     }
-    
+
     convenience init(
         coders: Coders = Coders(),
         @ComponentBuilder<Resolver, Context> _ components: () -> [Component<Resolver, Context>]
@@ -48,7 +48,7 @@ public extension Schema {
             components: components()
         )
     }
-    
+
     func execute(
         request: String,
         resolver: Resolver,
@@ -71,7 +71,7 @@ public extension Schema {
             return eventLoopGroup.next().makeFailedFuture(error)
         }
     }
-    
+
     func subscribe(
         request: String,
         resolver: Resolver,

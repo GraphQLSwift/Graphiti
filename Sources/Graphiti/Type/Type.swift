@@ -1,13 +1,13 @@
 import GraphQL
 
-public final class Type<Resolver, Context, ObjectType : Encodable> : Component<Resolver, Context> {
+public final class Type<Resolver, Context, ObjectType: Encodable>: Component<Resolver, Context> {
     let interfaces: [Any.Type]
     let fields: [FieldComponent<ObjectType, Context>]
-    
+
     let isTypeOf: GraphQLIsTypeOf = { source, _, _ in
-        return source is ObjectType
+        source is ObjectType
     }
-    
+
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         let objectType = try GraphQLObjectType(
             name: name,
@@ -18,23 +18,23 @@ public final class Type<Resolver, Context, ObjectType : Encodable> : Component<R
             },
             isTypeOf: isTypeOf
         )
-        
+
         try typeProvider.map(ObjectType.self, to: objectType)
     }
-    
+
     func fields(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLFieldMap {
         var map: GraphQLFieldMap = [:]
-        
+
         for field in fields {
             let (name, field) = try field.field(typeProvider: typeProvider, coders: coders)
             map[name] = field
         }
-        
+
         return map
     }
-    
+
     private init(
-        type: ObjectType.Type,
+        type _: ObjectType.Type,
         name: String?,
         interfaces: [Any.Type],
         fields: [FieldComponent<ObjectType, Context>]
@@ -50,7 +50,8 @@ public extension Type {
         _ type: ObjectType.Type,
         as name: String? = nil,
         interfaces: [Any.Type] = [],
-        @FieldComponentBuilder<ObjectType, Context> _ fields: () -> FieldComponent<ObjectType, Context>
+        @FieldComponentBuilder<ObjectType, Context> _ fields: ()
+            -> FieldComponent<ObjectType, Context>
     ) {
         self.init(
             type: type,
@@ -59,12 +60,13 @@ public extension Type {
             fields: [fields()]
         )
     }
-    
+
     convenience init(
         _ type: ObjectType.Type,
         as name: String? = nil,
         interfaces: [Any.Type] = [],
-        @FieldComponentBuilder<ObjectType, Context> _ fields: () -> [FieldComponent<ObjectType, Context>]
+        @FieldComponentBuilder<ObjectType, Context> _ fields: ()
+            -> [FieldComponent<ObjectType, Context>]
     ) {
         self.init(
             type: type,
