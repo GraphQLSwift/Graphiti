@@ -41,19 +41,16 @@ jobs:
   #       coverageLocations: ${{ env.codecov_path }}:lcov-json
 
   linux:
-    name: Build and test on ${{ matrix.tag }}-${{ matrix.os }}
-    runs-on: ubuntu-latest
+    name: Build and test ${{ matrix.swift }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os:
-          - focal
-          - bionic
-        tag:
-          - swift:5.4
-    container:
-      image: ${{ matrix.tag }}-${{ matrix.os }}
+        os: [ubuntu-latest]
+        swift: ["5.4", "5.5", "5.6"]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+    - uses: swift-actions/setup-swift@v1
+      with:
+        swift-version: ${{ matrix.swift }}
+    - uses: actions/checkout@v2
     - name: Test
-      run: swift test --enable-test-discovery --enable-code-coverage --sanitize=thread
+      run: swift test
