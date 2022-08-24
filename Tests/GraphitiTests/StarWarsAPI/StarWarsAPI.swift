@@ -1,8 +1,8 @@
 import Graphiti
 
-public struct StarWarsAPI : API {
+public struct StarWarsAPI: API {
     public let resolver = StarWarsResolver()
-    
+
     public let schema = try! Schema<StarWarsResolver, StarWarsContext> {
         Enum(Episode.self) {
             Value(.newHope)
@@ -42,7 +42,9 @@ public struct StarWarsAPI : API {
             Field("orbitalPeriod", at: \.orbitalPeriod)
             Field("residents", at: \.residents, as: [TypeReference<Human>].self)
         }
-        .description("A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY.")
+        .description(
+            "A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY."
+        )
 
         Type(Human.self, interfaces: [Character.self]) {
             Field("id", at: \.id)
@@ -77,10 +79,11 @@ public struct StarWarsAPI : API {
         Query {
             Field("hero", at: StarWarsResolver.hero, as: Character.self) {
                 Argument("episode", at: \.episode)
-                    .description("If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode.")
+                    .description(
+                        "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode."
+                    )
             }
             .description("Returns a hero based on the given episode.")
-
 
             Field("human", at: StarWarsResolver.human) {
                 Argument("id", at: \.id)

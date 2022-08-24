@@ -2,14 +2,13 @@ import GraphQL
 
 open class Component<Resolver, Context> {
     let name: String
-    var description: String? = nil
-    
+    var description: String?
+
     init(name: String) {
         self.name = name
     }
-    
-    
-    func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {}
+
+    func update(typeProvider _: SchemaTypeProvider, coders _: Coders) throws {}
 }
 
 public extension Component {

@@ -3,7 +3,7 @@ public enum Reflection {
         let description = String(describing: Swift.type(of: type))
         return description.hasSuffix("Protocol")
     }
-    
+
     public static func isEncodable(type: Any.Type) -> Bool {
         if isProtocol(type: type) {
             return true
@@ -20,26 +20,26 @@ public enum Reflection {
         var typeName: [Character] = []
         var genericArgument: [Character] = []
         var parsingTypeName = true
-        
+
         for character in String(describing: instance) {
             guard character != " " else {
                 break
             }
-            
+
             if ["(", ")"].contains(character) {
                 continue
             }
-            
+
             if character == "<" {
                 parsingTypeName = false
                 continue
             }
-            
+
             if character == ">" {
                 parsingTypeName = true
                 continue
             }
-            
+
             if parsingTypeName {
                 typeName.append(character)
             } else {

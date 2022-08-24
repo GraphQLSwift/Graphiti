@@ -1,22 +1,23 @@
-import XCTest
-import GraphQL
 import Foundation
-import NIO
 @testable import Graphiti
+import GraphQL
+import NIO
+import XCTest
 
-class ScalarTests : XCTestCase {
+class ScalarTests: XCTestCase {
     // MARK: Test UUID converts to String as expected
+
     func testUUIDOutput() throws {
-        struct UUIDOutput : Codable {
+        struct UUIDOutput: Codable {
             let value: UUID
         }
-        
+
         struct TestResolver {
-            func uuid(context: NoContext, arguments: NoArguments) -> UUIDOutput {
+            func uuid(context _: NoContext, arguments _: NoArguments) -> UUIDOutput {
                 return UUIDOutput(value: UUID(uuidString: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F")!)
             }
         }
-        
+
         let testSchema = try Schema<TestResolver, NoContext> {
             Scalar(UUID.self, as: "UUID")
             Type(UUIDOutput.self) {
@@ -26,14 +27,14 @@ class ScalarTests : XCTestCase {
                 Field("uuid", at: TestResolver.uuid)
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
+        let api = TestAPI<TestResolver, NoContext>(
             resolver: TestResolver(),
             schema: testSchema
         )
-        
+
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
-        
+
         XCTAssertEqual(
             try api.execute(
                 request: """
@@ -48,27 +49,27 @@ class ScalarTests : XCTestCase {
             ).wait(),
             GraphQLResult(data: [
                 "uuid": [
-                    "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"
-                ]
+                    "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+                ],
             ])
         )
     }
-    
+
     func testUUIDArg() throws {
-        struct UUIDOutput : Codable {
+        struct UUIDOutput: Codable {
             let value: UUID
         }
-        
-        struct Arguments : Codable {
+
+        struct Arguments: Codable {
             let value: UUID
         }
-        
+
         struct TestResolver {
-            func uuid(context: NoContext, arguments: Arguments) -> UUIDOutput {
+            func uuid(context _: NoContext, arguments: Arguments) -> UUIDOutput {
                 return UUIDOutput(value: arguments.value)
             }
         }
-        
+
         let testSchema = try Schema<TestResolver, NoContext> {
             Scalar(UUID.self, as: "UUID")
             Type(UUIDOutput.self) {
@@ -80,14 +81,14 @@ class ScalarTests : XCTestCase {
                 }
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
+        let api = TestAPI<TestResolver, NoContext>(
             resolver: TestResolver(),
             schema: testSchema
         )
-        
+
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
-        
+
         XCTAssertEqual(
             try api.execute(
                 request: """
@@ -102,31 +103,31 @@ class ScalarTests : XCTestCase {
             ).wait(),
             GraphQLResult(data: [
                 "uuid": [
-                    "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"
-                ]
+                    "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+                ],
             ])
         )
     }
-    
+
     func testUUIDInput() throws {
-        struct UUIDOutput : Codable {
+        struct UUIDOutput: Codable {
             let value: UUID
         }
-        
-        struct UUIDInput : Codable {
+
+        struct UUIDInput: Codable {
             let value: UUID
         }
-        
-        struct Arguments : Codable {
+
+        struct Arguments: Codable {
             let input: UUIDInput
         }
-        
+
         struct TestResolver {
-            func uuid(context: NoContext, arguments: Arguments) -> UUIDOutput {
+            func uuid(context _: NoContext, arguments: Arguments) -> UUIDOutput {
                 return UUIDOutput(value: arguments.input.value)
             }
         }
-        
+
         let testSchema = try Schema<TestResolver, NoContext> {
             Scalar(UUID.self, as: "UUID")
             Type(UUIDOutput.self) {
@@ -141,14 +142,14 @@ class ScalarTests : XCTestCase {
                 }
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
+        let api = TestAPI<TestResolver, NoContext>(
             resolver: TestResolver(),
             schema: testSchema
         )
-        
+
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
-        
+
         XCTAssertEqual(
             try api.execute(
                 request: """
@@ -163,24 +164,25 @@ class ScalarTests : XCTestCase {
             ).wait(),
             GraphQLResult(data: [
                 "uuid": [
-                    "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"
-                ]
+                    "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+                ],
             ])
         )
     }
-    
+
     // MARK: Test Date scalars convert to String using ISO8601 encoders
+
     func testDateOutput() throws {
-        struct DateOutput : Codable {
+        struct DateOutput: Codable {
             let value: Date
         }
-        
+
         struct TestResolver {
-            func date(context: NoContext, arguments: NoArguments) -> DateOutput {
-                return DateOutput(value: Date.init(timeIntervalSinceReferenceDate: 0))
+            func date(context _: NoContext, arguments _: NoArguments) -> DateOutput {
+                return DateOutput(value: Date(timeIntervalSinceReferenceDate: 0))
             }
         }
-        
+
         let coders = Coders()
         coders.decoder.dateDecodingStrategy = .iso8601
         coders.encoder.dateEncodingStrategy = .iso8601
@@ -195,14 +197,14 @@ class ScalarTests : XCTestCase {
                 Field("date", at: TestResolver.date)
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
+        let api = TestAPI<TestResolver, NoContext>(
             resolver: TestResolver(),
             schema: testSchema
         )
-        
+
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
-        
+
         XCTAssertEqual(
             try api.execute(
                 request: """
@@ -217,27 +219,27 @@ class ScalarTests : XCTestCase {
             ).wait(),
             GraphQLResult(data: [
                 "date": [
-                    "value": "2001-01-01T00:00:00Z"
-                ]
+                    "value": "2001-01-01T00:00:00Z",
+                ],
             ])
         )
     }
-    
+
     func testDateArg() throws {
-        struct DateOutput : Codable {
+        struct DateOutput: Codable {
             let value: Date
         }
-        
-        struct Arguments : Codable {
+
+        struct Arguments: Codable {
             let value: Date
         }
-        
+
         struct TestResolver {
-            func date(context: NoContext, arguments: Arguments) -> DateOutput {
+            func date(context _: NoContext, arguments: Arguments) -> DateOutput {
                 return DateOutput(value: arguments.value)
             }
         }
-        
+
         let coders = Coders()
         coders.decoder.dateDecodingStrategy = .iso8601
         coders.encoder.dateEncodingStrategy = .iso8601
@@ -254,14 +256,14 @@ class ScalarTests : XCTestCase {
                 }
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
+        let api = TestAPI<TestResolver, NoContext>(
             resolver: TestResolver(),
             schema: testSchema
         )
-        
+
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
-        
+
         XCTAssertEqual(
             try api.execute(
                 request: """
@@ -276,31 +278,31 @@ class ScalarTests : XCTestCase {
             ).wait(),
             GraphQLResult(data: [
                 "date": [
-                    "value": "2001-01-01T00:00:00Z"
-                ]
+                    "value": "2001-01-01T00:00:00Z",
+                ],
             ])
         )
     }
-    
+
     func testDateInput() throws {
-        struct DateOutput : Codable {
+        struct DateOutput: Codable {
             let value: Date
         }
-        
-        struct DateInput : Codable {
+
+        struct DateInput: Codable {
             let value: Date
         }
-        
-        struct Arguments : Codable {
+
+        struct Arguments: Codable {
             let input: DateInput
         }
-        
+
         struct TestResolver {
-            func date(context: NoContext, arguments: Arguments) -> DateOutput {
+            func date(context _: NoContext, arguments: Arguments) -> DateOutput {
                 return DateOutput(value: arguments.input.value)
             }
         }
-        
+
         let coders = Coders()
         coders.decoder.dateDecodingStrategy = .iso8601
         coders.encoder.dateEncodingStrategy = .iso8601
@@ -320,14 +322,14 @@ class ScalarTests : XCTestCase {
                 }
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
+        let api = TestAPI<TestResolver, NoContext>(
             resolver: TestResolver(),
             schema: testSchema
         )
-        
+
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
-        
+
         XCTAssertEqual(
             try api.execute(
                 request: """
@@ -342,24 +344,25 @@ class ScalarTests : XCTestCase {
             ).wait(),
             GraphQLResult(data: [
                 "date": [
-                    "value": "2001-01-01T00:00:00Z"
-                ]
+                    "value": "2001-01-01T00:00:00Z",
+                ],
             ])
         )
     }
-    
+
     // MARK: Test a scalar that converts to a single-value Map (StringCodedCoordinate -> String)
+
     func testStringCoordOutput() throws {
-        struct CoordinateOutput : Codable {
+        struct CoordinateOutput: Codable {
             let value: StringCodedCoordinate
         }
-        
+
         struct TestResolver {
-            func coord(context: NoContext, arguments: NoArguments) -> CoordinateOutput {
+            func coord(context _: NoContext, arguments _: NoArguments) -> CoordinateOutput {
                 return CoordinateOutput(value: StringCodedCoordinate(latitude: 0.0, longitude: 0.0))
             }
         }
-        
+
         let testSchema = try Schema<TestResolver, NoContext> {
             Scalar(StringCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
@@ -369,14 +372,14 @@ class ScalarTests : XCTestCase {
                 Field("coord", at: TestResolver.coord)
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
+        let api = TestAPI<TestResolver, NoContext>(
             resolver: TestResolver(),
             schema: testSchema
         )
-        
+
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
-        
+
         XCTAssertEqual(
             try api.execute(
                 request: """
@@ -391,27 +394,27 @@ class ScalarTests : XCTestCase {
             ).wait(),
             GraphQLResult(data: [
                 "coord": [
-                    "value": "(0.0, 0.0)"
-                ]
+                    "value": "(0.0, 0.0)",
+                ],
             ])
         )
     }
-    
+
     func testStringCoordArg() throws {
-        struct CoordinateOutput : Codable {
+        struct CoordinateOutput: Codable {
             let value: StringCodedCoordinate
         }
-        
-        struct Arguments : Codable {
+
+        struct Arguments: Codable {
             let value: StringCodedCoordinate
         }
-        
+
         struct TestResolver {
-            func coord(context: NoContext, arguments: Arguments) -> CoordinateOutput {
+            func coord(context _: NoContext, arguments: Arguments) -> CoordinateOutput {
                 return CoordinateOutput(value: arguments.value)
             }
         }
-        
+
         let testSchema = try Schema<TestResolver, NoContext> {
             Scalar(StringCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
@@ -423,14 +426,14 @@ class ScalarTests : XCTestCase {
                 }
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
+        let api = TestAPI<TestResolver, NoContext>(
             resolver: TestResolver(),
             schema: testSchema
         )
-        
+
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
-        
+
         XCTAssertEqual(
             try api.execute(
                 request: """
@@ -445,31 +448,31 @@ class ScalarTests : XCTestCase {
             ).wait(),
             GraphQLResult(data: [
                 "coord": [
-                    "value": "(0.0, 0.0)"
-                ]
+                    "value": "(0.0, 0.0)",
+                ],
             ])
         )
     }
-    
+
     func testStringCoordInput() throws {
-        struct CoordinateOutput : Codable {
+        struct CoordinateOutput: Codable {
             let value: StringCodedCoordinate
         }
-        
-        struct CoordinateInput : Codable {
+
+        struct CoordinateInput: Codable {
             let value: StringCodedCoordinate
         }
-        
-        struct Arguments : Codable {
+
+        struct Arguments: Codable {
             let input: CoordinateInput
         }
-        
+
         struct TestResolver {
-            func coord(context: NoContext, arguments: Arguments) -> CoordinateOutput {
+            func coord(context _: NoContext, arguments: Arguments) -> CoordinateOutput {
                 return CoordinateOutput(value: arguments.input.value)
             }
         }
-        
+
         let testSchema = try Schema<TestResolver, NoContext> {
             Scalar(StringCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
@@ -484,14 +487,14 @@ class ScalarTests : XCTestCase {
                 }
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
+        let api = TestAPI<TestResolver, NoContext>(
             resolver: TestResolver(),
             schema: testSchema
         )
-        
+
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
-        
+
         XCTAssertEqual(
             try api.execute(
                 request: """
@@ -506,24 +509,25 @@ class ScalarTests : XCTestCase {
             ).wait(),
             GraphQLResult(data: [
                 "coord": [
-                    "value": "(0.0, 0.0)"
-                ]
+                    "value": "(0.0, 0.0)",
+                ],
             ])
         )
     }
-    
+
     // MARK: Test a scalar that converts to a multi-value Map (Coordinate -> Dict)
+
     func testDictCoordOutput() throws {
-        struct CoordinateOutput : Codable {
+        struct CoordinateOutput: Codable {
             let value: DictCodedCoordinate
         }
-        
+
         struct TestResolver {
-            func coord(context: NoContext, arguments: NoArguments) -> CoordinateOutput {
+            func coord(context _: NoContext, arguments _: NoArguments) -> CoordinateOutput {
                 return CoordinateOutput(value: DictCodedCoordinate(latitude: 0, longitude: 0))
             }
         }
-        
+
         let testSchema = try Schema<TestResolver, NoContext> {
             Scalar(DictCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
@@ -533,14 +537,14 @@ class ScalarTests : XCTestCase {
                 Field("coord", at: TestResolver.coord)
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
+        let api = TestAPI<TestResolver, NoContext>(
             resolver: TestResolver(),
             schema: testSchema
         )
-        
+
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
-        
+
         // Test individual fields because we can't be confident we'll match the ordering of Map's OrderedDictionary
         let result = try api.execute(
             request: """
@@ -554,7 +558,7 @@ class ScalarTests : XCTestCase {
             on: group
         ).wait()
         let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
-        
+
         XCTAssertEqual(
             value?["longitude"],
             .number(0.0)
@@ -564,22 +568,22 @@ class ScalarTests : XCTestCase {
             .number(0.0)
         )
     }
-    
+
     func testDictCoordArg() throws {
-        struct CoordinateOutput : Codable {
+        struct CoordinateOutput: Codable {
             let value: DictCodedCoordinate
         }
-        
-        struct Arguments : Codable {
+
+        struct Arguments: Codable {
             let value: DictCodedCoordinate
         }
-        
+
         struct TestResolver {
-            func coord(context: NoContext, arguments: Arguments) -> CoordinateOutput {
+            func coord(context _: NoContext, arguments: Arguments) -> CoordinateOutput {
                 return CoordinateOutput(value: arguments.value)
             }
         }
-        
+
         let testSchema = try Schema<TestResolver, NoContext> {
             Scalar(DictCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
@@ -591,14 +595,14 @@ class ScalarTests : XCTestCase {
                 }
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
+        let api = TestAPI<TestResolver, NoContext>(
             resolver: TestResolver(),
             schema: testSchema
         )
-        
+
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
-        
+
         // Test individual fields because we can't be confident we'll match the ordering of Map's OrderedDictionary
         let result = try api.execute(
             request: """
@@ -612,7 +616,7 @@ class ScalarTests : XCTestCase {
             on: group
         ).wait()
         let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
-        
+
         XCTAssertEqual(
             value?["longitude"],
             .number(0.0)
@@ -622,26 +626,26 @@ class ScalarTests : XCTestCase {
             .number(0.0)
         )
     }
-    
+
     func testDictCoordInput() throws {
-        struct CoordinateOutput : Codable {
+        struct CoordinateOutput: Codable {
             let value: DictCodedCoordinate
         }
-        
-        struct CoordinateInput : Codable {
+
+        struct CoordinateInput: Codable {
             let value: DictCodedCoordinate
         }
-        
-        struct Arguments : Codable {
+
+        struct Arguments: Codable {
             let input: CoordinateInput
         }
-        
+
         struct TestResolver {
-            func coord(context: NoContext, arguments: Arguments) -> CoordinateOutput {
+            func coord(context _: NoContext, arguments: Arguments) -> CoordinateOutput {
                 return CoordinateOutput(value: arguments.input.value)
             }
         }
-        
+
         let testSchema = try Schema<TestResolver, NoContext> {
             Scalar(DictCodedCoordinate.self, as: "Coordinate")
             Type(CoordinateOutput.self) {
@@ -656,14 +660,14 @@ class ScalarTests : XCTestCase {
                 }
             }
         }
-        let api = TestAPI<TestResolver, NoContext> (
+        let api = TestAPI<TestResolver, NoContext>(
             resolver: TestResolver(),
             schema: testSchema
         )
-        
+
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         defer { try? group.syncShutdownGracefully() }
-        
+
         // Test individual fields because we can't be confident we'll match the ordering of Map's OrderedDictionary
         let result = try api.execute(
             request: """
@@ -677,7 +681,7 @@ class ScalarTests : XCTestCase {
             on: group
         ).wait()
         let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
-        
+
         XCTAssertEqual(
             value?["longitude"],
             .number(0.0)
@@ -689,32 +693,31 @@ class ScalarTests : XCTestCase {
     }
 }
 
-fileprivate class TestAPI<Resolver, ContextType> : API {
+private class TestAPI<Resolver, ContextType>: API {
     public let resolver: Resolver
     public let schema: Schema<Resolver, ContextType>
-    
+
     init(resolver: Resolver, schema: Schema<Resolver, ContextType>) {
         self.resolver = resolver
         self.schema = schema
     }
 }
 
-struct StringCodedCoordinate : Codable {
+struct StringCodedCoordinate: Codable {
     let latitude: Double
     let longitude: Double
-    
+
     init(latitude: Double, longitude: Double) {
         self.latitude = latitude
         self.longitude = longitude
     }
-    
+
     init(_ string: String) throws {
         let range = NSRange(location: 0, length: string.utf8.count)
         let regex = try NSRegularExpression(pattern: "\\((.*), (.*)\\)")
         guard let match = regex.firstMatch(in: string, options: .init(), range: range) else {
             throw GraphQLError(message: "Coordinate string didn't match expected value")
         }
-
 
         guard
             let latitudeRange = Range(match.range(at: 1), in: string),
@@ -748,14 +751,14 @@ struct StringCodedCoordinate : Codable {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        try container.encode(self.toString())
+        try container.encode(toString())
     }
 }
 
-struct DictCodedCoordinate : Codable {
+struct DictCodedCoordinate: Codable {
     let latitude: Double
     let longitude: Double
-    
+
     init(latitude: Double, longitude: Double) {
         self.latitude = latitude
         self.longitude = longitude

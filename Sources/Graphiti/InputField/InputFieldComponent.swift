@@ -1,9 +1,9 @@
 import GraphQL
 
 public class InputFieldComponent<InputObjectType, Context> {
-    var description: String? = nil
-    
-    func field(typeProvider: TypeProvider) throws -> (String, InputObjectField) {
+    var description: String?
+
+    func field(typeProvider _: TypeProvider) throws -> (String, InputObjectField) {
         fatalError()
     }
 }

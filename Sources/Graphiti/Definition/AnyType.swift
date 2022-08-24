@@ -1,4 +1,4 @@
-final class AnyType : Hashable {
+final class AnyType: Hashable {
     let type: Any.Type
 
     init(_ type: Any.Type) {

@@ -1,10 +1,10 @@
 import GraphQL
 
 public class FieldComponent<ObjectType, Context> {
-    var description: String? = nil
-    var deprecationReason: String? = nil
-    
-    func field(typeProvider: TypeProvider, coders: Coders) throws -> (String, GraphQLField) {
+    var description: String?
+    var deprecationReason: String?
+
+    func field(typeProvider _: TypeProvider, coders _: Coders) throws -> (String, GraphQLField) {
         fatalError()
     }
 }
@@ -14,7 +14,7 @@ public extension FieldComponent {
         self.description = description
         return self
     }
-    
+
     func deprecationReason(_ deprecationReason: String) -> Self {
         self.deprecationReason = deprecationReason
         return self

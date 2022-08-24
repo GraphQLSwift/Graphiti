@@ -166,6 +166,15 @@ one that you've created yourself.
 
 Check the [Star Wars API](Tests/GraphitiTests/StarWarsAPI/StarWarsAPI.swift) for a more complete example.
 
+## Contributing
+
+This repo uses [SwiftFormat](https://github.com/nicklockwood/SwiftFormat), and includes lint checks to enforce these formatting standards.
+To format your code, install `swiftformat` and run:
+
+```bash
+swiftformat .
+```
+
 ## License
 
 This project is released under the MIT license. See [LICENSE](LICENSE) for details.

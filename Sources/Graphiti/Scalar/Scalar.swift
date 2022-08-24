@@ -6,18 +6,20 @@ import OrderedCollections
 /// It is **highly** recommended that you do not subclass this type.
 /// Instead, modify the encoding/decoding behavior through the `MapEncoder`/`MapDecoder` options available through
 /// `Coders` or a custom encoding/decoding on the `ScalarType` itself.
-open class Scalar<Resolver, Context, ScalarType : Codable> : Component<Resolver, Context> {
+open class Scalar<Resolver, Context, ScalarType: Codable>: Component<Resolver, Context> {
     // TODO: Change this no longer be an open class
-    
+
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         let scalarType = try GraphQLScalarType(
             name: name,
             description: description,
             serialize: { value in
                 guard let scalar = value as? ScalarType else {
-                    throw GraphQLError(message: "Serialize expected type \(ScalarType.self) but got \(type(of: value))")
+                    throw GraphQLError(
+                        message: "Serialize expected type \(ScalarType.self) but got \(type(of: value))"
+                    )
                 }
-                
+
                 return try self.serialize(scalar: scalar, encoder: coders.encoder)
             },
             parseValue: { map in
@@ -30,20 +32,20 @@ open class Scalar<Resolver, Context, ScalarType : Codable> : Component<Resolver,
                 return try self.serialize(scalar: scalar, encoder: coders.encoder)
             }
         )
-        
+
         try typeProvider.map(ScalarType.self, to: scalarType)
     }
-    
+
     open func serialize(scalar: ScalarType, encoder: MapEncoder) throws -> Map {
         try encoder.encode(scalar)
     }
-    
+
     open func parse(map: Map, decoder: MapDecoder) throws -> ScalarType {
         try decoder.decode(ScalarType.self, from: map)
     }
-    
+
     init(
-        type: ScalarType.Type,
+        type _: ScalarType.Type,
         name: String?
     ) {
         super.init(name: name ?? Reflection.name(for: ScalarType.self))
@@ -54,7 +56,7 @@ public extension Scalar {
     convenience init(
         _ type: ScalarType.Type,
         as name: String? = nil
-    )  {
+    ) {
         self.init(
             type: type,
             name: name
@@ -69,44 +71,45 @@ extension GraphQL.Value {
         {
             return .bool(value.value)
         }
-        
+
         if
             let value = self as? IntValue,
             let int = Int(value.value)
         {
             return .int(int)
         }
-        
+
         if
             let value = self as? FloatValue,
             let double = Double(value.value)
         {
             return .double(double)
         }
-        
+
         if
             let value = self as? StringValue
         {
             return .string(value.value)
         }
-        
+
         if
             let value = self as? ListValue
         {
-            let array = value.values.map({ $0.map })
+            let array = value.values.map { $0.map }
             return .array(array)
         }
-        
+
         if
             let value = self as? ObjectValue
         {
-            let dictionary: OrderedDictionary<String, Map> = value.fields.reduce(into: [:]) { result, field in
-                result[field.name.value] = field.value.map
-            }
-            
+            let dictionary: OrderedDictionary<String, Map> = value.fields
+                .reduce(into: [:]) { result, field in
+                    result[field.name.value] = field.value.map
+                }
+
             return .dictionary(dictionary)
         }
-        
+
         return .null
     }
 }
