@@ -61,13 +61,13 @@ import XCTest
             Type(User.self) {
                 Field("id", at: \.id)
                 Field("name", at: \.name)
-                Field("friends", at: \.friends, as: [TypeReference<User>]?.self)
+                Field("friends", at: \.friends)
             }
 
             Input(UserInput.self) {
                 InputField("id", at: \.id)
                 InputField("name", at: \.name)
-                InputField("friends", at: \.friends, as: [TypeReference<UserInput>]?.self)
+                InputField("friends", at: \.friends)
             }
 
             Type(UserEvent.self) {
