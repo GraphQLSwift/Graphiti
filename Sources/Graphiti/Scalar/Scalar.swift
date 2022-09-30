@@ -34,7 +34,6 @@ open class Scalar<Resolver, Context, ScalarType: Codable>: Component<Resolver, C
         )
 
         try typeProvider.map(ScalarType.self, to: scalarType)
-        typeProvider.types.append(scalarType)
     }
 
     open func serialize(scalar: ScalarType, encoder: MapEncoder) throws -> Map {

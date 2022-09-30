@@ -20,7 +20,6 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: Component<Res
         )
 
         try typeProvider.map(ObjectType.self, to: objectType)
-        typeProvider.types.append(objectType)
     }
 
     func fields(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLFieldMap {

@@ -1,6 +1,5 @@
 import GraphQL
 
-@available(*, deprecated, message: "No longer use this. Instead define types using `Type`.")
 public final class Types<Resolver, Context>: Component<Resolver, Context> {
     let types: [Any.Type]
 
@@ -14,8 +13,10 @@ public final class Types<Resolver, Context>: Component<Resolver, Context> {
         self.types = types
         super.init(name: "")
     }
+}
 
-    public convenience init(_ types: Any.Type...) {
+public extension Types {
+    convenience init(_ types: Any.Type...) {
         self.init(types: types)
     }
 }
