@@ -12,6 +12,7 @@ public final class Interface<Resolver, Context, InterfaceType>: Component<Resolv
         )
 
         try typeProvider.map(InterfaceType.self, to: interfaceType)
+        typeProvider.types.append(interfaceType)
     }
 
     func fields(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLFieldMap {

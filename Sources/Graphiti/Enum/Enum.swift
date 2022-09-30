@@ -24,6 +24,7 @@ public final class Enum<
         )
 
         try typeProvider.map(EnumType.self, to: enumType)
+        typeProvider.types.append(enumType)
     }
 
     private init(
