@@ -94,6 +94,12 @@ extension GraphQL.Value {
         }
 
         if
+            let value = self as? EnumValue
+        {
+            return .string(value.value)
+        }
+
+        if
             let value = self as? ListValue
         {
             let array = value.values.map { $0.map }
