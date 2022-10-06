@@ -18,6 +18,7 @@ public final class Input<
         )
 
         try typeProvider.map(InputObjectType.self, to: inputObjectType)
+        typeProvider.types.append(inputObjectType)
     }
 
     func fields(typeProvider: TypeProvider) throws -> InputObjectFieldMap {

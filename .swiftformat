@@ -5,3 +5,5 @@
 --wrapcollections before-first
 --wrapconditions before-first
 --wrapparameters before-first
+
+--disable wrapSingleLineComments 

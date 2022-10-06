@@ -34,6 +34,7 @@ open class Scalar<Resolver, Context, ScalarType: Codable>: Component<Resolver, C
         )
 
         try typeProvider.map(ScalarType.self, to: scalarType)
+        typeProvider.types.append(scalarType)
     }
 
     open func serialize(scalar: ScalarType, encoder: MapEncoder) throws -> Map {
@@ -88,6 +89,12 @@ extension GraphQL.Value {
 
         if
             let value = self as? StringValue
+        {
+            return .string(value.value)
+        }
+
+        if
+            let value = self as? EnumValue
         {
             return .string(value.value)
         }

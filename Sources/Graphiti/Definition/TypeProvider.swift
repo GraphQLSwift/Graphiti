@@ -56,11 +56,15 @@ extension TypeProvider {
                 return try getGraphQLOptionalType(from: referenceType, isOptional: isOptional)
             }
         } else {
-            guard let graphQLType = graphQLTypeMap[AnyType(type)] else {
-                throw GraphQLError(message: "Type \"\(type)\" is not registered.")
-            }
+            if let graphQLType = graphQLTypeMap[AnyType(type)] {
+                return try getGraphQLOptionalType(from: graphQLType, isOptional: isOptional)
+            } else {
+                // If we haven't seen this type yet, just store it as a type reference and resolve later.
+                let name = Reflection.name(for: type)
+                let referenceType = GraphQLTypeReference(name)
 
-            return try getGraphQLOptionalType(from: graphQLType, isOptional: isOptional)
+                return try getGraphQLOptionalType(from: referenceType, isOptional: isOptional)
+            }
         }
     }
 

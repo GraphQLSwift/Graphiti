@@ -40,7 +40,7 @@ public struct StarWarsAPI: API {
             Field("diameter", at: \.diameter)
             Field("rotationPeriod", at: \.rotationPeriod)
             Field("orbitalPeriod", at: \.orbitalPeriod)
-            Field("residents", at: \.residents, as: [TypeReference<Human>].self)
+            Field("residents", at: \.residents)
         }
         .description(
             "A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY."
@@ -100,7 +100,5 @@ public struct StarWarsAPI: API {
                     .defaultValue("R2-D2")
             }
         }
-
-        Types(Human.self, Droid.self)
     }
 }
