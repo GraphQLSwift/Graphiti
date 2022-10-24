@@ -1,6 +1,9 @@
 import GraphQL
 
-public final class Type<Resolver, Context, ObjectType: Encodable>: Component<Resolver, Context> {
+public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent<
+    Resolver,
+    Context
+> {
     let interfaces: [Any.Type]
     let fields: [FieldComponent<ObjectType, Context>]
 
@@ -78,6 +81,22 @@ public extension Type {
             name: name,
             interfaces: interfaces,
             fields: fields()
+        )
+    }
+
+    convenience init(
+        resolver _: Resolver.Type,
+        context _: Context.Type,
+        _ type: ObjectType.Type,
+        as name: String? = nil,
+        interfaces: [Any.Type] = [],
+        fields: [FieldComponent<ObjectType, Context>]
+    ) {
+        self.init(
+            type: type,
+            name: name,
+            interfaces: interfaces,
+            fields: fields
         )
     }
 }

@@ -4,7 +4,7 @@ public final class Input<
     Resolver,
     Context,
     InputObjectType: Decodable
->: Component<
+>: TypeComponent<
     Resolver,
     Context
 > {
