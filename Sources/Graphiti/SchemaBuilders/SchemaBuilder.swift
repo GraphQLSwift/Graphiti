@@ -3,13 +3,12 @@
 public final class SchemaBuilder<Resolver, Context> {
     private var coders: Coders
     private var typeComponents: [TypeComponent<Resolver, Context>]
-
-    /// Defines the schema query operations
-    public let query: QueryBuilder<Resolver, Context>
-    /// Defines the schema mutation operations
-    public let mutation: MutationBuilder<Resolver, Context>
-    /// Defines the schema subscription operations
-    public let subscription: SubscriptionBuilder<Resolver, Context>
+    private var queryName: String
+    private var queryFields: [FieldComponent<Resolver, Context>]
+    private var mutationName: String
+    private var mutationFields: [FieldComponent<Resolver, Context>]
+    private var subscriptionName: String
+    private var subscriptionFields: [FieldComponent<Resolver, Context>]
 
     public init(
         _ resolverType: Resolver.Type,
@@ -17,9 +16,13 @@ public final class SchemaBuilder<Resolver, Context> {
     ) {
         coders = Coders()
         typeComponents = []
-        query = QueryBuilder(resolverType: resolverType, contextType: contextType)
-        mutation = MutationBuilder(resolverType: resolverType, contextType: contextType)
-        subscription = SubscriptionBuilder(resolverType: resolverType, contextType: contextType)
+        
+        queryName = "Query"
+        queryFields = []
+        mutationName = "Mutation"
+        mutationFields = []
+        subscriptionName = "Subscription"
+        subscriptionFields = []
     }
 
     @discardableResult
@@ -28,6 +31,24 @@ public final class SchemaBuilder<Resolver, Context> {
     /// - Returns: This object for method chaining
     public func setCoders(to newCoders: Coders) -> Self {
         coders = newCoders
+        return self
+    }
+    
+    @discardableResult
+    public func setQueryName(to name: String) -> Self {
+        queryName = name
+        return self
+    }
+    
+    @discardableResult
+    public func setMutationName(to name: String) -> Self {
+        mutationName = name
+        return self
+    }
+    
+    @discardableResult
+    public func setSubscriptionName(to name: String) -> Self {
+        subscriptionName = name
         return self
     }
 
@@ -43,6 +64,45 @@ public final class SchemaBuilder<Resolver, Context> {
         }
         return self
     }
+    
+    @discardableResult
+    /// Adds multiple query operation definitions to the schema.
+    /// - Parameter component: The query operations to add
+    /// - Returns: This object for method chaining
+    public func addQuery(
+        @FieldComponentBuilder<Resolver, Context> _ fields: () -> [FieldComponent<Resolver, Context>]
+    ) -> Self {
+        for field in fields() {
+            self.queryFields.append(field)
+        }
+        return self
+    }
+    
+    @discardableResult
+    /// Adds multiple mutation operation definitions to the schema.
+    /// - Parameter component: The query operations to add
+    /// - Returns: This object for method chaining
+    public func addMutation(
+        @FieldComponentBuilder<Resolver, Context> _ fields: () -> [FieldComponent<Resolver, Context>]
+    ) -> Self {
+        for field in fields() {
+            self.mutationFields.append(field)
+        }
+        return self
+    }
+    
+    @discardableResult
+    /// Adds multiple subscription operation definitions to the schema.
+    /// - Parameter component: The query operations to add
+    /// - Returns: This object for method chaining
+    public func addSubscription(
+        @FieldComponentBuilder<Resolver, Context> _ fields: () -> [FieldComponent<Resolver, Context>]
+    ) -> Self {
+        for field in fields() {
+            self.subscriptionFields.append(field)
+        }
+        return self
+    }
 
     /// Create and return the queryable GraphQL schema
     public func build() throws -> Schema<Resolver, Context> {
@@ -50,16 +110,19 @@ public final class SchemaBuilder<Resolver, Context> {
             topLevelComponent as Component<Resolver, Context>
         }
 
-        if !query.fields.isEmpty {
-            components.append(query.build())
+        if !queryFields.isEmpty {
+            let query = Query(name: queryName, fields: queryFields)
+            components.append(query)
         }
 
-        if !mutation.fields.isEmpty {
-            components.append(mutation.build())
+        if !mutationFields.isEmpty {
+            let mutation = Mutation(name: mutationName, fields: mutationFields)
+            components.append(mutation)
         }
 
-        if !subscription.fields.isEmpty {
-            components.append(subscription.build())
+        if !subscriptionFields.isEmpty {
+            let subscription = Subscription(name: subscriptionName, fields: subscriptionFields)
+            components.append(subscription)
         }
 
         return try Schema(coders: coders, components: components)

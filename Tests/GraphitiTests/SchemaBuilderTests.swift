@@ -10,7 +10,7 @@ class SchemaBuilderTests: XCTestCase {
         let builder = SchemaBuilder(StarWarsResolver.self, StarWarsContext.self)
 
         // Add assets slightly out of order
-        builder.query.add {
+        builder.addQuery {
             Field("hero", at: StarWarsResolver.hero, as: Character.self) {
                 Argument("episode", at: \.episode)
                     .description(
@@ -78,7 +78,7 @@ class SchemaBuilderTests: XCTestCase {
         }.add {
             Union(SearchResult.self, members: Planet.self, Human.self, Droid.self)
         }
-        builder.query.add {
+        builder.addQuery {
             Field("human", at: StarWarsResolver.human) {
                 Argument("id", at: \.id)
                     .description("Id of the human.")
