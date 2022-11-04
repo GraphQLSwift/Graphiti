@@ -10,15 +10,15 @@ class SchemaBuilderTests: XCTestCase {
         let builder = SchemaBuilder(StarWarsResolver.self, StarWarsContext.self)
 
         // Add assets slightly out of order
-        builder.query.add(
+        builder.query.add {
             Field("hero", at: StarWarsResolver.hero, as: Character.self) {
                 Argument("episode", at: \.episode)
                     .description(
                         "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode."
                     )
             }.description("Returns a hero based on the given episode.")
-        )
-        builder.add(
+        }
+        builder.add {
             Type(Planet.self) {
                 Field("id", at: \.id)
                 Field("name", at: \.name)
@@ -29,7 +29,7 @@ class SchemaBuilderTests: XCTestCase {
             }.description(
                 "A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY."
             )
-        ).add(
+        }.add {
             Enum(Episode.self) {
                 Value(.newHope)
                     .description("Released in 1977.")
@@ -38,8 +38,8 @@ class SchemaBuilderTests: XCTestCase {
                 Value(.jedi)
                     .description("Released in 1983.")
             }.description("One of the films in the Star Wars Trilogy.")
-        )
-        builder.add(
+        }
+        builder.add {
             Interface(Character.self) {
                 Field("id", at: \.id)
                     .description("The id of the character.")
@@ -54,7 +54,7 @@ class SchemaBuilderTests: XCTestCase {
                 Field("secretBackstory", at: \.secretBackstory)
                     .description("All secrets about their past.")
             }
-        ).add([
+        }.add {
             Type(Human.self, interfaces: [Character.self]) {
                 Field("id", at: \.id)
                 Field("name", at: \.name)
@@ -64,8 +64,7 @@ class SchemaBuilderTests: XCTestCase {
                     .description("The friends of the human, or an empty list if they have none.")
                 Field("secretBackstory", at: Human.getSecretBackstory)
                     .description("Where are they from and how they came to be who they are.")
-            }
-            .description("A humanoid creature in the Star Wars universe."),
+            }.description("A humanoid creature in the Star Wars universe.")
             Type(Droid.self, interfaces: [Character.self]) {
                 Field("id", at: \.id)
                 Field("name", at: \.name)
@@ -75,25 +74,24 @@ class SchemaBuilderTests: XCTestCase {
                     .description("The friends of the droid, or an empty list if they have none.")
                 Field("secretBackstory", at: Droid.getSecretBackstory)
                     .description("Where are they from and how they came to be who they are.")
-            }
-            .description("A mechanical creature in the Star Wars universe."),
-        ]).add(
+            }.description("A mechanical creature in the Star Wars universe.")
+        }.add {
             Union(SearchResult.self, members: Planet.self, Human.self, Droid.self)
-        )
-        builder.query.add([
+        }
+        builder.query.add {
             Field("human", at: StarWarsResolver.human) {
                 Argument("id", at: \.id)
                     .description("Id of the human.")
-            },
+            }
             Field("droid", at: StarWarsResolver.droid) {
                 Argument("id", at: \.id)
                     .description("Id of the droid.")
-            },
+            }
             Field("search", at: StarWarsResolver.search, as: [SearchResult].self) {
                 Argument("query", at: \.query)
                     .defaultValue("R2-D2")
-            },
-        ])
+            }
+        }
 
         let schema = try builder.build()
         

@@ -32,23 +32,14 @@ public final class SchemaBuilder<Resolver, Context> {
     }
 
     @discardableResult
-    /// Adds a type, input, enum, interface, union or scalar definition to the schema.
-    /// - Parameter component: The component to add
+    /// Adds multiple query operation definitions to the schema.
+    /// - Parameter component: The query operations to add
     /// - Returns: This object for method chaining
-    public func add(_ component: TopLevelComponent<Resolver, Context>) -> Self {
-        topLevelComponents.append(component)
-        return self
-    }
-
-    @discardableResult
-    /// Adds multiple type, input, enum, interface, union or scalar definitions to the schema.
-    /// - Parameter component: The components to add
-    /// - Returns: This object for method chaining
-    public func add<T: Sequence>(
-        _ components: T
-    ) -> Self where T.Element: TopLevelComponent<Resolver, Context> {
-        for component in components {
-            topLevelComponents.append(component)
+    public func add(
+        @TypeComponentBuilder<Resolver, Context> _ components: () -> [TypeComponent<Resolver, Context>]
+    ) -> Self {
+        for component in components() {
+            typeComponents.append(component)
         }
         return self
     }

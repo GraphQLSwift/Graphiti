@@ -13,22 +13,13 @@ public final class SubscriptionBuilder<Resolver, Context> {
     }
 
     @discardableResult
-    /// Adds a subscription operation definition to the schema.
-    /// - Parameter component: The subscription operation to add
-    /// - Returns: This object for method chaining
-    public func add(_ field: FieldComponent<Resolver, Context>) -> Self {
-        fields.append(field)
-        return self
-    }
-
-    @discardableResult
     /// Adds multiple subscription operation definitions to the schema.
     /// - Parameter component: The mutation operations to add
     /// - Returns: This object for method chaining
-    public func add<T: Sequence>(
-        _ fields: T
-    ) -> Self where T.Element: FieldComponent<Resolver, Context> {
-        for field in fields {
+    public func add(
+        @FieldComponentBuilder<Resolver, Context> _ fields: () -> [FieldComponent<Resolver, Context>]
+    ) -> Self {
+        for field in fields() {
             self.fields.append(field)
         }
         return self
