@@ -47,7 +47,7 @@ public extension API {
 #if compiler(>=5.5) && canImport(_Concurrency)
 
     public extension API {
-        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
         func execute(
             request: String,
             context: ContextType,
@@ -65,7 +65,7 @@ public extension API {
             ).get()
         }
 
-        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
         func subscribe(
             request: String,
             context: ContextType,
