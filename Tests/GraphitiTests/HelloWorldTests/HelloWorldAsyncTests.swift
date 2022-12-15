@@ -5,10 +5,10 @@ import XCTest
 
 #if compiler(>=5.5) && canImport(_Concurrency)
 
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
     let pubsub = SimplePubSub<User>()
 
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
     extension HelloResolver {
         func asyncHello(
             context: HelloContext,
@@ -41,7 +41,7 @@ import XCTest
         }
     }
 
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
     // Same as the HelloAPI, except with an async query and a few subscription fields
     struct HelloAsyncAPI: API {
         typealias ContextType = HelloContext
@@ -122,7 +122,7 @@ import XCTest
         }
     }
 
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
     class HelloWorldAsyncTests: XCTestCase {
         private let api = HelloAsyncAPI()
         private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
@@ -320,7 +320,7 @@ import XCTest
         }
     }
 
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
     /// A very simple publish/subscriber used for testing
     class SimplePubSub<T> {
         private var subscribers: [Subscriber<T>]

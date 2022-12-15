@@ -597,7 +597,7 @@ public extension SubscriptionField {
 #if compiler(>=5.5) && canImport(_Concurrency)
 
     public extension SubscriptionField {
-        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
         convenience init<ResolveType>(
             name: String,
             arguments: [ArgumentComponent<Arguments>],
@@ -647,7 +647,7 @@ public extension SubscriptionField {
             )
         }
 
-        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
         convenience init(
             name: String,
             arguments: [ArgumentComponent<Arguments>],
@@ -681,7 +681,7 @@ public extension SubscriptionField {
     // MARK: ConcurrentResolve Initializers
 
     public extension SubscriptionField where FieldType: Encodable {
-        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
         convenience init(
             _ name: String,
             at function: @escaping ConcurrentResolve<
@@ -706,7 +706,7 @@ public extension SubscriptionField {
             )
         }
 
-        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
         convenience init(
             _ name: String,
             at function: @escaping ConcurrentResolve<
@@ -732,7 +732,7 @@ public extension SubscriptionField {
             )
         }
 
-        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
         convenience init(
             _ name: String,
             as: FieldType.Type,
@@ -747,7 +747,7 @@ public extension SubscriptionField {
             self.init(name: name, arguments: [arguments()], as: `as`, concurrentSubscribe: subFunc)
         }
 
-        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
         convenience init(
             _ name: String,
             as: FieldType.Type,
@@ -765,7 +765,7 @@ public extension SubscriptionField {
     }
 
     public extension SubscriptionField {
-        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
         convenience init<ResolveType>(
             _ name: String,
             at function: @escaping ConcurrentResolve<
@@ -791,7 +791,7 @@ public extension SubscriptionField {
             )
         }
 
-        @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+        @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
         convenience init<ResolveType>(
             _ name: String,
             at function: @escaping ConcurrentResolve<
