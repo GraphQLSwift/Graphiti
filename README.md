@@ -4,7 +4,6 @@ Graphiti is a Swift library for building GraphQL schemas fast, safely and easily
 
 [![Swift][swift-badge]][swift-url]
 [![License][mit-badge]][mit-url]
-[![Slack][slack-badge]][slack-url]
 [![GitHub Actions][gh-actions-badge]][gh-actions-url]
 [![Maintainability][maintainability-badge]][maintainability-url]
 [![Coverage][coverage-badge]][coverage-url]
@@ -184,9 +183,6 @@ This project is released under the MIT license. See [LICENSE](LICENSE) for detai
 
 [mit-badge]: https://img.shields.io/badge/License-MIT-blue.svg?style=flat
 [mit-url]: https://tldrlegal.com/license/mit-license
-
-[slack-badge]: https://zewo-slackin.herokuapp.com/badge.svg
-[slack-url]: http://slack.zewo.io
 
 [gh-actions-badge]: https://github.com/GraphQLSwift/Graphiti/workflows/Tests/badge.svg
 [gh-actions-url]: https://github.com/GraphQLSwift/Graphiti/actions?query=workflow%3ATests
