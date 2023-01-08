@@ -37,6 +37,10 @@ open class Scalar<Resolver, Context, ScalarType: Codable>: Component<Resolver, C
         typeProvider.types.append(scalarType)
     }
 
+    override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {
+        try typeProvider.mapName(ScalarType.self, to: name)
+    }
+
     open func serialize(scalar: ScalarType, encoder: MapEncoder) throws -> Map {
         try encoder.encode(scalar)
     }

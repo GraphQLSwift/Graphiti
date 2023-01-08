@@ -1,12 +1,29 @@
 import GraphQL
 
 protocol TypeProvider: AnyObject {
+    var graphQLNameMap: [AnyType: String] { get set }
     var graphQLTypeMap: [AnyType: GraphQLType] { get set }
 }
 
 extension TypeProvider {
     func contains(type: Any.Type) -> Bool {
         graphQLTypeMap[AnyType(type)] != nil
+    }
+
+    func mapName(_ type: Any.Type, to name: String) throws {
+        guard !(type is Void.Type) else {
+            return
+        }
+
+        let key = AnyType(type)
+
+        guard graphQLNameMap[key] == nil else {
+            throw GraphQLError(
+                message: "Duplicate type registration for GraphQL type name \"\(name)\" while trying to register type \(Reflection.name(for: type))"
+            )
+        }
+
+        graphQLNameMap[key] = name
     }
 
     func map(_ type: Any.Type, to graphQLType: GraphQLType) throws {
@@ -50,7 +67,7 @@ extension TypeProvider {
                     isOptional: isOptional
                 )
             case .reference:
-                let name = Reflection.name(for: type.wrappedType)
+                let name = getGraphQLName(of: type.wrappedType)
                 let referenceType = GraphQLTypeReference(name)
 
                 return try getGraphQLOptionalType(from: referenceType, isOptional: isOptional)
@@ -60,7 +77,7 @@ extension TypeProvider {
                 return try getGraphQLOptionalType(from: graphQLType, isOptional: isOptional)
             } else {
                 // If we haven't seen this type yet, just store it as a type reference and resolve later.
-                let name = Reflection.name(for: type)
+                let name = getGraphQLName(of: type)
                 let referenceType = GraphQLTypeReference(name)
 
                 return try getGraphQLOptionalType(from: referenceType, isOptional: isOptional)
@@ -237,5 +254,9 @@ extension TypeProvider {
         }
 
         return objectType
+    }
+    
+    private func getGraphQLName(of type: Any.Type) -> String {
+        return graphQLNameMap[AnyType(type)] ?? Reflection.name(for: type)
     }
 }

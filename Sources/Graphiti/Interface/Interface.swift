@@ -15,6 +15,10 @@ public final class Interface<Resolver, Context, InterfaceType>: Component<Resolv
         typeProvider.types.append(interfaceType)
     }
 
+    override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {
+        try typeProvider.mapName(InterfaceType.self, to: name)
+    }
+
     func fields(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLFieldMap {
         var map: GraphQLFieldMap = [:]
 
