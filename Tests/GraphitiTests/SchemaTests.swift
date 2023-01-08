@@ -71,6 +71,75 @@ class SchemaTests: XCTestCase {
             ])
         )
     }
+
+    // Tests that we can resolve type references for named types
+    func testTypeReferenceForNamedType() throws {
+        struct LocationObject: Codable {
+            let id: String
+            let name: String
+        }
+
+        struct User: Codable {
+            let id: String
+            let location: LocationObject?
+        }
+
+        struct TestResolver {
+            func user(context _: NoContext, arguments _: NoArguments) -> User {
+                return User(
+                    id: "user1",
+                    location: LocationObject(
+                        id: "location1",
+                        name: "Earth"
+                    )
+                )
+            }
+        }
+
+        let testSchema = try Schema<TestResolver, NoContext> {
+            Type(User.self) {
+                Field("id", at: \.id)
+                Field("location", at: \.location)
+            }
+            Type(LocationObject.self, as: "Location") {
+                Field("id", at: \.id)
+                Field("name", at: \.name)
+            }
+            Query {
+                Field("user", at: TestResolver.user)
+            }
+        }
+        let api = TestAPI<TestResolver, NoContext>(
+            resolver: TestResolver(),
+            schema: testSchema
+        )
+
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        defer { try? group.syncShutdownGracefully() }
+
+        XCTAssertEqual(
+            try api.execute(
+                request: """
+                query {
+                  user {
+                    location {
+                      name
+                    }
+                  }
+                }
+                """,
+                context: NoContext(),
+                on: group
+            ).wait(),
+            GraphQLResult(data: [
+                "user": [
+                    "location": [
+                        "name": "Earth",
+                    ],
+                ],
+            ])
+        )
+    }
 }
 
 private class TestAPI<Resolver, ContextType>: API {
