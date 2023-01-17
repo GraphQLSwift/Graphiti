@@ -10,6 +10,12 @@ public final class Schema<Resolver, Context> {
     ) throws {
         let typeProvider = SchemaTypeProvider()
 
+        // Collect types mappings first
+        for component in components {
+            try component.setGraphQLName(typeProvider: typeProvider)
+        }
+
+        // Then build up GraphQLTypes
         for component in components {
             try component.update(typeProvider: typeProvider, coders: coders)
         }

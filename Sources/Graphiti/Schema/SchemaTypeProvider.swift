@@ -1,6 +1,13 @@
 import GraphQL
 
 final class SchemaTypeProvider: TypeProvider {
+    var graphQLNameMap: [AnyType: String] = [
+        AnyType(Int.self): "Int",
+        AnyType(Double.self): "Float",
+        AnyType(String.self): "String",
+        AnyType(Bool.self): "Boolean",
+    ]
+
     var graphQLTypeMap: [AnyType: GraphQLType] = [
         AnyType(Int.self): GraphQLInt,
         AnyType(Double.self): GraphQLFloat,

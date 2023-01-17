@@ -23,6 +23,10 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: Component<Res
         typeProvider.types.append(objectType)
     }
 
+    override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {
+        try typeProvider.mapName(ObjectType.self, to: name)
+    }
+
     func fields(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLFieldMap {
         var map: GraphQLFieldMap = [:]
 
