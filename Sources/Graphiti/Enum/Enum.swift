@@ -4,7 +4,7 @@ public final class Enum<
     Resolver,
     Context,
     EnumType: Encodable & RawRepresentable
->: Component<
+>: TypeComponent<
     Resolver,
     Context
 > where EnumType.RawValue == String {

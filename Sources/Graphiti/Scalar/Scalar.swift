@@ -6,7 +6,7 @@ import OrderedCollections
 /// It is **highly** recommended that you do not subclass this type.
 /// Instead, modify the encoding/decoding behavior through the `MapEncoder`/`MapDecoder` options available through
 /// `Coders` or a custom encoding/decoding on the `ScalarType` itself.
-open class Scalar<Resolver, Context, ScalarType: Codable>: Component<Resolver, Context> {
+open class Scalar<Resolver, Context, ScalarType: Codable>: TypeComponent<Resolver, Context> {
     // TODO: Change this no longer be an open class
 
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {

@@ -27,7 +27,7 @@ public final class Mutation<Resolver, Context>: Component<Resolver, Context> {
         return map
     }
 
-    private init(
+    init(
         name: String,
         fields: [FieldComponent<Resolver, Context>]
     ) {

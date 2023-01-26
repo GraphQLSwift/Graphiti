@@ -4,7 +4,7 @@ import NIO
 public final class Schema<Resolver, Context> {
     public let schema: GraphQLSchema
 
-    private init(
+    init(
         coders: Coders,
         components: [Component<Resolver, Context>]
     ) throws {

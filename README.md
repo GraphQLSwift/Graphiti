@@ -85,44 +85,59 @@ Now we can finally define the GraphQL API with its schema.
 struct MessageAPI : API {
     let resolver: Resolver
     let schema: Schema<Resolver, Context>
-    
-    init(resolver: Resolver) throws {
-        self.resolver = resolver
+}
+        
+let api = MessageAPI(
+    resolver: Resolver()
+    schema: try! Schema<Resolver, Context> {
+        Type(Message.self) {
+            Field("content", at: \.content)
+        }
 
-        self.schema = try Schema<Resolver, Context> {
-            Type(Message.self) {
-                Field("content", at: \.content)
-            }
-
-            Query {
-                Field("message", at: Resolver.message)
-            }
+        Query {
+            Field("message", at: Resolver.message)
         }
     }
-}
+)
 ```
+
+Schemas may also be created in a modular way using `SchemaBuilder`:
+
+```
+let builder = SchemaBuilder(Resolver.self, Context.self)
+builder.add(
+    Type(Message.self) {
+        Field("content", at: \.content)
+    }
+)
+builder.query.add(
+    Field("message", at: Resolver.message)
+)
+let schema = try builder.build()
+
+let api = MessageAPI(
+    resolver: Resolver()
+    schema: schema
+)
+``` 
 
 ⭐️ Notice that `API` allows dependency injection. You could pass mocks of `resolver` and `context` when testing, for example.
 
 #### Querying
 
-To query the schema we need to instantiate the api and pass in an EventLoopGroup to feed the execute function alongside the query itself.
+To query the schema we need to pass in a NIO EventLoopGroup to feed the execute function alongside the query itself.
 
 ```swift
 import NIO
 
-let resolver = Resolver()
-let context = Context()
-let api = try MessageAPI(resolver: resolver)
 let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        
 defer {
     try? group.syncShutdownGracefully()
 }
 
 api.execute(
     request: "{ message { content } }",
-    context: context,
+    context: Context(),
     on: group
 ).whenSuccess { result in
     print(result)
