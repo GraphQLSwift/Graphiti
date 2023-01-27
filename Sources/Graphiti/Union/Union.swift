@@ -38,4 +38,12 @@ public extension Union {
     ) {
         self.init(type: type, name: name, members: members)
     }
+
+    convenience init(
+        _ type: UnionType.Type,
+        as name: String? = nil,
+        members: [Any.Type]
+    ) {
+        self.init(type: type, name: name, members: members)
+    }
 }
