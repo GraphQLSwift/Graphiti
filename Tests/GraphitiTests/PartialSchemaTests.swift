@@ -3,43 +3,10 @@ import GraphQL
 import NIO
 import XCTest
 
-class SchemaBuilderTests: XCTestCase {
-    func testSchemaBuilder() throws {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-
-        let builder = SchemaBuilder(StarWarsResolver.self, StarWarsContext.self)
-
-        // Add assets slightly out of order
-        builder.addQuery {
-            Field("hero", at: StarWarsResolver.hero, as: Character.self) {
-                Argument("episode", at: \.episode)
-                    .description(
-                        "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode."
-                    )
-            }.description("Returns a hero based on the given episode.")
-        }
-        builder.add {
-            Type(Planet.self) {
-                Field("id", at: \.id)
-                Field("name", at: \.name)
-                Field("diameter", at: \.diameter)
-                Field("rotationPeriod", at: \.rotationPeriod)
-                Field("orbitalPeriod", at: \.orbitalPeriod)
-                Field("residents", at: \.residents)
-            }.description(
-                "A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY."
-            )
-        }.add {
-            Enum(Episode.self) {
-                Value(.newHope)
-                    .description("Released in 1977.")
-                Value(.empire)
-                    .description("Released in 1980.")
-                Value(.jedi)
-                    .description("Released in 1983.")
-            }.description("One of the films in the Star Wars Trilogy.")
-        }
-        builder.add {
+class PartialSchemaTests: XCTestCase {
+    class BaseSchema: PartialSchema<StarWarsResolver, StarWarsContext> {
+        @TypeDefinitions
+        override var types: Types {
             Interface(Character.self) {
                 Field("id", at: \.id)
                     .description("The id of the character.")
@@ -54,7 +21,41 @@ class SchemaBuilderTests: XCTestCase {
                 Field("secretBackstory", at: \.secretBackstory)
                     .description("All secrets about their past.")
             }
-        }.add {
+
+            Enum(Episode.self) {
+                Value(.newHope)
+                    .description("Released in 1977.")
+                Value(.empire)
+                    .description("Released in 1980.")
+                Value(.jedi)
+                    .description("Released in 1983.")
+            }.description("One of the films in the Star Wars Trilogy.")
+        }
+
+        @FieldDefinitions
+        override var query: Fields {
+            Field("hero", at: StarWarsResolver.hero, as: Character.self) {
+                Argument("episode", at: \.episode)
+                    .description(
+                        "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode."
+                    )
+            }.description("Returns a hero based on the given episode.")
+        }
+    }
+
+    class SearchSchema: PartialSchema<StarWarsResolver, StarWarsContext> {
+        @TypeDefinitions
+        override var types: Types {
+            Type(Planet.self) {
+                Field("id", at: \.id)
+                Field("name", at: \.name)
+                Field("diameter", at: \.diameter)
+                Field("rotationPeriod", at: \.rotationPeriod)
+                Field("orbitalPeriod", at: \.orbitalPeriod)
+                Field("residents", at: \.residents)
+            }.description(
+                "A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY."
+            )
             Type(Human.self, interfaces: [Character.self]) {
                 Field("id", at: \.id)
                 Field("name", at: \.name)
@@ -75,10 +76,11 @@ class SchemaBuilderTests: XCTestCase {
                 Field("secretBackstory", at: Droid.getSecretBackstory)
                     .description("Where are they from and how they came to be who they are.")
             }.description("A mechanical creature in the Star Wars universe.")
-        }.add {
             Union(SearchResult.self, members: Planet.self, Human.self, Droid.self)
         }
-        builder.addQuery {
+
+        @FieldDefinitions
+        override var query: Fields {
             Field("human", at: StarWarsResolver.human) {
                 Argument("id", at: \.id)
                     .description("Id of the human.")
@@ -92,15 +94,56 @@ class SchemaBuilderTests: XCTestCase {
                     .defaultValue("R2-D2")
             }
         }
+    }
+
+    func testPartialSchemaWithBuilder() throws {
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+
+        let builder = SchemaBuilder(StarWarsResolver.self, StarWarsContext.self)
+
+        builder.use(partials: [BaseSchema(), SearchSchema()])
 
         let schema = try builder.build()
 
-        struct SchemaBuilderTestAPI: API {
+        struct PartialSchemaTestAPI: API {
             let resolver: StarWarsResolver
             let schema: Schema<StarWarsResolver, StarWarsContext>
         }
 
-        let api = SchemaBuilderTestAPI(resolver: StarWarsResolver(), schema: schema)
+        let api = PartialSchemaTestAPI(resolver: StarWarsResolver(), schema: schema)
+
+        XCTAssertEqual(
+            try api.execute(
+                request: """
+                query {
+                    human(id: "1000") {
+                        name
+                    }
+                }
+                """,
+                context: StarWarsContext(),
+                on: group
+            ).wait(),
+            GraphQLResult(data: [
+                "human": [
+                    "name": "Luke Skywalker",
+                ],
+            ])
+        )
+    }
+
+    func testPartialSchema() throws {
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+
+        /// Double check if static func works and the types are inferred properly
+        let schema = try Schema.create(from: [BaseSchema(), SearchSchema()])
+
+        struct PartialSchemaTestAPI: API {
+            let resolver: StarWarsResolver
+            let schema: Schema<StarWarsResolver, StarWarsContext>
+        }
+
+        let api = PartialSchemaTestAPI(resolver: StarWarsResolver(), schema: schema)
 
         XCTAssertEqual(
             try api.execute(

@@ -28,7 +28,6 @@ class UnionTests: XCTestCase {
             }
         }
 
-
         _ = try Schema<StarWarsResolver, StarWarsContext> {
             Type(Planet.self) {
                 Field("id", at: \.id)
@@ -54,6 +53,5 @@ class UnionTests: XCTestCase {
                 }
             }
         }
-
     }
 }
