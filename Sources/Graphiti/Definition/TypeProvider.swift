@@ -255,7 +255,7 @@ extension TypeProvider {
 
         return objectType
     }
-    
+
     private func getGraphQLName(of type: Any.Type) -> String {
         return graphQLNameMap[AnyType(type)] ?? Reflection.name(for: type)
     }

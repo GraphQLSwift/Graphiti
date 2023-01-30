@@ -94,12 +94,12 @@ class SchemaBuilderTests: XCTestCase {
         }
 
         let schema = try builder.build()
-        
+
         struct SchemaBuilderTestAPI: API {
             let resolver: StarWarsResolver
             let schema: Schema<StarWarsResolver, StarWarsContext>
         }
-        
+
         let api = SchemaBuilderTestAPI(resolver: StarWarsResolver(), schema: schema)
 
         XCTAssertEqual(

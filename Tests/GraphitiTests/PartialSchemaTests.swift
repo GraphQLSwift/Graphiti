@@ -109,7 +109,7 @@ class PartialSchemaTests: XCTestCase {
             let resolver: StarWarsResolver
             let schema: Schema<StarWarsResolver, StarWarsContext>
         }
-        
+
         let api = PartialSchemaTestAPI(resolver: StarWarsResolver(), schema: schema)
 
         XCTAssertEqual(
@@ -142,7 +142,7 @@ class PartialSchemaTests: XCTestCase {
             let resolver: StarWarsResolver
             let schema: Schema<StarWarsResolver, StarWarsContext>
         }
-        
+
         let api = PartialSchemaTestAPI(resolver: StarWarsResolver(), schema: schema)
 
         XCTAssertEqual(
