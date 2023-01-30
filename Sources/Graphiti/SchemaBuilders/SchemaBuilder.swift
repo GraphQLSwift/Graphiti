@@ -104,6 +104,26 @@ public final class SchemaBuilder<Resolver, Context> {
         return self
     }
 
+    @discardableResult
+    /// Adds multiple type, query, mutation, and subscription definitions using partial schemas to the schema.
+    /// - Parameter partials: Partial schemas that declare types, query, mutation, and/or subscription definiton
+    /// - Returns: Thie object for method chaining
+    public func use(partials: [PartialSchema<Resolver, Context>]) -> Self {
+        for type in partials.flatMap({ $0.types }) {
+            typeComponents.append(type)
+        }
+        for query in partials.flatMap({ $0.query }) {
+            queryFields.append(query)
+        }
+        for mutation in partials.flatMap({ $0.mutation }) {
+            mutationFields.append(mutation)
+        }
+        for subscription in partials.flatMap({ $0.subscription }) {
+            subscriptionFields.append(subscription)
+        }        
+        return self
+    }
+
     /// Create and return the queryable GraphQL schema
     public func build() throws -> Schema<Resolver, Context> {
         var components = typeComponents.map { topLevelComponent in
