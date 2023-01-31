@@ -20,7 +20,10 @@ public final class ConnectionType<
             try pageInfo.update(typeProvider: typeProvider, coders: coders)
         }
 
-        let edge = Type<Resolver, Context, Edge<ObjectType>>(Edge<ObjectType>.self) {
+        let edge = Type<Resolver, Context, Edge<ObjectType>>(
+            Edge<ObjectType>.self,
+            as: name+"Edge"
+        ) {
             Field("node", at: \.node)
             Field("cursor", at: \.cursor)
         }
@@ -28,8 +31,8 @@ public final class ConnectionType<
         try edge.update(typeProvider: typeProvider, coders: coders)
 
         let connection = Type<Resolver, Context, Connection<ObjectType>>(
-            Connection<ObjectType>
-                .self
+            Connection<ObjectType>.self,
+            as: name+"Connection"
         ) {
             Field("edges", at: \.edges)
             Field("pageInfo", at: \.pageInfo)
@@ -38,13 +41,19 @@ public final class ConnectionType<
         try connection.update(typeProvider: typeProvider, coders: coders)
     }
 
-    private init(type _: ObjectType.Type) {
-        super.init(name: "")
+    private init(
+        type _: ObjectType.Type,
+        name: String?
+    ) {
+        super.init(name: name ?? Reflection.name(for: ObjectType.self))
     }
 }
 
 public extension ConnectionType {
-    convenience init(_ type: ObjectType.Type) {
-        self.init(type: type)
+    convenience init(
+        _ type: ObjectType.Type,
+        as name: String? = nil
+    ) {
+        self.init(type: type, name: name)
     }
 }
