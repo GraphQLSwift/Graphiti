@@ -30,6 +30,8 @@ class SchemaBuilderTests: XCTestCase {
                 "A large mass, planet or planetoid in the Star Wars Universe, at the time of 0 ABY."
             )
         }.add {
+            ConnectionType(Planet.self)
+        }.add {
             Enum(Episode.self) {
                 Value(.newHope)
                     .description("Released in 1977.")
@@ -119,6 +121,12 @@ class SchemaBuilderTests: XCTestCase {
                     "name": "Luke Skywalker",
                 ],
             ])
+        )
+        
+        XCTAssert(
+            api.schema.schema.typeMap.contains(where: { key, _ in
+                key == "PlanetConnection"
+            })
         )
     }
 }
