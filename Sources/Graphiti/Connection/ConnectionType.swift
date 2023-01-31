@@ -4,7 +4,7 @@ public final class ConnectionType<
     Resolver,
     Context,
     ObjectType: Encodable
->: Component<
+>: TypeComponent<
     Resolver,
     Context
 > {
