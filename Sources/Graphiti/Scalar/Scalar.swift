@@ -33,8 +33,7 @@ open class Scalar<Resolver, Context, ScalarType: Codable>: TypeComponent<Resolve
             }
         )
 
-        try typeProvider.map(ScalarType.self, to: scalarType)
-        typeProvider.types.append(scalarType)
+        try typeProvider.add(type: ScalarType.self, as: scalarType)
     }
 
     override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {

@@ -17,8 +17,7 @@ public final class Input<
             fields: fields(typeProvider: typeProvider)
         )
 
-        try typeProvider.map(InputObjectType.self, to: inputObjectType)
-        typeProvider.types.append(inputObjectType)
+        try typeProvider.add(type: InputObjectType.self, as: inputObjectType)
     }
 
     override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {

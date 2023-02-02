@@ -22,8 +22,7 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
             isTypeOf: isTypeOf
         )
 
-        try typeProvider.map(ObjectType.self, to: objectType)
-        typeProvider.types.append(objectType)
+        try typeProvider.add(type: ObjectType.self, as: objectType)
     }
 
     override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {

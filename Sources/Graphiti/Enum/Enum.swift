@@ -23,8 +23,7 @@ public final class Enum<
             }
         )
 
-        try typeProvider.map(EnumType.self, to: enumType)
-        typeProvider.types.append(enumType)
+        try typeProvider.add(type: EnumType.self, as: enumType)
     }
 
     override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {
