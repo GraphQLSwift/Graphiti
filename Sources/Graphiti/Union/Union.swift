@@ -14,6 +14,7 @@ public final class Union<Resolver, Context, UnionType>: TypeComponent<Resolver, 
         )
 
         try typeProvider.map(UnionType.self, to: unionType)
+        typeProvider.types.append(unionType)
     }
 
     override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {
