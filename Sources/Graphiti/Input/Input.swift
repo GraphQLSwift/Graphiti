@@ -41,7 +41,10 @@ public final class Input<
         fields: [InputFieldComponent<InputObjectType, Context>]
     ) {
         self.fields = fields
-        super.init(name: name ?? Reflection.name(for: InputObjectType.self))
+        super.init(
+            name: name ?? Reflection.name(for: InputObjectType.self),
+            type: .connection
+        )
     }
 }
 

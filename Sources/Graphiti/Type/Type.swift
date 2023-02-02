@@ -48,7 +48,10 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
     ) {
         self.interfaces = interfaces
         self.fields = fields
-        super.init(name: name ?? Reflection.name(for: ObjectType.self))
+        super.init(
+            name: name ?? Reflection.name(for: ObjectType.self),
+            type: .type
+        )
     }
 }
 

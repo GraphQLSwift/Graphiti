@@ -36,7 +36,10 @@ public final class Enum<
         values: [Value<EnumType>]
     ) {
         self.values = values
-        super.init(name: name ?? Reflection.name(for: EnumType.self))
+        super.init(
+            name: name ?? Reflection.name(for: EnumType.self),
+            type: .enum
+        )
     }
 }
 

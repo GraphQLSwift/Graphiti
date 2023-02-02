@@ -45,7 +45,10 @@ public final class ConnectionType<
         type _: ObjectType.Type,
         name: String?
     ) {
-        super.init(name: name ?? Reflection.name(for: ObjectType.self))
+        super.init(
+            name: name ?? Reflection.name(for: ObjectType.self),
+            type: .connection
+        )
     }
 }
 

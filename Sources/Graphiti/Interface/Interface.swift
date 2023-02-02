@@ -38,7 +38,10 @@ public final class Interface<Resolver, Context, InterfaceType>: TypeComponent<
         fields: [FieldComponent<InterfaceType, Context>]
     ) {
         self.fields = fields
-        super.init(name: name ?? Reflection.name(for: InterfaceType.self))
+        super.init(
+            name: name ?? Reflection.name(for: InterfaceType.self),
+            type: .interface
+        )
     }
 }
 

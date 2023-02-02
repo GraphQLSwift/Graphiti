@@ -52,7 +52,10 @@ open class Scalar<Resolver, Context, ScalarType: Codable>: TypeComponent<Resolve
         type _: ScalarType.Type,
         name: String?
     ) {
-        super.init(name: name ?? Reflection.name(for: ScalarType.self))
+        super.init(
+            name: name ?? Reflection.name(for: ScalarType.self),
+            type: .scalar
+        )
     }
 }
 
