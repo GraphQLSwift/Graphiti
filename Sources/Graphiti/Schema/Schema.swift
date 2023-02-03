@@ -15,8 +15,11 @@ public final class Schema<Resolver, Context> {
             try component.setGraphQLName(typeProvider: typeProvider)
         }
 
-        // Then build up GraphQLTypes
-        for component in components {
+        // Order component by componentType build order
+        let sortedComponents = components.sorted {
+            $0.componentType.buildOrder <= $1.componentType.buildOrder
+        }
+        for component in sortedComponents {
             try component.update(typeProvider: typeProvider, coders: coders)
         }
 

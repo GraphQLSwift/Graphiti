@@ -13,7 +13,7 @@ public final class Union<Resolver, Context, UnionType>: TypeComponent<Resolver, 
             }
         )
 
-        try typeProvider.map(UnionType.self, to: unionType)
+        try typeProvider.add(type: UnionType.self, as: unionType)
     }
 
     override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {
@@ -26,7 +26,10 @@ public final class Union<Resolver, Context, UnionType>: TypeComponent<Resolver, 
         members: [Any.Type]
     ) {
         self.members = members
-        super.init(name: name ?? Reflection.name(for: UnionType.self))
+        super.init(
+            name: name ?? Reflection.name(for: UnionType.self),
+            type: .union
+        )
     }
 }
 

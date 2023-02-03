@@ -17,8 +17,7 @@ public final class Input<
             fields: fields(typeProvider: typeProvider)
         )
 
-        try typeProvider.map(InputObjectType.self, to: inputObjectType)
-        typeProvider.types.append(inputObjectType)
+        try typeProvider.add(type: InputObjectType.self, as: inputObjectType)
     }
 
     override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {
@@ -42,7 +41,10 @@ public final class Input<
         fields: [InputFieldComponent<InputObjectType, Context>]
     ) {
         self.fields = fields
-        super.init(name: name ?? Reflection.name(for: InputObjectType.self))
+        super.init(
+            name: name ?? Reflection.name(for: InputObjectType.self),
+            type: .connection
+        )
     }
 }
 

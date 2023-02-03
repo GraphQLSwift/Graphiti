@@ -32,7 +32,10 @@ public final class Mutation<Resolver, Context>: Component<Resolver, Context> {
         fields: [FieldComponent<Resolver, Context>]
     ) {
         self.fields = fields
-        super.init(name: name)
+        super.init(
+            name: name,
+            type: .mutation
+        )
     }
 }
 

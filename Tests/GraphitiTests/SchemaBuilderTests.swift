@@ -42,20 +42,7 @@ class SchemaBuilderTests: XCTestCase {
             }.description("One of the films in the Star Wars Trilogy.")
         }
         builder.add {
-            Interface(Character.self) {
-                Field("id", at: \.id)
-                    .description("The id of the character.")
-                Field("name", at: \.name)
-                    .description("The name of the character.")
-                Field("friends", at: \.friends, as: [TypeReference<Character>].self)
-                    .description(
-                        "The friends of the character, or an empty list if they have none."
-                    )
-                Field("appearsIn", at: \.appearsIn)
-                    .description("Which movies they appear in.")
-                Field("secretBackstory", at: \.secretBackstory)
-                    .description("All secrets about their past.")
-            }
+            Union(SearchResult.self, members: Planet.self, Human.self, Droid.self)
         }.add {
             Type(Human.self, interfaces: [Character.self]) {
                 Field("id", at: \.id)
@@ -78,7 +65,20 @@ class SchemaBuilderTests: XCTestCase {
                     .description("Where are they from and how they came to be who they are.")
             }.description("A mechanical creature in the Star Wars universe.")
         }.add {
-            Union(SearchResult.self, members: Planet.self, Human.self, Droid.self)
+            Interface(Character.self) {
+                Field("id", at: \.id)
+                    .description("The id of the character.")
+                Field("name", at: \.name)
+                    .description("The name of the character.")
+                Field("friends", at: \.friends, as: [TypeReference<Character>].self)
+                    .description(
+                        "The friends of the character, or an empty list if they have none."
+                    )
+                Field("appearsIn", at: \.appearsIn)
+                    .description("Which movies they appear in.")
+                Field("secretBackstory", at: \.secretBackstory)
+                    .description("All secrets about their past.")
+            }
         }
         builder.addQuery {
             Field("human", at: StarWarsResolver.human) {
@@ -122,7 +122,7 @@ class SchemaBuilderTests: XCTestCase {
                 ],
             ])
         )
-        
+
         XCTAssert(
             api.schema.schema.typeMap.contains(where: { key, _ in
                 key == "PlanetConnection"

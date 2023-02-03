@@ -12,7 +12,10 @@ public final class Types<Resolver, Context>: Component<Resolver, Context> {
 
     init(types: [Any.Type]) {
         self.types = types
-        super.init(name: "")
+        super.init(
+            name: "",
+            type: .types
+        )
     }
 
     public convenience init(_ types: Any.Type...) {
