@@ -166,35 +166,35 @@ class PartialSchemaTests: XCTestCase {
     }
 
     func testPartialSchemaOutOfOrder() throws {
-    let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 
-    /// Double check if ordering of partial schema doesn't matter
-    let schema = try Schema.create(from: [SearchSchema(), BaseSchema()])
+        /// Double check if ordering of partial schema doesn't matter
+        let schema = try Schema.create(from: [SearchSchema(), BaseSchema()])
 
-    struct PartialSchemaTestAPI: API {
-        let resolver: StarWarsResolver
-        let schema: Schema<StarWarsResolver, StarWarsContext>
-    }
+        struct PartialSchemaTestAPI: API {
+            let resolver: StarWarsResolver
+            let schema: Schema<StarWarsResolver, StarWarsContext>
+        }
 
-    let api = PartialSchemaTestAPI(resolver: StarWarsResolver(), schema: schema)
+        let api = PartialSchemaTestAPI(resolver: StarWarsResolver(), schema: schema)
 
-    XCTAssertEqual(
-        try api.execute(
-            request: """
-            query {
-                human(id: "1000") {
-                    name
+        XCTAssertEqual(
+            try api.execute(
+                request: """
+                query {
+                    human(id: "1000") {
+                        name
+                    }
                 }
-            }
-            """,
-            context: StarWarsContext(),
-            on: group
-        ).wait(),
-        GraphQLResult(data: [
-            "human": [
-                "name": "Luke Skywalker",
-            ],
-        ])
-    )
-}
+                """,
+                context: StarWarsContext(),
+                on: group
+            ).wait(),
+            GraphQLResult(data: [
+                "human": [
+                    "name": "Luke Skywalker",
+                ],
+            ])
+        )
+    }
 }
