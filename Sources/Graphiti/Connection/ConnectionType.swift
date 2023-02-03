@@ -22,7 +22,7 @@ public final class ConnectionType<
 
         let edge = Type<Resolver, Context, Edge<ObjectType>>(
             Edge<ObjectType>.self,
-            as: name+"Edge"
+            as: name + "Edge"
         ) {
             Field("node", at: \.node)
             Field("cursor", at: \.cursor)
@@ -32,7 +32,7 @@ public final class ConnectionType<
 
         let connection = Type<Resolver, Context, Connection<ObjectType>>(
             Connection<ObjectType>.self,
-            as: name+"Connection"
+            as: name + "Connection"
         ) {
             Field("edges", at: \.edges)
             Field("pageInfo", at: \.pageInfo)

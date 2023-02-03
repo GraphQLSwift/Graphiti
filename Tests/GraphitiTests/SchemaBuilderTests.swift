@@ -122,7 +122,7 @@ class SchemaBuilderTests: XCTestCase {
                 ],
             ])
         )
-        
+
         XCTAssert(
             api.schema.schema.typeMap.contains(where: { key, _ in
                 key == "PlanetConnection"

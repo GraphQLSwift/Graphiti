@@ -7,7 +7,7 @@ open class Component<Resolver, Context> {
 
     init(name: String, type: ComponentType) {
         self.name = name
-        self.componentType = type
+        componentType = type
     }
 
     func update(typeProvider _: SchemaTypeProvider, coders _: Coders) throws {}
@@ -36,7 +36,7 @@ enum ComponentType {
     case type
     case types
     case union
-    
+
     /// An index used to sort components into the correct schema build order. This order goes
     /// from "least other type references" to "most". By building in this order we are able to satisfy
     /// hard ordering requirements (interfaces MUST be built before inheriting types), as well as

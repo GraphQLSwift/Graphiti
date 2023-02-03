@@ -20,9 +20,9 @@ final class SchemaTypeProvider: TypeProvider {
     var subscription: GraphQLObjectType?
     var types: [GraphQLNamedType] = []
     var directives: [GraphQLDirective] = []
-    
+
     func add(type: Any.Type, as graphQLType: GraphQLNamedType) throws {
-        try self.map(type, to: graphQLType)
+        try map(type, to: graphQLType)
         types.append(graphQLType)
     }
 }
