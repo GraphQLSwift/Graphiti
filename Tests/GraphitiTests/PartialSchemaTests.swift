@@ -235,7 +235,7 @@ class PartialSchemaTests: XCTestCase {
                         .description("Released in 1980.")
                     Value(.jedi)
                         .description("Released in 1983.")
-                }.description("One of the films in the Star Wars Trilogy.")  
+                }.description("One of the films in the Star Wars Trilogy.")
             },
             query: {
                 Field("hero", at: StarWarsResolver.hero, as: Character.self) {
@@ -265,7 +265,9 @@ class PartialSchemaTests: XCTestCase {
                     Field("appearsIn", at: \.appearsIn)
                     Field("homePlanet", at: \.homePlanet)
                     Field("friends", at: Human.getFriends, as: [Character].self)
-                        .description("The friends of the human, or an empty list if they have none.")
+                        .description(
+                            "The friends of the human, or an empty list if they have none."
+                        )
                     Field("secretBackstory", at: Human.getSecretBackstory)
                         .description("Where are they from and how they came to be who they are.")
                 }.description("A humanoid creature in the Star Wars universe.")
@@ -275,7 +277,9 @@ class PartialSchemaTests: XCTestCase {
                     Field("appearsIn", at: \.appearsIn)
                     Field("primaryFunction", at: \.primaryFunction)
                     Field("friends", at: Droid.getFriends, as: [Character].self)
-                        .description("The friends of the droid, or an empty list if they have none.")
+                        .description(
+                            "The friends of the droid, or an empty list if they have none."
+                        )
                     Field("secretBackstory", at: Droid.getSecretBackstory)
                         .description("Where are they from and how they came to be who they are.")
                 }.description("A mechanical creature in the Star Wars universe.")
