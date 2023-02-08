@@ -397,3 +397,120 @@ Each time an event fires, the following message will be generated:
   "fiftyYearStormAlert": "A 50-year storm is occurring!"
 }
 ```
+
+## Federation
+
+Federation allows you split your GraphQL API into smaller services and link them back together so clients see a single larger API. More information can be found [here](https://www.apollographql.com/docs/federation). To enable federation you'll need to implement `FederationResolver` on your resolver. If you would like to use [Federated Entities](https://www.apollographql.com/docs/federation/entities) you'll need to implement `FederationEntity` and `FederationEntityKey` on your types.
+
+```graphql
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: [ "@extends", "@external", "@key", "@inaccessible", "@override", "@provides", "@requires", "@shareable", "@tag"])
+
+type Product {
+    id: ID!
+    sku: String
+    createdBy: User
+}
+
+extend type Query {
+  product(id: ID!): Product
+}
+
+extend type User @key(fields: "email") {
+  email: ID! @external
+  name: String @override(from: "users")
+  totalProductsCreated: Int @external
+  yearsOfEmployment: Int! @external
+}
+```
+
+```swift
+import Foundation
+import Graphiti
+
+struct Product: Codable {
+    let id: String
+    let sku: String
+    let createdBy: User
+}
+
+struct User: Codable, FederationEntity {
+    let email: String
+    let name: String?
+    let totalProductsCreated: Int?
+    let yearsOfEmployment: Int
+}
+
+struct UserEntityKey: FederationEntityKey {
+    let email: String
+}
+
+struct ProductContext { ... }
+
+struct ProductResolver: FederationResolver {
+    static let encoder = JSONEncoder()
+    static let decoder = JSONDecoder()
+    static let entityKeys: [(entity: FederationEntity.Type, keys: [FederationEntityKey.Type])] = [
+        (User.self, [UserEntityKey.self]),
+    ]
+    var sdl: String
+
+    struct ProductArguments: Codable {
+        let id: String
+    }
+
+    func product(context: ProductContext, arguments: ProductArguments) -> Product? {
+        context.getProduct(id: arguments.id)
+    }
+
+    // Loop through all the keys you want to support
+    func entity(context: ProductContext, key: FederationEntityKey, group: EventLoopGroup) -> EventLoopFuture<FederationEntity?> {
+        switch key {
+        case let key as UserEntityKey:
+            return context.getUser(email: key.email)
+        default:
+            return group.next.makeSucceededFuture(nil)
+        }
+    }
+}
+
+final class ProductSchema: PartialSchema<ProductResolver, ProductContext> {
+    @TypeDefinitions
+    override var types: Types {
+        Type(Product.self) {
+            Field("id", at: \.id)
+            Field("sku", at: \.sku)
+            Field("package", at: \.package)
+            Field("createdBy", at: \.createdBy)
+        }
+
+        Type(User.self) {
+            Field("email", at: \.email)
+            Field("name", at: \.name)
+            Field("totalProductsCreated", at: \.totalProductsCreated)
+            Field("yearsOfEmployment", at: \.yearsOfEmployment)
+        }
+    }
+
+    @FieldDefinitions
+    override var query: Fields {
+        Field("product", at: ProductResolver.product) {
+            Argument("id", at: \.id)
+        }
+    }
+}
+
+struct ProductAPI: API {
+    let resolver: ProductResolver
+    let schema: Schema<ProductResolver, ProductContext>
+}
+
+let schema = try SchemaBuilder(ProductResolver.self, ProductContext.self)
+    .use(partials: [ProductSchema()])
+    .enableFederation()
+    .build()
+
+let api = try ProductAPI(resolver: ProductResolver(sdl: getSDL()), schema: schema)
+let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+
+try api.execute(request: "query { product(id: '123') { id createdBy { name } } }", on: group)
+```
