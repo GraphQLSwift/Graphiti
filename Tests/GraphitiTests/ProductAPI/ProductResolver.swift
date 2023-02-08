@@ -58,21 +58,10 @@ extension ProductResolver: FederationResolver {
 }
 
 #if compiler(<5.7)
-// On older versions of Swift, the user will need to map the representation to the key manually
-
 import GraphQL
 
 extension ProductResolver {
-    func entityResolver(context: ProductContext, arguments: FederationEntityResolverArguments, group: EventLoopGroup) -> EventLoopFuture<[FederationEntity?]> {
-        return arguments.representations
-            .map { entityKey(representation: $0) }
-            .map { key in
-                guard let key = key else { return group.next().makeSucceededFuture(nil) }
-                return entity(context: context, key: key, group: group)
-            }
-            .flatten(on: group)
-    }
-
+    // On older versions of Swift, the user will need to map the representation to the key manually
     func entityKey(representation: Map) -> FederationEntityKey? {
         guard
             let encoded = try? Self.encoder.encode(representation),
@@ -97,5 +86,4 @@ extension ProductResolver {
         return nil
     }
 }
-
 #endif

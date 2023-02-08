@@ -8,22 +8,17 @@ public struct FederationEntityResolverArguments: Codable {
 
 public protocol FederationResolver {
     associatedtype Context
-    static var entityKeys: [(entity: FederationEntity.Type, keys: [FederationEntityKey.Type])] { get }
     static var encoder: JSONEncoder { get }
     static var decoder: JSONDecoder { get }
     var sdl: String { get }
-    func entityResolver(context: Context, arguments: FederationEntityResolverArguments, group: EventLoopGroup) -> EventLoopFuture<[FederationEntity?]>
-    func serviceResolver(context: Context, arguments: NoArguments) -> FederationServiceType
     func entity(context: Context, key: FederationEntityKey, group: EventLoopGroup) -> EventLoopFuture<FederationEntity?>
-}
-
-public extension FederationResolver {
-    func serviceResolver(context: Context, arguments: NoArguments) -> FederationServiceType {
-        FederationServiceType(sdl: sdl)
-    }
-}
 
 #if compiler(>=5.7)
+    static var entityKeys: [(entity: FederationEntity.Type, keys: [FederationEntityKey.Type])] { get }
+#else
+    func entityKey(representation: Map) -> FederationEntityKey?
+#endif
+}
 
 public extension FederationResolver {
     func entityResolver(context: Context, arguments: FederationEntityResolverArguments, group: EventLoopGroup) -> EventLoopFuture<[FederationEntity?]> {
@@ -36,6 +31,14 @@ public extension FederationResolver {
             .flatten(on: group)
     }
 
+    func serviceResolver(context: Context, arguments: NoArguments) -> FederationServiceType {
+        FederationServiceType(sdl: sdl)
+    }
+}
+
+#if compiler(>=5.7)
+
+public extension FederationResolver {
     func entityKey(representation: Map) -> FederationEntityKey? {
         guard
             let encoded = try? Self.encoder.encode(representation),
