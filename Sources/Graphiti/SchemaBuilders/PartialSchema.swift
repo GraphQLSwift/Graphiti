@@ -14,10 +14,10 @@ open class PartialSchema<Resolver, Context> {
     public typealias Fields = [FieldComponent<Resolver, Context>]
 
     /// Stored predefined "default" properties for a instance-based declaration
-    private let tdef: Types
-    private let qdef: Fields
-    private let mdef: Fields
-    private let sdef: Fields
+    private let typedef: Types
+    private let querydef: Fields
+    private let mutationdef: Fields
+    private let subscriptiondef: Fields
 
     public init(
         @TypeDefinitions types: () -> Types = { [] },
@@ -25,23 +25,23 @@ open class PartialSchema<Resolver, Context> {
         @FieldDefinitions mutation: () -> Fields = { [] },
         @FieldDefinitions subscription: () -> Fields = { [] }
     ) {
-        tdef = types()
-        qdef = query()
-        mdef = mutation()
-        sdef = subscription()
+        typedef = types()
+        querydef = query()
+        mutationdef = mutation()
+        subscriptiondef = subscription()
     }
 
     /// Definitions of types
-    open var types: Types { tdef }
+    open var types: Types { typedef }
 
     /// Definitions of query operation fields
-    open var query: Fields { qdef }
+    open var query: Fields { querydef }
 
     /// Definitions of mutation operation fields
-    open var mutation: Fields { mdef }
+    open var mutation: Fields { mutationdef }
 
     /// Definitions of subscription operation fields
-    open var subscription: Fields { sdef }
+    open var subscription: Fields { subscriptiondef }
 }
 
 public extension Schema {
