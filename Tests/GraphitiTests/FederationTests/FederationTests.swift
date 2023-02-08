@@ -8,9 +8,7 @@ final class FederationTests: XCTestCase {
     private var group: MultiThreadedEventLoopGroup!
     private var api: ProductAPI!
 
-#if compiler(>=5.5) && canImport(_Concurrency)
-
-    override func setUp() async throws {
+    override func setUpWithError() throws {
         let schema = try SchemaBuilder(ProductResolver.self, ProductContext.self)
             .use(partials: [ProductSchema()])
             .enableFederation()
@@ -20,41 +18,11 @@ final class FederationTests: XCTestCase {
         self.api = try ProductAPI(resolver: ProductResolver(sdl: loadSDL()), schema: schema)
     }
 
-    override func tearDown() async throws {
+    override func tearDownWithError() throws {
         try group.syncShutdownGracefully()
         group = nil
         api = nil
     }
-
-#else
-
-    override func setUp(completion: @escaping (Error?) -> Void) {
-        do {
-            let schema = try SchemaBuilder(ProductResolver.self, ProductContext.self)
-                .use(partials: [ProductSchema()])
-                .enableFederation()
-                .build()
-
-            self.group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-            self.api = try ProductAPI(resolver: ProductResolver(sdl: loadSDL()), schema: schema)
-            completion(nil)
-        } catch {
-            completion(error)
-        }
-    }
-
-    override func tearDown(completion: @escaping (Error?) -> Void) {
-        do {
-            try group.syncShutdownGracefully()
-            group = nil
-            api = nil
-            completion(nil)
-        } catch {
-            completion(error)
-        }
-    }
-
-#endif
 
     func testProductQuery() throws {
         try XCTAssertEqual(execute(request: query("product"), variables: ["id": "apollo-federation"]), GraphQLResult(data: [
