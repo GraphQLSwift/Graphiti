@@ -18,9 +18,6 @@ final class ProductSchema: PartialSchema<ProductResolver, ProductContext> {
             Field("notes", at: \.notes)
             Field("research", at: \.research)
         }
-        .key(Product.EntityKey1.self)
-        .key(Product.EntityKey2.self)
-        .key(Product.EntityKey3.self)
 
         Type(DeprecatedProduct.self) {
             Field("sku", at: \.sku)
@@ -28,7 +25,6 @@ final class ProductSchema: PartialSchema<ProductResolver, ProductContext> {
             Field("reason", at: \.reason)
             Field("createdBy", at: \.createdBy)
         }
-        .key(DeprecatedProduct.EntityKey.self)
 
         Type(ProductVariation.self) {
             Field("id", at: \.id)
@@ -38,7 +34,6 @@ final class ProductSchema: PartialSchema<ProductResolver, ProductContext> {
             Field("study", at: \.study)
             Field("outcome", at: \.outcome)
         }
-        .key(ProductResearch.EntityKey.self)
 
         Type(CaseStudy.self) {
             Field("caseNumber", at: \.caseNumber)
@@ -58,7 +53,6 @@ final class ProductSchema: PartialSchema<ProductResolver, ProductContext> {
             Field("yearsOfEmployment", at: \.yearsOfEmployment)
             Field("averageProductsCreatedPerYear", at: \.averageProductsCreatedPerYear)
         }
-        .key(ProductUser.EntityKey.self)
     }
 
     @FieldDefinitions

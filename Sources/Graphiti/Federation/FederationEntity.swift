@@ -1,8 +1,6 @@
 import Foundation
 
-public protocol FederationEntityKey: Codable {
-    static var fields: String { get }
-}
+public protocol FederationEntityKey: Codable {}
 
 public protocol FederationEntity: Codable {
     static var typename: String { get }

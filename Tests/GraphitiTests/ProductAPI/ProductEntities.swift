@@ -12,21 +12,15 @@ struct Product: Codable, FederationEntity {
     let research: [ProductResearch]
 
     struct EntityKey1: FederationEntityKey {
-        static let fields: String = "id"
-
         let id: String
     }
 
     struct EntityKey2: FederationEntityKey {
-        static let fields: String = "sku package"
-
         let sku: String
         let package: String
     }
 
     struct EntityKey3: FederationEntityKey {
-        static let fields: String = "sku variation { id }"
-
         let sku: String
         let variation: VariationKey
 
@@ -43,8 +37,6 @@ struct DeprecatedProduct: Codable, FederationEntity {
     let createdBy: ProductUser?
 
     struct EntityKey: FederationEntityKey {
-        static let fields: String = "sku package"
-
         let sku: String
         let package: String
     }
@@ -59,8 +51,6 @@ struct ProductResearch: Codable, FederationEntity {
     let outcome: String?
 
     struct EntityKey: FederationEntityKey {
-        static let fields: String = "study { caseNumber }"
-
         let study: CaseStudyKey
 
         struct CaseStudyKey: Codable {
@@ -94,8 +84,6 @@ struct ProductUser: Codable, FederationEntity {
     static let typename: String = "User"
 
     struct EntityKey: FederationEntityKey {
-        static let fields: String = "email"
-
         let email: String
     }
 }
