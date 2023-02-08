@@ -2,21 +2,24 @@ query($representations: [_Any!]!) {
   _entities(representations: $representations) {
     ... on Product {
       id
-      notes
-      package
       sku
-      createdBy {
-        averageProductsCreatedPerYear
-        email
-        name
-        totalProductsCreated
-        yearsOfEmployment
+      package
+      variation {
+        id
       }
       dimensions {
         size
         unit
         weight
       }
+      createdBy {
+        email
+        name
+        totalProductsCreated
+        yearsOfEmployment
+        averageProductsCreatedPerYear
+      }
+      notes
       research {
         outcome
         study {
@@ -24,35 +27,33 @@ query($representations: [_Any!]!) {
           description
         }
       }
-      variation {
-        id
-      }
     }
     ... on DeprecatedProduct {
+      sku
+      package
       reason
       createdBy {
-        averageProductsCreatedPerYear
         email
         name
         totalProductsCreated
         yearsOfEmployment
+        averageProductsCreatedPerYear
       }
-      package
-      sku
+
     }
     ... on ProductResearch {
-      outcome
       study {
         caseNumber
         description
       }
+      outcome
     }
     ... on User {
-      averageProductsCreatedPerYear
       email
       name
       totalProductsCreated
       yearsOfEmployment
+      averageProductsCreatedPerYear
     }
   }
 }

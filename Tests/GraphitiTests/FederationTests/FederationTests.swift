@@ -105,11 +105,16 @@ final class FederationTests: XCTestCase {
         try XCTAssertEqual(execute(request: query("entities"), variables: representations), GraphQLResult(data: [
             "_entities": [
                 [
-                    "email": "support@apollographql.com",
-                    "name": "Jane Smith",
-                    "totalProductsCreated": 1337,
-                    "yearsOfEmployment": 10,
-                    "averageProductsCreatedPerYear": 133,
+                    "sku": "apollo-federation-v1",
+                    "package": "@apollo/federation-v1",
+                    "reason": "Migrate to Federation V2",
+                    "createdBy": [
+                        "email": "support@apollographql.com",
+                        "name": "Jane Smith",
+                        "totalProductsCreated": 1337,
+                        "yearsOfEmployment": 10,
+                        "averageProductsCreatedPerYear": 133,
+                    ]
                 ]
             ]
         ]))
@@ -125,11 +130,11 @@ final class FederationTests: XCTestCase {
         try XCTAssertEqual(execute(request: query("entities"), variables: representations), GraphQLResult(data: [
             "_entities": [
                 [
-                    "email": "support@apollographql.com",
-                    "name": "Jane Smith",
-                    "totalProductsCreated": 1337,
-                    "yearsOfEmployment": 10,
-                    "averageProductsCreatedPerYear": 133,
+                    "study": [
+                        "caseNumber": "1234",
+                        "description": "Federation Study"
+                    ],
+                    "outcome": nil
                 ]
             ]
         ]))
@@ -147,11 +152,94 @@ final class FederationTests: XCTestCase {
         try XCTAssertEqual(execute(request: query("entities"), variables: representations), GraphQLResult(data: [
             "_entities": [
                 [
-                    "email": "support@apollographql.com",
-                    "name": "Jane Smith",
-                    "totalProductsCreated": 1337,
-                    "yearsOfEmployment": 10,
-                    "averageProductsCreatedPerYear": 133,
+                    "id": "apollo-federation",
+                    "sku": "federation",
+                    "package": "@apollo/federation",
+                    "variation": [
+                        "id": "OSS"
+                    ],
+                    "dimensions": [
+                        "size": "small",
+                        "unit": "kg",
+                        "weight": 1
+                    ],
+                    "createdBy": [
+                        "email": "support@apollographql.com",
+                        "name": "Jane Smith",
+                        "totalProductsCreated": 1337,
+                        "yearsOfEmployment":10,
+                        "averageProductsCreatedPerYear":133,
+                    ],
+                    "notes": nil,
+                    "research": [
+                        [
+                            "outcome": nil,
+                            "study": [
+                                "caseNumber": "1234",
+                                "description": "Federation Study"
+                            ]
+                        ]
+                    ]
+                ],
+                [
+                    "id": "apollo-federation",
+                    "sku": "federation",
+                    "package": "@apollo/federation",
+                    "variation": [
+                        "id": "OSS"
+                    ],
+                    "dimensions": [
+                        "size": "small",
+                        "unit": "kg",
+                        "weight": 1
+                    ],
+                    "createdBy": [
+                        "email": "support@apollographql.com",
+                        "name": "Jane Smith",
+                        "totalProductsCreated": 1337,
+                        "yearsOfEmployment":10,
+                        "averageProductsCreatedPerYear":133,
+                    ],
+                    "notes": nil,
+                    "research": [
+                        [
+                            "outcome": nil,
+                            "study": [
+                                "caseNumber": "1234",
+                                "description": "Federation Study"
+                            ]
+                        ]
+                    ]
+                ],
+                [
+                    "id": "apollo-studio",
+                    "sku": "studio",
+                    "package": "",
+                    "variation": [
+                        "id": "platform"
+                    ],
+                    "dimensions": [
+                        "size": "small",
+                        "unit": "kg",
+                        "weight": 1
+                    ],
+                    "createdBy": [
+                        "email": "support@apollographql.com",
+                        "name": "Jane Smith",
+                        "totalProductsCreated": 1337,
+                        "yearsOfEmployment":10,
+                        "averageProductsCreatedPerYear":133,
+                    ],
+                    "notes": nil,
+                    "research": [
+                        [
+                            "outcome": nil,
+                            "study": [
+                                "caseNumber": "1235",
+                                "description": "Studio Study"
+                            ]
+                        ]
+                    ]
                 ]
             ]
         ]))
@@ -175,7 +263,6 @@ extension FederationTests {
         guard let url = Bundle.module.url(forResource: name, withExtension: "graphql", subdirectory: "GraphQL") else {
             throw FederationTestsError.couldNotLoadFile
         }
-        print(url)
         return try String(contentsOf: url)
     }
 
@@ -186,11 +273,11 @@ extension FederationTests {
     override func setUp() async throws {
         let schema = try SchemaBuilder(ProductResolver.self, ProductContext.self)
             .use(partials: [ProductSchema()])
-//            .enableFederation()
+            .enableFederation()
             .build()
 
         self.group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        self.api = ProductAPI(resolver: ProductResolver(), schema: schema)
+        self.api = try ProductAPI(resolver: ProductResolver(sdl: loadSDL()), schema: schema)
     }
 
     override func tearDown() async throws {
