@@ -1,0 +1,14 @@
+query($sku: String!, $package: String!) {
+    deprecatedProduct(sku: $sku, package: $package) {
+        sku
+        package
+        reason
+        createdBy {
+            email
+            name
+            totalProductsCreated
+            yearsOfEmployment
+            averageProductsCreatedPerYear
+        }
+    }
+}
