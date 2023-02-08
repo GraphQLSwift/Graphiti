@@ -152,12 +152,3 @@ public final class SchemaBuilder<Resolver, Context> {
         return try Schema(coders: coders, components: components)
     }
 }
-
-extension SchemaBuilder where Resolver: FederationResolver, Resolver.Context == Context {
-    @discardableResult
-    /// Enable federation to add additional capabilities for federation subgraph support
-    public func enableFederation() -> Self {
-        use(partials: [FederationSchema(entityTypes: Resolver.entityKeys.map { $0.entity })])
-        return self
-    }
-}
