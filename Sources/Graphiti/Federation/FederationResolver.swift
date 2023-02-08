@@ -17,6 +17,12 @@ public protocol FederationResolver {
     func entity(context: Context, key: FederationEntityKey, group: EventLoopGroup) -> EventLoopFuture<FederationEntity?>
 }
 
+public extension FederationResolver {
+    func serviceResolver(context: Context, arguments: NoArguments) -> FederationServiceType {
+        FederationServiceType(sdl: sdl)
+    }
+}
+
 #if compiler(>=5.7)
 
 public extension FederationResolver {
@@ -43,10 +49,6 @@ public extension FederationResolver {
         }
 
         return nil
-    }
-
-    func serviceResolver(context: Context, arguments: NoArguments) -> FederationServiceType {
-        FederationServiceType(sdl: sdl)
     }
 }
 
