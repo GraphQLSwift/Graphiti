@@ -3,7 +3,7 @@ import GraphQL
 import NIO
 
 public struct FederationEntityResolverArguments: Codable {
-    let representations: [Map]
+    public let representations: [Map]
 }
 
 public protocol FederationResolver {
@@ -16,6 +16,8 @@ public protocol FederationResolver {
     func serviceResolver(context: Context, arguments: NoArguments) -> FederationServiceType
     func entity(context: Context, key: FederationEntityKey, group: EventLoopGroup) -> EventLoopFuture<FederationEntity?>
 }
+
+#if compiler(>=5.7)
 
 public extension FederationResolver {
     func entityResolver(context: Context, arguments: FederationEntityResolverArguments, group: EventLoopGroup) -> EventLoopFuture<[FederationEntity?]> {
@@ -47,3 +49,5 @@ public extension FederationResolver {
         FederationServiceType(sdl: sdl)
     }
 }
+
+#endif

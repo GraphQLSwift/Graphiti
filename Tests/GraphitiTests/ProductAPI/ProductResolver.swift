@@ -56,3 +56,46 @@ extension ProductResolver: FederationResolver {
         return group.next().makeSucceededFuture(entity)
     }
 }
+
+#if compiler(<5.7)
+// On older versions of Swift, the user will need to map the representation to the key manually
+
+import GraphQL
+
+extension ProductResolver {
+    func entityResolver(context: ProductContext, arguments: FederationEntityResolverArguments, group: EventLoopGroup) -> EventLoopFuture<[FederationEntity?]> {
+        return arguments.representations
+            .map { entityKey(representation: $0) }
+            .map { key in
+                guard let key = key else { return group.next().makeSucceededFuture(nil) }
+                return entity(context: context, key: key, group: group)
+            }
+            .flatten(on: group)
+    }
+
+    func entityKey(representation: Map) -> FederationEntityKey? {
+        guard
+            let encoded = try? Self.encoder.encode(representation),
+            let typename = representation["__typename"].string
+        else { return nil }
+
+        switch typename {
+        case "Product":
+            if let key = try? Self.decoder.decode(Product.EntityKey1.self, from: encoded) { return key }
+            if let key = try? Self.decoder.decode(Product.EntityKey2.self, from: encoded) { return key }
+            if let key = try? Self.decoder.decode(Product.EntityKey3.self, from: encoded) { return key }
+        case "DeprecatedProduct":
+            if let key = try? Self.decoder.decode(DeprecatedProduct.EntityKey.self, from: encoded) { return key }
+        case "ProductResearch":
+            if let key = try? Self.decoder.decode(ProductResearch.EntityKey.self, from: encoded) { return key }
+        case "User":
+            if let key = try? Self.decoder.decode(ProductUser.EntityKey.self, from: encoded) { return key }
+        default:
+            return nil
+        }
+
+        return nil
+    }
+}
+
+#endif
