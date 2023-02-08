@@ -103,7 +103,12 @@ let api = MessageAPI(
 
 Schemas may also be created in a modular way using `SchemaBuilder`:
 
-```
+<blockquote>
+
+<details open="true">
+<summary>SchemaBuilder API</summary>
+
+```swift
 let builder = SchemaBuilder(Resolver.self, Context.self)
 builder.add(
     Type(Message.self) {
@@ -120,6 +125,66 @@ let api = MessageAPI(
     schema: schema
 )
 ``` 
+
+</details>
+<details>
+<summary>PartialSchema implementation</summary>
+
+```swift
+final class ChatSchema: PartialSchema<Resolver, Context> {
+    @TypeDefinitions
+    public override var types: Types {
+        Type(Message.self) {
+            Field("content", at: \.content)
+        }        
+    }
+
+    @FieldDefinitions
+    public override var query: Fields {
+        Field("message", at: Resolver.message)
+    }
+}
+let schema = try SchemaBuilder(Resolver.self, Context.self)
+    .use(partials: [ChatSchema(), ...])
+    .build()
+
+let api = MessageAPI(
+    resolver: Resolver()
+    schema: schema
+)
+``` 
+
+</details>
+
+<details>
+<summary>PartialSchema instance</summary>
+
+```swift
+let chatSchema = PartialSchema<Resolver, Context>(
+    types:  {
+        Type(Message.self) {
+            Field("content", at: \.content)
+        }        
+    },
+    query: {
+        Field("message", at: Resolver.message)
+    }
+)
+let schema = try SchemaBuilder(Resolver.self, Context.self)
+    .use(partials: [chatSchema, ...])
+    .build()
+
+let api = MessageAPI(
+    resolver: Resolver()
+    schema: schema
+)
+``` 
+
+</details>
+
+---
+
+</blockquote>
 
 ⭐️ Notice that `API` allows dependency injection. You could pass mocks of `resolver` and `context` when testing, for example.
 
