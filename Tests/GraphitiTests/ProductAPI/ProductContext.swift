@@ -74,7 +74,23 @@ struct ProductContext {
         Self.products.first { $0.id == id }
     }
 
+    func getProduct(sku: String, package: String) -> Product? {
+        Self.products.first { $0.sku == sku && $0.package == package }
+    }
+
+    func getProduct(sku: String, variationID: String) -> Product? {
+        Self.products.first { $0.sku == sku && $0.variation?.id == variationID }
+    }
+
     func getDeprecatedProduct(sku: String, package: String) -> DeprecatedProduct? {
         Self.deprecatedProducts.first { $0.sku == sku && $0.package == package }
+    }
+
+    func getProductResearch(studyCaseNumber: String) -> ProductResearch? {
+        Self.productsResearch.first { $0.study.caseNumber == studyCaseNumber }
+    }
+
+    func getUser(email: String) -> ProductUser? {
+        Self.users.first { $0.email == email }
     }
 }
