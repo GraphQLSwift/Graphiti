@@ -8,22 +8,7 @@ final class ProductSchema: PartialSchema<ProductResolver, ProductContext> {
     override var types: Types {
         Scalar(Float.self)
         
-        Type(
-            Product.self,
-            keys: {
-                Key(at: ProductResolver.getProduct1) {
-                    Argument("id", at: \.id)
-                }
-                Key(at: ProductResolver.getProduct2) {
-                    Argument("sku", at: \.sku)
-                    Argument("package", at: \.package)
-                }
-                Key(at: ProductResolver.getProduct3) {
-                    Argument("sku", at: \.sku)
-                    Argument("variation", at: \.variation)
-                }
-            }
-        ) {
+        Type(Product.self) {
             Field("id", at: \.id)
             Field("sku", at: \.sku)
             Field("package", at: \.package)
@@ -32,36 +17,35 @@ final class ProductSchema: PartialSchema<ProductResolver, ProductContext> {
             Field("createdBy", at: \.createdBy)
             Field("notes", at: \.notes)
             Field("research", at: \.research)
+        }.key(at: ProductResolver.getProduct1) {
+            Argument("id", at: \.id)
+        }.key(at: ProductResolver.getProduct2) {
+            Argument("sku", at: \.sku)
+            Argument("package", at: \.package)
+        }.key(at: ProductResolver.getProduct3) {
+            Argument("sku", at: \.sku)
+            Argument("variation", at: \.variation)
         }
         
-        Type(DeprecatedProduct.self,
-            keys: {
-                Key(at: ProductResolver.getDeprecatedProduct) {
-                    Argument("sku", at: \.sku)
-                    Argument("package", at: \.package)
-                }
-            }
-        ) {
+        Type(DeprecatedProduct.self) {
             Field("sku", at: \.sku)
             Field("package", at: \.package)
             Field("reason", at: \.reason)
             Field("createdBy", at: \.createdBy)
+        }.key(at: ProductResolver.getDeprecatedProduct) {
+            Argument("sku", at: \.sku)
+            Argument("package", at: \.package)
         }
         
         Type(ProductVariation.self) {
             Field("id", at: \.id)
         }
         
-        Type(
-            ProductResearch.self,
-            keys: {
-                Key(at: ProductResolver.getProductResearch) {
-                    Argument("study", at: \.study)
-                }
-            }
-        ) {
+        Type(ProductResearch.self) {
             Field("study", at: \.study)
             Field("outcome", at: \.outcome)
+        }.key(at: ProductResolver.getProductResearch) {
+            Argument("study", at: \.study)
         }
         
         Type(CaseStudy.self) {
@@ -75,20 +59,14 @@ final class ProductSchema: PartialSchema<ProductResolver, ProductContext> {
             Field("unit", at: \.unit)
         }
         
-        Type(
-            ProductUser.self,
-            as: "User",
-            keys: {
-                Key(at: ProductResolver.getUser) {
-                    Argument("email", at: \.email)
-                }
-            }
-        ) {
+        Type(ProductUser.self, as: "User") {
             Field("email", at: \.email)
             Field("name", at: \.name)
             Field("totalProductsCreated", at: \.totalProductsCreated)
             Field("yearsOfEmployment", at: \.yearsOfEmployment)
             Field("averageProductsCreatedPerYear", at: \.averageProductsCreatedPerYear)
+        }.key(at: ProductResolver.getUser) {
+            Argument("email", at: \.email)
         }
     }
 }
