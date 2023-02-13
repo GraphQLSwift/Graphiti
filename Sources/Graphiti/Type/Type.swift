@@ -5,6 +5,7 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
     Context
 > {
     let interfaces: [Any.Type]
+    let keys: [KeyComponent<ObjectType, Resolver, Context>]
     let fields: [FieldComponent<ObjectType, Context>]
 
     let isTypeOf: GraphQLIsTypeOf = { source, _, _ in
@@ -44,9 +45,11 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
         type _: ObjectType.Type,
         name: String?,
         interfaces: [Any.Type],
+        keys: [KeyComponent<ObjectType, Resolver, Context>],
         fields: [FieldComponent<ObjectType, Context>]
     ) {
         self.interfaces = interfaces
+        self.keys = keys
         self.fields = fields
         super.init(
             name: name ?? Reflection.name(for: ObjectType.self),
@@ -67,6 +70,7 @@ public extension Type {
             type: type,
             name: name,
             interfaces: interfaces,
+            keys: [],
             fields: [fields()]
         )
     }
@@ -75,6 +79,8 @@ public extension Type {
         _ type: ObjectType.Type,
         as name: String? = nil,
         interfaces: [Any.Type] = [],
+        @KeyComponentBuilder<ObjectType, Resolver, Context> keys:
+            () -> [KeyComponent<ObjectType, Resolver, Context>] = { [] },
         @FieldComponentBuilder<ObjectType, Context> _ fields: ()
             -> [FieldComponent<ObjectType, Context>]
     ) {
@@ -82,6 +88,7 @@ public extension Type {
             type: type,
             name: name,
             interfaces: interfaces,
+            keys: keys(),
             fields: fields()
         )
     }
@@ -92,12 +99,14 @@ public extension Type {
         _ type: ObjectType.Type,
         as name: String? = nil,
         interfaces: [Any.Type] = [],
+        keys: [KeyComponent<ObjectType, Resolver, Context>] = [],
         fields: [FieldComponent<ObjectType, Context>]
     ) {
         self.init(
             type: type,
             name: name,
             interfaces: interfaces,
+            keys: keys,
             fields: fields
         )
     }
