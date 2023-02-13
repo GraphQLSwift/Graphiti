@@ -13,10 +13,52 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
     }
 
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
+        var fieldDefs = try fields(typeProvider: typeProvider, coders: coders)
+        
+        if !keys.isEmpty {
+            fieldDefs[resolveReferenceFieldName] = GraphQLField(
+                type: GraphQLNonNull(GraphQLTypeReference(name)), // Self-referential
+                description: "Return the entity of this object type that matches the provided representation.  Used by Query._entities.",
+                args: [
+                    "representations": GraphQLArgument(type: GraphQLList(anyType))
+                ],
+                resolve: { source, args, context, eventLoopGroup, info in
+                    guard let s = source as? Resolver else {
+                        throw GraphQLError(
+                            message: "Expected source type \(ObjectType.self) but got \(type(of: source))"
+                        )
+                    }
+
+                    guard let c = context as? Context else {
+                        throw GraphQLError(
+                            message: "Expected context type \(Context.self) but got \(type(of: context))"
+                        )
+                    }
+                    
+                    let keyMatch = self.keys.first { key in
+                        key.mapMatchesArguments(args, coders: coders)
+                    }
+                    guard let key = keyMatch else {
+                        throw GraphQLError(
+                            message: "No matching key was found for representation \(args)."
+                        )
+                    }
+                    
+                    return try key.resolveMap(
+                        resolver: s,
+                        context: c,
+                        map: args,
+                        eventLoopGroup: eventLoopGroup,
+                        coders: coders
+                    )
+                }
+            )
+        }
+        
         let objectType = try GraphQLObjectType(
             name: name,
             description: description,
-            fields: fields(typeProvider: typeProvider, coders: coders),
+            fields: fieldDefs,
             interfaces: interfaces.map {
                 try typeProvider.getInterfaceType(from: $0)
             },
@@ -24,6 +66,9 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
         )
 
         try typeProvider.add(type: ObjectType.self, as: objectType)
+        if !keys.isEmpty {
+            typeProvider.federatedTypes.append(objectType)
+        }
     }
 
     override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {
