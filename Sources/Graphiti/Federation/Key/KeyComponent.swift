@@ -15,4 +15,8 @@ public class KeyComponent<ObjectType, Resolver, Context> {
     ) throws -> EventLoopFuture<Any?> {
         fatalError()
     }
+    
+    func validate(againstFields fieldNames: [String], typeProvider: TypeProvider, coders: Coders) throws {
+        fatalError()
+    }
 }

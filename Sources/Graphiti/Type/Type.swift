@@ -16,6 +16,15 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
         var fieldDefs = try fields(typeProvider: typeProvider, coders: coders)
         
         if !keys.isEmpty {
+            let fieldNames = Array(fieldDefs.keys)
+            for key in keys {
+                try key.validate(
+                    againstFields: fieldNames,
+                    typeProvider: typeProvider,
+                    coders: coders
+                )
+            }
+            
             fieldDefs[resolveReferenceFieldName] = GraphQLField(
                 type: GraphQLNonNull(GraphQLTypeReference(name)), // Self-referential
                 description: "Return the entity of this object type that matches the provided representation.  Used by Query._entities.",

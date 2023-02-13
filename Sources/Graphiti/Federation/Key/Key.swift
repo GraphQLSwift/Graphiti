@@ -20,6 +20,27 @@ public class Key<ObjectType, Resolver, Context, Arguments: Codable>: KeyComponen
         let arguments = try coders.decoder.decode(Arguments.self, from: map)
         return try self.resolve(resolver)(context, arguments, eventLoopGroup).map { $0 as Any? }
     }
+    
+    override func validate(againstFields fieldNames: [String], typeProvider: TypeProvider, coders: Coders) throws {
+        // Ensure that every argument is included in the provided field list
+        for (name, argument) in try arguments(typeProvider: typeProvider, coders: coders) {
+            if !fieldNames.contains(name) {
+                throw GraphQLError(message: "Argument name not found in type fields: \(name)")
+            }
+        }
+    }
+    
+
+    func arguments(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLArgumentConfigMap {
+        var map: GraphQLArgumentConfigMap = [:]
+
+        for argument in arguments {
+            let (name, argument) = try argument.argument(typeProvider: typeProvider, coders: coders)
+            map[name] = argument
+        }
+
+        return map
+    }
 
     init(
         arguments: [ArgumentComponent<Arguments>],
