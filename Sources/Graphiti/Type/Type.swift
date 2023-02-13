@@ -5,13 +5,13 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
     Context
 > {
     let interfaces: [Any.Type]
-    let keys: [KeyComponent<ObjectType, Resolver, Context>]
+    var keys: [KeyComponent<ObjectType, Resolver, Context>]
     let fields: [FieldComponent<ObjectType, Context>]
 
     let isTypeOf: GraphQLIsTypeOf = { source, _, _ in
         source is ObjectType
     }
-
+    
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         var fieldDefs = try fields(typeProvider: typeProvider, coders: coders)
         
