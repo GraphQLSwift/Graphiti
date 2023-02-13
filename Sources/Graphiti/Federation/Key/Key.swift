@@ -85,64 +85,6 @@ public class Key<ObjectType, Resolver, Context, Arguments: Codable>: KeyComponen
     }
 }
 
-// MARK: AsyncResolve Initializers
-
-public extension Key {
-    convenience init(
-        at function: @escaping AsyncResolve<Resolver, Context, Arguments, ObjectType?>,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(arguments: [argument()], asyncResolve: function)
-    }
-
-    convenience init(
-        _ name: String,
-        at function: @escaping AsyncResolve<Resolver, Context, Arguments, ObjectType?>,
-        @ArgumentComponentBuilder<Arguments> _ arguments: ()
-            -> [ArgumentComponent<Arguments>] = { [] }
-    ) {
-        self.init(arguments: arguments(), asyncResolve: function)
-    }
-}
-
-// MARK: SimpleAsyncResolve Initializers
-
-public extension Key {
-    convenience init(
-        at function: @escaping SimpleAsyncResolve<Resolver, Context, Arguments, ObjectType?>,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(arguments: [argument()], simpleAsyncResolve: function)
-    }
-
-    convenience init(
-        at function: @escaping SimpleAsyncResolve<Resolver, Context, Arguments, ObjectType?>,
-        @ArgumentComponentBuilder<Arguments> _ arguments: ()
-            -> [ArgumentComponent<Arguments>] = { [] }
-    ) {
-        self.init(arguments: arguments(), simpleAsyncResolve: function)
-    }
-}
-
-// MARK: SyncResolve Initializers
-
-public extension Key {
-    convenience init(
-        at function: @escaping SyncResolve<Resolver, Context, Arguments, ObjectType?>,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(arguments: [argument()], syncResolve: function)
-    }
-
-    convenience init(
-        at function: @escaping SyncResolve<Resolver, Context, Arguments, ObjectType?>,
-        @ArgumentComponentBuilder<Arguments> _ arguments: ()
-            -> [ArgumentComponent<Arguments>] = { [] }
-    ) {
-        self.init(arguments: arguments(), syncResolve: function)
-    }
-}
-
 #if compiler(>=5.5) && canImport(_Concurrency)
 
     public extension Key {
@@ -166,27 +108,6 @@ public extension Key {
                 }
             }
             self.init(arguments: arguments, asyncResolve: asyncResolve)
-        }
-    }
-
-    // MARK: ConcurrentResolve Initializers
-
-    public extension Key {
-        @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
-        convenience init(
-            at function: @escaping ConcurrentResolve<Resolver, Context, Arguments, ObjectType>,
-            @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-        ) {
-            self.init(arguments: [argument()], concurrentResolve: function)
-        }
-
-        @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
-        convenience init(
-            at function: @escaping ConcurrentResolve<Resolver, Context, Arguments, ObjectType>,
-            @ArgumentComponentBuilder<Arguments> _ arguments: ()
-                -> [ArgumentComponent<Arguments>] = { [] }
-        ) {
-            self.init(arguments: arguments(), concurrentResolve: function)
         }
     }
 

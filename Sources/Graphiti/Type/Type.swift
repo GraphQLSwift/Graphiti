@@ -133,8 +133,6 @@ public extension Type {
         _ type: ObjectType.Type,
         as name: String? = nil,
         interfaces: [Any.Type] = [],
-        @KeyComponentBuilder<ObjectType, Resolver, Context> keys:
-            () -> [KeyComponent<ObjectType, Resolver, Context>] = { [] },
         @FieldComponentBuilder<ObjectType, Context> _ fields: ()
             -> [FieldComponent<ObjectType, Context>]
     ) {
@@ -142,7 +140,7 @@ public extension Type {
             type: type,
             name: name,
             interfaces: interfaces,
-            keys: keys(),
+            keys: [],
             fields: fields()
         )
     }
