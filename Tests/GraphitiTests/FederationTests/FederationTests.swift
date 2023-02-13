@@ -9,18 +9,10 @@ final class FederationTests: XCTestCase {
     private var api: ProductAPI!
 
     override func setUpWithError() throws {
-#if compiler(>=5.7)
         let schema = try SchemaBuilder(ProductResolver.self, ProductContext.self)
             .use(partials: [ProductSchema()])
-            .enableFederation()
+            .setFederatedSDL(to: loadSDL())
             .build()
-#else
-        let schema = try SchemaBuilder(ProductResolver.self, ProductContext.self)
-            .use(partials: [ProductSchema()])
-            .enableFederation(entityTypes: [Product.self, DeprecatedProduct.self, ProductResearch.self, ProductUser.self])
-            .build()
-#endif
-
         self.group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         self.api = try ProductAPI(resolver: ProductResolver(sdl: loadSDL()), schema: schema)
     }
@@ -30,64 +22,7 @@ final class FederationTests: XCTestCase {
         group = nil
         api = nil
     }
-
-    func testProductQuery() throws {
-        try XCTAssertEqual(execute(request: query("product"), variables: ["id": "apollo-federation"]), GraphQLResult(data: [
-            "product": [
-                "id": "apollo-federation",
-                "sku": "federation",
-                "package": "@apollo/federation",
-                "variation": [
-                    "id": "OSS"
-                ],
-                "dimensions": [
-                    "size": "small",
-                    "weight": 1,
-                    "unit":"kg"
-                ],
-                "createdBy": [
-                    "email": "support@apollographql.com",
-                    "name": "Jane Smith",
-                    "totalProductsCreated": 1337,
-                    "yearsOfEmployment": 10,
-                    "averageProductsCreatedPerYear": 133
-                ],
-                "notes": nil,
-                "research": [
-                    [
-                        "study": [
-                            "caseNumber": "1234",
-                            "description": "Federation Study",
-                        ]
-                    ]
-                ]
-            ]
-        ]))
-    }
-
-    func testProductQueryWithInvalidID() throws {
-        try XCTAssertEqual(execute(request: query("product"), variables: ["id": "graphiti"]), GraphQLResult(data: [
-            "product": nil
-        ]))
-    }
-
-    func testDeprecatedProductQuery() throws {
-        try XCTAssertEqual(execute(request: query("deprecatedProduct"), variables: ["sku": "apollo-federation-v1", "package": "@apollo/federation-v1"]), GraphQLResult(data: [
-            "deprecatedProduct": [
-                "sku": "apollo-federation-v1",
-                "package": "@apollo/federation-v1",
-                "reason": "Migrate to Federation V2",
-                "createdBy": [
-                    "email": "support@apollographql.com",
-                    "name": "Jane Smith",
-                    "totalProductsCreated": 1337,
-                    "yearsOfEmployment": 10,
-                    "averageProductsCreatedPerYear": 133,
-                ],
-            ]
-        ]))
-    }
-
+    
     // Test Queries from https://github.com/apollographql/apollo-federation-subgraph-compatibility/blob/main/COMPATIBILITY.md
 
     func testServiceQuery() throws {

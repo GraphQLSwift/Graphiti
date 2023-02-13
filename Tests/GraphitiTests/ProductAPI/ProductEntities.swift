@@ -1,7 +1,7 @@
 import Foundation
 import Graphiti
 
-struct Product: Codable, FederationEntity {
+struct Product: Codable {
     let id: String
     let sku: String?
     let package: String?
@@ -11,16 +11,16 @@ struct Product: Codable, FederationEntity {
     let notes: String?
     let research: [ProductResearch]
 
-    struct EntityKey1: FederationEntityKey {
+    struct EntityKey1: Codable {
         let id: String
     }
 
-    struct EntityKey2: FederationEntityKey {
+    struct EntityKey2: Codable {
         let sku: String
         let package: String
     }
 
-    struct EntityKey3: FederationEntityKey {
+    struct EntityKey3: Codable {
         let sku: String
         let variation: VariationKey
 
@@ -30,13 +30,13 @@ struct Product: Codable, FederationEntity {
     }
 }
 
-struct DeprecatedProduct: Codable, FederationEntity {
+struct DeprecatedProduct: Codable {
     let sku: String
     let package: String
     let reason: String?
     let createdBy: ProductUser?
 
-    struct EntityKey: FederationEntityKey {
+    struct EntityKey: Codable {
         let sku: String
         let package: String
     }
@@ -46,11 +46,11 @@ struct ProductVariation: Codable {
     let id: String
 }
 
-struct ProductResearch: Codable, FederationEntity {
+struct ProductResearch: Codable {
     let study: CaseStudy
     let outcome: String?
 
-    struct EntityKey: FederationEntityKey {
+    struct EntityKey: Codable {
         let study: CaseStudyKey
 
         struct CaseStudyKey: Codable {
@@ -70,7 +70,7 @@ struct ProductDimension: Codable {
     let unit: String?
 }
 
-struct ProductUser: Codable, FederationEntity {
+struct ProductUser: Codable {
     let email: String
     let name: String?
     let totalProductsCreated: Int?
@@ -83,7 +83,7 @@ struct ProductUser: Codable, FederationEntity {
 
     static let typename: String = "User"
 
-    struct EntityKey: FederationEntityKey {
+    struct EntityKey: Codable {
         let email: String
     }
 }
