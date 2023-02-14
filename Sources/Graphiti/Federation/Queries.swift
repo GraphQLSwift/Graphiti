@@ -26,10 +26,7 @@ func entitiesQuery(for federatedTypes: [GraphQLObjectType], entityType: GraphQLU
                     EntityRepresentation.self,
                     from: representationMap
                 )
-                let type = federatedTypes.first { value in
-                    value.name == representation.__typename
-                }
-                guard let type = type else {
+                guard let type = federatedTypes.first(where: { value in value.name == representation.__typename }) else {
                     throw GraphQLError(message: "Federated type not found: \(representation.__typename)")
                 }
                 guard let resolve = type.fields[resolveReferenceFieldName]?.resolve else {
