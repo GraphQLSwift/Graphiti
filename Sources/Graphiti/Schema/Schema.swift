@@ -6,9 +6,11 @@ public final class Schema<Resolver, Context> {
 
     init(
         coders: Coders,
+        federatedSDL: String?,
         components: [Component<Resolver, Context>]
     ) throws {
         let typeProvider = SchemaTypeProvider()
+        typeProvider.federatedSDL = federatedSDL
 
         // Collect types mappings first
         for component in components {
@@ -26,7 +28,6 @@ public final class Schema<Resolver, Context> {
         guard let query = typeProvider.query else {
             fatalError("Query type is required.")
         }
-
         schema = try GraphQLSchema(
             query: query,
             mutation: typeProvider.mutation,
@@ -40,20 +41,24 @@ public final class Schema<Resolver, Context> {
 public extension Schema {
     convenience init(
         coders: Coders = Coders(),
+        federatedSDL: String? = nil,
         @ComponentBuilder<Resolver, Context> _ components: () -> Component<Resolver, Context>
     ) throws {
         try self.init(
             coders: coders,
+            federatedSDL: federatedSDL,
             components: [components()]
         )
     }
 
     convenience init(
         coders: Coders = Coders(),
+        federatedSDL: String? = nil,
         @ComponentBuilder<Resolver, Context> _ components: () -> [Component<Resolver, Context>]
     ) throws {
         try self.init(
             coders: coders,
+            federatedSDL: federatedSDL,
             components: components()
         )
     }

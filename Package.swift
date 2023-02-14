@@ -11,6 +11,8 @@ let package = Package(
     ],
     targets: [
         .target(name: "Graphiti", dependencies: ["GraphQL"]),
-        .testTarget(name: "GraphitiTests", dependencies: ["Graphiti"]),
+        .testTarget(name: "GraphitiTests", dependencies: ["Graphiti"], resources: [
+            .copy("FederationTests/GraphQL"),
+        ]),
     ]
 )

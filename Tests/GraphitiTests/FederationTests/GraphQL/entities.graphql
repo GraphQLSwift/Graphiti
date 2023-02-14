@@ -1,0 +1,59 @@
+query($representations: [_Any!]!) {
+  _entities(representations: $representations) {
+    ... on Product {
+      id
+      sku
+      package
+      variation {
+        id
+      }
+      dimensions {
+        size
+        unit
+        weight
+      }
+      createdBy {
+        email
+        name
+        totalProductsCreated
+        yearsOfEmployment
+        averageProductsCreatedPerYear
+      }
+      notes
+      research {
+        outcome
+        study {
+          caseNumber
+          description
+        }
+      }
+    }
+    ... on DeprecatedProduct {
+      sku
+      package
+      reason
+      createdBy {
+        email
+        name
+        totalProductsCreated
+        yearsOfEmployment
+        averageProductsCreatedPerYear
+      }
+
+    }
+    ... on ProductResearch {
+      study {
+        caseNumber
+        description
+      }
+      outcome
+    }
+    ... on User {
+      email
+      name
+      totalProductsCreated
+      yearsOfEmployment
+      averageProductsCreatedPerYear
+    }
+  }
+}

@@ -14,6 +14,9 @@ final class SchemaTypeProvider: TypeProvider {
         AnyType(String.self): GraphQLString,
         AnyType(Bool.self): GraphQLBoolean,
     ]
+    
+    var federatedTypes: [GraphQLObjectType] = []
+    var federatedSDL: String? = nil
 
     var query: GraphQLObjectType?
     var mutation: GraphQLObjectType?
@@ -24,5 +27,10 @@ final class SchemaTypeProvider: TypeProvider {
     func add(type: Any.Type, as graphQLType: GraphQLNamedType) throws {
         try map(type, to: graphQLType)
         types.append(graphQLType)
+    }
+    
+    func addFederated(type: Any.Type, as graphQLType: GraphQLObjectType) throws {
+        try add(type: type, as: graphQLType)
+        federatedTypes.append(graphQLType)
     }
 }

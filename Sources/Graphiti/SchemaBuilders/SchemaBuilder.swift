@@ -2,6 +2,7 @@
 /// When ready to build and use the schema, run `build`
 public final class SchemaBuilder<Resolver, Context> {
     private var coders: Coders
+    private var federatedSDL: String?
     private var typeComponents: [TypeComponent<Resolver, Context>]
     private var queryName: String
     private var queryFields: [FieldComponent<Resolver, Context>]
@@ -15,6 +16,7 @@ public final class SchemaBuilder<Resolver, Context> {
         _: Context.Type
     ) {
         coders = Coders()
+        federatedSDL = nil
         typeComponents = []
 
         queryName = "Query"
@@ -31,6 +33,15 @@ public final class SchemaBuilder<Resolver, Context> {
     /// - Returns: This object for method chaining
     public func setCoders(to newCoders: Coders) -> Self {
         coders = newCoders
+        return self
+    }
+    
+    @discardableResult
+    /// Allows for setting SDL for federated subgraphs.
+    /// - Parameter newSDL: The new SDL to use
+    /// - Returns: This object for method chaining
+    public func setFederatedSDL(to newSDL: String) -> Self {
+        federatedSDL = newSDL
         return self
     }
 
@@ -134,10 +145,8 @@ public final class SchemaBuilder<Resolver, Context> {
             topLevelComponent as Component<Resolver, Context>
         }
 
-        if !queryFields.isEmpty {
-            let query = Query(name: queryName, fields: queryFields)
-            components.append(query)
-        }
+        let query = Query(name: queryName, fields: queryFields)
+        components.append(query)
 
         if !mutationFields.isEmpty {
             let mutation = Mutation(name: mutationName, fields: mutationFields)
@@ -149,6 +158,10 @@ public final class SchemaBuilder<Resolver, Context> {
             components.append(subscription)
         }
 
-        return try Schema(coders: coders, components: components)
+        return try Schema(
+            coders: coders,
+            federatedSDL: federatedSDL,
+            components: components
+        )
     }
 }

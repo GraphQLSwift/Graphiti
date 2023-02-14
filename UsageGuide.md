@@ -397,3 +397,119 @@ Each time an event fires, the following message will be generated:
   "fiftyYearStormAlert": "A 50-year storm is occurring!"
 }
 ```
+
+## Federation
+
+Federation allows you split your GraphQL API into smaller services and link them back together so clients see a single larger API. More information can be found [here](https://www.apollographql.com/docs/federation). To enable federation you must:
+
+1. Define `Keys` on the entity types, which specify the primary key fields and the resolver function used to load an entity from that key.
+2. Provide the schema SDL to the schema itself. 
+
+Here's an example for the following schema:
+
+```graphql
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: [ "@extends", "@external", "@key", "@inaccessible", "@override", "@provides", "@requires", "@shareable", "@tag"])
+
+type Product {
+    id: ID!
+    sku: String
+    createdBy: User
+}
+
+extend type Query {
+  product(id: ID!): Product
+}
+
+extend type User @key(fields: "email") {
+  email: ID! @external
+  name: String @override(from: "users")
+  totalProductsCreated: Int @external
+  yearsOfEmployment: Int! @external
+}
+```
+
+```swift
+import Foundation
+import Graphiti
+import NIO
+
+struct Product: Codable {
+    let id: String
+    let sku: String
+    let createdBy: User
+}
+
+struct User: Codable {
+    let email: String
+    let name: String?
+    let totalProductsCreated: Int?
+    let yearsOfEmployment: Int
+}
+
+struct ProductContext {
+    func getUser(email: String) -> User { ... }
+}
+
+struct ProductResolver {
+    struct UserArguments: Codable {
+        let email: String
+    }
+    
+    func user(context: ProductContext, arguments: UserArguments) -> User? {
+        context.getUser(email: arguments.email)
+    }
+}
+
+final class ProductSchema: PartialSchema<ProductResolver, ProductContext> {
+    @TypeDefinitions
+    override var types: Types {
+        Type(Product.self) {
+            Field("id", at: \.id)
+            Field("sku", at: \.sku)
+            Field("createdBy", at: \.createdBy)
+        }
+        
+        Type(
+            User.self,
+            keys: {
+                Key(at: ProductResolver.user) {
+                    Argument("email", at: \.email)
+                }
+            }
+        ) {
+            Field("email", at: \.email)
+            Field("name", at: \.name)
+            Field("totalProductsCreated", at: \.totalProductsCreated)
+            Field("yearsOfEmployment", at: \.yearsOfEmployment)
+        }
+    }
+}
+
+struct ProductAPI: API {
+    let resolver: ProductResolver
+    let schema: Schema<ProductResolver, ProductContext>
+}
+
+let schema = try SchemaBuilder(ProductResolver.self, ProductContext.self)
+    .use(partials: [ProductSchema()])
+    .setFederatedSDL(to: getSDL())
+    .build()
+
+let api = ProductAPI(resolver: ProductResolver(), schema: schema)
+let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+
+api.execute(
+    request: """
+    query {
+      _entities(representations: {__typename: "User", email: "abc@def.com"}) {
+        ... on User {
+          email
+          name
+        }
+      }
+    }
+    """,
+    context: ProductContext(),
+    on: group
+)
+```
