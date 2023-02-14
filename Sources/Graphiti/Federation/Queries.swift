@@ -21,7 +21,7 @@ func entitiesQuery(for federatedTypes: [GraphQLObjectType], entityType: GraphQLU
         args: ["representations": GraphQLArgument(type: GraphQLList(anyType))],
         resolve: { source, args, context, eventLoopGroup, info in
             let arguments = try coders.decoder.decode(EntityArguments.self, from: args)
-            return try arguments.representations.map { representationMap in
+            let futures: [EventLoopFuture<Any?>] = try arguments.representations.map { (representationMap: Map) in
                 let representation = try coders.decoder.decode(
                     EntityRepresentation.self,
                     from: representationMap
@@ -44,9 +44,10 @@ func entitiesQuery(for federatedTypes: [GraphQLObjectType], entityType: GraphQLU
                     eventLoopGroup,
                     info
                 )
-            }.flatten(on: eventLoopGroup).map {
-                $0 as Any?
             }
+
+            return futures.flatten(on: eventLoopGroup)
+                .map { $0 as Any? }
         }
     )
 }
