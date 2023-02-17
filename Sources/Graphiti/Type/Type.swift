@@ -13,8 +13,20 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
     }
     
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
-        var fieldDefs = try fields(typeProvider: typeProvider, coders: coders)
+        let fieldDefs = try fields(typeProvider: typeProvider, coders: coders)
+        let objectType = try GraphQLObjectType(
+            name: name,
+            description: description,
+            fields: fieldDefs,
+            interfaces: interfaces.map {
+                try typeProvider.getInterfaceType(from: $0)
+            },
+            isTypeOf: isTypeOf
+        )
         
+        try typeProvider.add(type: ObjectType.self, as: objectType)
+        
+        // If federation keys are included, validate and create resolver closure
         if !keys.isEmpty {
             let fieldNames = Array(fieldDefs.keys)
             for key in keys {
@@ -55,22 +67,9 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
                     coders: coders
                 )
             }
-            typeProvider.federatedResolvers[name] = resolve
-        }
-        
-        let objectType = try GraphQLObjectType(
-            name: name,
-            description: description,
-            fields: fieldDefs,
-            interfaces: interfaces.map {
-                try typeProvider.getInterfaceType(from: $0)
-            },
-            isTypeOf: isTypeOf
-        )
-
-        try typeProvider.add(type: ObjectType.self, as: objectType)
-        if !keys.isEmpty {
+            
             typeProvider.federatedTypes.append(objectType)
+            typeProvider.federatedResolvers[name] = resolve
         }
     }
 
