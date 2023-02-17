@@ -13,8 +13,20 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
     }
     
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
-        var fieldDefs = try fields(typeProvider: typeProvider, coders: coders)
+        let fieldDefs = try fields(typeProvider: typeProvider, coders: coders)
+        let objectType = try GraphQLObjectType(
+            name: name,
+            description: description,
+            fields: fieldDefs,
+            interfaces: interfaces.map {
+                try typeProvider.getInterfaceType(from: $0)
+            },
+            isTypeOf: isTypeOf
+        )
         
+        try typeProvider.add(type: ObjectType.self, as: objectType)
+        
+        // If federation keys are included, validate and create resolver closure
         if !keys.isEmpty {
             let fieldNames = Array(fieldDefs.keys)
             for key in keys {
@@ -25,58 +37,39 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
                 )
             }
             
-            fieldDefs[resolveReferenceFieldName] = GraphQLField(
-                type: GraphQLNonNull(GraphQLTypeReference(name)), // Self-referential
-                description: "Return the entity of this object type that matches the provided representation.  Used by Query._entities.",
-                args: [
-                    "representations": GraphQLArgument(type: GraphQLList(anyType))
-                ],
-                resolve: { source, args, context, eventLoopGroup, info in
-                    guard let s = source as? Resolver else {
-                        throw GraphQLError(
-                            message: "Expected source type \(ObjectType.self) but got \(type(of: source))"
-                        )
-                    }
-
-                    guard let c = context as? Context else {
-                        throw GraphQLError(
-                            message: "Expected context type \(Context.self) but got \(type(of: context))"
-                        )
-                    }
-                    
-                    let keyMatch = self.keys.first { key in
-                        key.mapMatchesArguments(args, coders: coders)
-                    }
-                    guard let key = keyMatch else {
-                        throw GraphQLError(
-                            message: "No matching key was found for representation \(args)."
-                        )
-                    }
-                    
-                    return try key.resolveMap(
-                        resolver: s,
-                        context: c,
-                        map: args,
-                        eventLoopGroup: eventLoopGroup,
-                        coders: coders
+            let resolve: GraphQLFieldResolve = { source, args, context, eventLoopGroup, info in
+                guard let s = source as? Resolver else {
+                    throw GraphQLError(
+                        message: "Expected source type \(ObjectType.self) but got \(type(of: source))"
                     )
                 }
-            )
-        }
-        
-        let objectType = try GraphQLObjectType(
-            name: name,
-            description: description,
-            fields: fieldDefs,
-            interfaces: interfaces.map {
-                try typeProvider.getInterfaceType(from: $0)
-            },
-            isTypeOf: isTypeOf
-        )
 
-        try typeProvider.add(type: ObjectType.self, as: objectType)
-        if !keys.isEmpty {
+                guard let c = context as? Context else {
+                    throw GraphQLError(
+                        message: "Expected context type \(Context.self) but got \(type(of: context))"
+                    )
+                }
+                
+                let keyMatch = self.keys.first { key in
+                    key.mapMatchesArguments(args, coders: coders)
+                }
+                guard let key = keyMatch else {
+                    throw GraphQLError(
+                        message: "No matching key was found for representation \(args)."
+                    )
+                }
+                
+                return try key.resolveMap(
+                    resolver: s,
+                    context: c,
+                    map: args,
+                    eventLoopGroup: eventLoopGroup,
+                    coders: coders
+                )
+            }
+            
             typeProvider.federatedTypes.append(objectType)
+            typeProvider.federatedResolvers[name] = resolve
         }
     }
 

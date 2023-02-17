@@ -16,6 +16,7 @@ final class SchemaTypeProvider: TypeProvider {
     ]
     
     var federatedTypes: [GraphQLObjectType] = []
+    var federatedResolvers: [String: GraphQLFieldResolve] = [:]
     var federatedSDL: String? = nil
 
     var query: GraphQLObjectType?
@@ -27,10 +28,5 @@ final class SchemaTypeProvider: TypeProvider {
     func add(type: Any.Type, as graphQLType: GraphQLNamedType) throws {
         try map(type, to: graphQLType)
         types.append(graphQLType)
-    }
-    
-    func addFederated(type: Any.Type, as graphQLType: GraphQLObjectType) throws {
-        try add(type: type, as: graphQLType)
-        federatedTypes.append(graphQLType)
     }
 }
