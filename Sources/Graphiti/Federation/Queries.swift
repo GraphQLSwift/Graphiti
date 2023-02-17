@@ -18,7 +18,7 @@ func entitiesQuery(for federatedTypes: [GraphQLObjectType], entityType: GraphQLU
     return GraphQLField(
         type: GraphQLNonNull(GraphQLList(entityType)),
         description: "Return all entities matching the provided representations.",
-        args: ["representations": GraphQLArgument(type: GraphQLList(anyType))],
+        args: ["representations": GraphQLArgument(type: GraphQLNonNull(GraphQLList(GraphQLNonNull(anyType))))],
         resolve: { source, args, context, eventLoopGroup, info in
             let arguments = try coders.decoder.decode(EntityArguments.self, from: args)
             let futures: [EventLoopFuture<Any?>] = try arguments.representations.map { (representationMap: Map) in

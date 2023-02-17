@@ -29,7 +29,7 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
                 type: GraphQLNonNull(GraphQLTypeReference(name)), // Self-referential
                 description: "Return the entity of this object type that matches the provided representation.  Used by Query._entities.",
                 args: [
-                    "representations": GraphQLArgument(type: GraphQLList(anyType))
+                    "representation": GraphQLArgument(type: GraphQLNonNull(anyType))
                 ],
                 resolve: { source, args, context, eventLoopGroup, info in
                     guard let s = source as? Resolver else {
