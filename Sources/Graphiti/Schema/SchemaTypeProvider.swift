@@ -28,9 +28,4 @@ final class SchemaTypeProvider: TypeProvider {
         try map(type, to: graphQLType)
         types.append(graphQLType)
     }
-    
-    func addFederated(type: Any.Type, as graphQLType: GraphQLObjectType) throws {
-        try add(type: type, as: graphQLType)
-        federatedTypes.append(graphQLType)
-    }
 }
