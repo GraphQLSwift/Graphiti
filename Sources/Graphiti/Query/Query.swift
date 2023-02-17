@@ -24,7 +24,11 @@ public final class Query<Resolver, Context>: Component<Resolver, Context> {
             typeProvider.types.append(entity)
             
             // Add subgraph queries (_entities, _service)
-            queryFields["_entities"] = entitiesQuery(for: federatedTypes, entityType: entity, coders: coders)
+            queryFields["_entities"] = entitiesQuery(
+                for: typeProvider.federatedResolvers,
+                entityType: entity,
+                coders: coders
+            )
             queryFields["_service"] = serviceQuery(for: sdl)
         }
         
