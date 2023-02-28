@@ -6,9 +6,14 @@ public protocol API {
     associatedtype ContextType
     var resolver: Resolver { get }
     var schema: Schema<Resolver, ContextType> { get }
+    var validationRules: [(ValidationContext) -> Visitor] { get }
 }
 
 public extension API {
+    var validationRules: [(ValidationContext) -> Visitor] {
+        []
+    }
+    
     func execute(
         request: String,
         context: ContextType,
@@ -22,7 +27,8 @@ public extension API {
             context: context,
             eventLoopGroup: eventLoopGroup,
             variables: variables,
-            operationName: operationName
+            operationName: operationName,
+            validationRules: validationRules
         )
     }
 
@@ -39,7 +45,8 @@ public extension API {
             context: context,
             eventLoopGroup: eventLoopGroup,
             variables: variables,
-            operationName: operationName
+            operationName: operationName,
+            validationRules: validationRules
         )
     }
 }
@@ -61,7 +68,8 @@ public extension API {
                 context: context,
                 eventLoopGroup: eventLoopGroup,
                 variables: variables,
-                operationName: operationName
+                operationName: operationName,
+                validationRules: validationRules
             ).get()
         }
 
@@ -79,7 +87,8 @@ public extension API {
                 context: context,
                 eventLoopGroup: eventLoopGroup,
                 variables: variables,
-                operationName: operationName
+                operationName: operationName,
+                validationRules: validationRules
             ).get()
         }
     }
