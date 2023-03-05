@@ -5,7 +5,7 @@ import NIO
 import XCTest
 
 class ValidationRulesTests: XCTestCase {
-    // Tests that circularly dependent objects can be used in schema and resolved correctly
+    // Test registering custom validation rules
     func testRegisteringCustomValidationRule() throws {
         struct TestResolver {
             var helloWorld: String { "Hellow World" }
