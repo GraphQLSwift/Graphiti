@@ -74,7 +74,7 @@ public extension Schema {
     ) -> EventLoopFuture<GraphQLResult> {
         do {
             return try graphql(
-                validationRules: validationRules,
+                validationRules: GraphQL.specifiedRules + validationRules,
                 schema: schema,
                 request: request,
                 rootValue: resolver,
@@ -99,7 +99,7 @@ public extension Schema {
     ) -> EventLoopFuture<SubscriptionResult> {
         do {
             return try graphqlSubscribe(
-                validationRules: validationRules,
+                validationRules: GraphQL.specifiedRules + validationRules,
                 schema: schema,
                 request: request,
                 rootValue: resolver,

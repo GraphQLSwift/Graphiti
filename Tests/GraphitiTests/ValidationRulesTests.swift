@@ -18,8 +18,7 @@ class ValidationRulesTests: XCTestCase {
         }
         let api = TestAPI<TestResolver, NoContext>(
             resolver: TestResolver(),
-            schema: testSchema,
-            validationRules: GraphQL.specifiedRules + [NoIntrospectionRule]
+            schema: testSchema
         )
 
         let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
@@ -36,7 +35,8 @@ class ValidationRulesTests: XCTestCase {
                 }
                 """,
                 context: NoContext(),
-                on: group
+                on: group,
+                validationRules: [NoIntrospectionRule]
             ).wait(),
             GraphQLResult(errors: [
                 .init(message: "GraphQL introspection is not allowed, but the query contained __schema or __type", locations: [.init(line: 2, column: 3)])
@@ -48,11 +48,9 @@ class ValidationRulesTests: XCTestCase {
 private class TestAPI<Resolver, ContextType>: API {
     public let resolver: Resolver
     public let schema: Schema<Resolver, ContextType>
-    var validationRules: [(ValidationContext) -> Visitor]
 
-    init(resolver: Resolver, schema: Schema<Resolver, ContextType>, validationRules: [(ValidationContext) -> Visitor]) {
+    init(resolver: Resolver, schema: Schema<Resolver, ContextType>) {
         self.resolver = resolver
         self.schema = schema
-        self.validationRules = validationRules
     }
 }

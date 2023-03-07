@@ -6,20 +6,16 @@ public protocol API {
     associatedtype ContextType
     var resolver: Resolver { get }
     var schema: Schema<Resolver, ContextType> { get }
-    var validationRules: [(ValidationContext) -> Visitor] { get }
 }
 
 public extension API {
-    var validationRules: [(ValidationContext) -> Visitor] {
-        []
-    }
-    
     func execute(
         request: String,
         context: ContextType,
         on eventLoopGroup: EventLoopGroup,
         variables: [String: Map] = [:],
-        operationName: String? = nil
+        operationName: String? = nil,
+        validationRules: [(ValidationContext) -> Visitor] = []
     ) -> EventLoopFuture<GraphQLResult> {
         return schema.execute(
             request: request,
@@ -37,7 +33,8 @@ public extension API {
         context: ContextType,
         on eventLoopGroup: EventLoopGroup,
         variables: [String: Map] = [:],
-        operationName: String? = nil
+        operationName: String? = nil,
+        validationRules: [(ValidationContext) -> Visitor] = []
     ) -> EventLoopFuture<SubscriptionResult> {
         return schema.subscribe(
             request: request,
@@ -60,7 +57,8 @@ public extension API {
             context: ContextType,
             on eventLoopGroup: EventLoopGroup,
             variables: [String: Map] = [:],
-            operationName: String? = nil
+            operationName: String? = nil,
+            validationRules: [(ValidationContext) -> Visitor] = []
         ) async throws -> GraphQLResult {
             return try await schema.execute(
                 request: request,
@@ -79,7 +77,8 @@ public extension API {
             context: ContextType,
             on eventLoopGroup: EventLoopGroup,
             variables: [String: Map] = [:],
-            operationName: String? = nil
+            operationName: String? = nil,
+            validationRules: [(ValidationContext) -> Visitor] = []
         ) async throws -> SubscriptionResult {
             return try await schema.subscribe(
                 request: request,
