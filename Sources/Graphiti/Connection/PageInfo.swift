@@ -1,4 +1,4 @@
-struct PageInfo: Codable {
+public struct PageInfo: Codable {
     let hasPreviousPage: Bool
     let hasNextPage: Bool
     let startCursor: String?
