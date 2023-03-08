@@ -14,7 +14,8 @@ public extension API {
         context: ContextType,
         on eventLoopGroup: EventLoopGroup,
         variables: [String: Map] = [:],
-        operationName: String? = nil
+        operationName: String? = nil,
+        validationRules: [(ValidationContext) -> Visitor] = []
     ) -> EventLoopFuture<GraphQLResult> {
         return schema.execute(
             request: request,
@@ -22,7 +23,8 @@ public extension API {
             context: context,
             eventLoopGroup: eventLoopGroup,
             variables: variables,
-            operationName: operationName
+            operationName: operationName,
+            validationRules: validationRules
         )
     }
 
@@ -31,7 +33,8 @@ public extension API {
         context: ContextType,
         on eventLoopGroup: EventLoopGroup,
         variables: [String: Map] = [:],
-        operationName: String? = nil
+        operationName: String? = nil,
+        validationRules: [(ValidationContext) -> Visitor] = []
     ) -> EventLoopFuture<SubscriptionResult> {
         return schema.subscribe(
             request: request,
@@ -39,7 +42,8 @@ public extension API {
             context: context,
             eventLoopGroup: eventLoopGroup,
             variables: variables,
-            operationName: operationName
+            operationName: operationName,
+            validationRules: validationRules
         )
     }
 }
@@ -53,7 +57,8 @@ public extension API {
             context: ContextType,
             on eventLoopGroup: EventLoopGroup,
             variables: [String: Map] = [:],
-            operationName: String? = nil
+            operationName: String? = nil,
+            validationRules: [(ValidationContext) -> Visitor] = []
         ) async throws -> GraphQLResult {
             return try await schema.execute(
                 request: request,
@@ -61,7 +66,8 @@ public extension API {
                 context: context,
                 eventLoopGroup: eventLoopGroup,
                 variables: variables,
-                operationName: operationName
+                operationName: operationName,
+                validationRules: validationRules
             ).get()
         }
 
@@ -71,7 +77,8 @@ public extension API {
             context: ContextType,
             on eventLoopGroup: EventLoopGroup,
             variables: [String: Map] = [:],
-            operationName: String? = nil
+            operationName: String? = nil,
+            validationRules: [(ValidationContext) -> Visitor] = []
         ) async throws -> SubscriptionResult {
             return try await schema.subscribe(
                 request: request,
@@ -79,7 +86,8 @@ public extension API {
                 context: context,
                 eventLoopGroup: eventLoopGroup,
                 variables: variables,
-                operationName: operationName
+                operationName: operationName,
+                validationRules: validationRules
             ).get()
         }
     }

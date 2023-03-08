@@ -69,10 +69,12 @@ public extension Schema {
         context: Context,
         eventLoopGroup: EventLoopGroup,
         variables: [String: Map] = [:],
-        operationName: String? = nil
+        operationName: String? = nil,
+        validationRules: [(ValidationContext) -> Visitor] = []
     ) -> EventLoopFuture<GraphQLResult> {
         do {
             return try graphql(
+                validationRules: GraphQL.specifiedRules + validationRules,
                 schema: schema,
                 request: request,
                 rootValue: resolver,
@@ -92,10 +94,12 @@ public extension Schema {
         context: Context,
         eventLoopGroup: EventLoopGroup,
         variables: [String: Map] = [:],
-        operationName: String? = nil
+        operationName: String? = nil,
+        validationRules: [(ValidationContext) -> Visitor] = []
     ) -> EventLoopFuture<SubscriptionResult> {
         do {
             return try graphqlSubscribe(
+                validationRules: GraphQL.specifiedRules + validationRules,
                 schema: schema,
                 request: request,
                 rootValue: resolver,
