@@ -1,4 +1,4 @@
-public protocol Edgeable {
+protocol Edgeable {
     associatedtype Node: Encodable
     var node: Node { get }
     var cursor: String { get }
