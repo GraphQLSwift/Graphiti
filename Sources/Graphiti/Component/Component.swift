@@ -48,10 +48,10 @@ enum ComponentType {
         case .enum: return 2
         case .interface: return 3
         case .input: return 4
-        case .type: return 5
-        case .types: return 6
-        case .union: return 7
-        case .connection: return 8
+        case .connection: return 5
+        case .type: return 6
+        case .types: return 7
+        case .union: return 8
         case .query: return 9
         case .mutation: return 10
         case .subscription: return 11

@@ -463,4 +463,96 @@ class ConnectionTests: XCTestCase {
             )
         )
     }
+
+    /// Test that adjusting names using `as` works
+    func testNaming() throws {
+        struct ChatObject: Codable {
+            func messages(
+                context _: NoContext,
+                arguments: PaginationArguments
+            ) throws -> Connection<MessageObject> {
+                return try [
+                    MessageObject(id: 1, text: "a"),
+                    MessageObject(id: 2, text: "b"),
+                ].connection(from: arguments)
+            }
+        }
+
+        struct MessageObject: Codable, Identifiable {
+            let id: Int
+            let text: String
+        }
+
+        struct Resolver {
+            func chatObject(context _: NoContext, arguments _: NoArguments) throws -> ChatObject {
+                return ChatObject()
+            }
+        }
+
+        let schema = try Schema<Resolver, NoContext> {
+            Type(ChatObject.self, as: "Chat") {
+                Field("messages", at: ChatObject.messages, as: Connection<MessageObject>.self) {
+                    Argument("first", at: \.first)
+                    Argument("after", at: \.after)
+                    Argument("last", at: \.last)
+                    Argument("before", at: \.before)
+                }
+            }
+
+            Type(MessageObject.self, as: "Message") {
+                Field("id", at: \.id)
+                Field("text", at: \.text)
+            }
+
+            ConnectionType(MessageObject.self, as: "Message")
+
+            Query {
+                Field("chatObject", at: Resolver.chatObject)
+            }
+        }
+
+        XCTAssertEqual(
+            try schema.execute(
+                request: """
+                {
+                    chatObject {
+                        messages {
+                            edges {
+                                node {
+                                    id
+                                    text
+                                }
+                            }
+                        }
+                    }
+                }
+                """,
+                resolver: .init(),
+                context: NoContext(),
+                eventLoopGroup: eventLoopGroup
+            ).wait(),
+            .init(
+                data: [
+                    "chatObject": [
+                        "messages": [
+                            "edges": [
+                                [
+                                    "node": [
+                                        "id": 1,
+                                        "text": "a",
+                                    ],
+                                ],
+                                [
+                                    "node": [
+                                        "id": 2,
+                                        "text": "b",
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ]
+            )
+        )
+    }
 }
