@@ -8,6 +8,9 @@ public final class ConnectionType<
     Resolver,
     Context
 > {
+    let connectionFields: [FieldComponent<Connection<ObjectType>, Context>]
+    let edgeFields: [FieldComponent<Edge<ObjectType>, Context>]
+
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         if !typeProvider.contains(type: PageInfo.self) {
             let pageInfo = Type<Resolver, Context, PageInfo>(PageInfo.self) {
@@ -22,29 +25,35 @@ public final class ConnectionType<
 
         let edge = Type<Resolver, Context, Edge<ObjectType>>(
             Edge<ObjectType>.self,
-            as: name + "Edge"
-        ) {
-            Field("node", at: \.node)
-            Field("cursor", at: \.cursor)
-        }
+            as: name + "Edge",
+            fields: edgeFields + [
+                Field("node", at: \.node),
+                Field("cursor", at: \.cursor),
+            ]
+        )
 
         try edge.update(typeProvider: typeProvider, coders: coders)
 
         let connection = Type<Resolver, Context, Connection<ObjectType>>(
             Connection<ObjectType>.self,
-            as: name + "Connection"
-        ) {
-            Field("edges", at: \.edges)
-            Field("pageInfo", at: \.pageInfo)
-        }
+            as: name + "Connection",
+            fields: connectionFields + [
+                Field("edges", at: \.edges),
+                Field("pageInfo", at: \.pageInfo),
+            ]
+        )
 
         try connection.update(typeProvider: typeProvider, coders: coders)
     }
 
     private init(
         type _: ObjectType.Type,
-        name: String?
+        name: String?,
+        connectionFields: [FieldComponent<Connection<ObjectType>, Context>],
+        edgeFields: [FieldComponent<Edge<ObjectType>, Context>]
     ) {
+        self.connectionFields = connectionFields
+        self.edgeFields = edgeFields
         super.init(
             name: name ?? Reflection.name(for: ObjectType.self),
             type: .connection
@@ -57,6 +66,38 @@ public extension ConnectionType {
         _ type: ObjectType.Type,
         as name: String? = nil
     ) {
-        self.init(type: type, name: name)
+        self.init(type: type, name: name, connectionFields: [], edgeFields: [])
+    }
+
+    convenience init(
+        _ type: ObjectType.Type,
+        as name: String? = nil,
+        @FieldComponentBuilder<Connection<ObjectType>, Context> connectionFields: ()
+            -> FieldComponent<Connection<ObjectType>, Context>,
+        @FieldComponentBuilder<Edge<ObjectType>, Context> edgeFields: ()
+            -> FieldComponent<Edge<ObjectType>, Context>
+    ) {
+        self.init(
+            type: type,
+            name: name,
+            connectionFields: [connectionFields()],
+            edgeFields: [edgeFields()]
+        )
+    }
+
+    convenience init(
+        _ type: ObjectType.Type,
+        as name: String? = nil,
+        @FieldComponentBuilder<Connection<ObjectType>, Context> connectionFields: ()
+            -> [FieldComponent<Connection<ObjectType>, Context>] = { [] },
+        @FieldComponentBuilder<Edge<ObjectType>, Context> edgeFields: ()
+            -> [FieldComponent<Edge<ObjectType>, Context>] = { [] }
+    ) {
+        self.init(
+            type: type,
+            name: name,
+            connectionFields: connectionFields(),
+            edgeFields: edgeFields()
+        )
     }
 }

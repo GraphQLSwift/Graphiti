@@ -139,8 +139,6 @@ public extension Type {
     }
 
     convenience init(
-        resolver _: Resolver.Type,
-        context _: Context.Type,
         _ type: ObjectType.Type,
         as name: String? = nil,
         interfaces: [Any.Type] = [],
