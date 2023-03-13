@@ -1,6 +1,6 @@
-struct PageInfo: Codable {
-    let hasPreviousPage: Bool
-    let hasNextPage: Bool
-    let startCursor: String?
-    let endCursor: String?
+public struct PageInfo: Codable {
+    public let hasPreviousPage: Bool
+    public let hasNextPage: Bool
+    public let startCursor: String?
+    public let endCursor: String?
 }

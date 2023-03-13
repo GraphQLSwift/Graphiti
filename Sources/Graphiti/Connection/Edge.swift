@@ -4,7 +4,7 @@ protocol Edgeable {
     var cursor: String { get }
 }
 
-struct Edge<Node: Encodable>: Edgeable, Encodable {
-    let node: Node
-    let cursor: String
+public struct Edge<Node: Encodable>: Edgeable, Encodable {
+    public let node: Node
+    public let cursor: String
 }

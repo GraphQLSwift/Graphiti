@@ -3,8 +3,8 @@ import GraphQL
 import NIO
 
 public struct Connection<Node: Encodable>: Encodable {
-    let edges: [Edge<Node>]
-    let pageInfo: PageInfo
+    public let edges: [Edge<Node>]
+    public let pageInfo: PageInfo
 }
 
 @available(OSX 10.15, *)
