@@ -398,6 +398,107 @@ Each time an event fires, the following message will be generated:
 }
 ```
 
+## Cursor Connections
+
+This package supports pagination using the [Relay-based GraphQL Cursor Connections Specification](https://relay.dev/graphql/connections.htm). To use this pagination style you must:
+
+1. Ensure any `node` types implement the `Identifiable` protocol (they must have a unique `id` field)
+2. Change the relevant resolver types to use `PaginationArguments` and return a `Connection`
+3. Add the `PaginationArguments` arguments to the schema declaration
+
+Here's an example using the schema above:
+
+```swift
+struct Person: Codable, Identifiable {
+    let id: Int
+    let name: String
+}
+
+let characters = [
+    Person(id: 1, name: "Johnny Utah"),
+    Person(id: 2, name: "Bodhi"),
+]
+
+struct PersonResolver {
+    func people(context: NoContext, arguments: PaginationArguments) throws -> Connection<Person> {
+        return try characters.connection(from: arguments)
+    }
+}
+
+struct PointBreakAPI : API {
+    typealias ContextType = NoContext
+    let resolver = PersonResolver()
+    let schema = try! Schema<PersonResolver, NoContext> {
+        Type(Person.self) {
+            Field("id", at: \.id)
+            Field("name", at: \.name)
+        }
+        ConnectionType(Person.self)
+        Query {
+            Field("people", at: PersonResolver.people) {
+                Argument("first", at: \.first)
+                Argument("last", at: \.last)
+                Argument("after", at: \.after)
+                Argument("before", at: \.before)
+            }
+        }
+    }
+}
+```
+
+A request string for this might be:
+
+```graphql
+{
+    people {
+        edges {
+            cursor
+            node {
+                id
+                name
+            }
+        }
+        pageInfo {
+            hasPreviousPage
+            hasNextPage
+            startCursor
+            endCursor
+        }
+    }
+}
+```
+
+The result of this query is a `GraphQLResult` that encodes to the following JSON:
+
+```json
+{
+    "people": {
+        "edges": [
+            {
+                "cursor": "MQ==",
+                "node": {
+                    "id": 1,
+                    "name": "Johnny Utah"
+                }
+            },
+            {
+                "cursor": "Mg==",
+                "node": {
+                    "id": 2,
+                    "name": "Bodhi"
+                }
+            },
+        ],
+        "pageInfo": {
+            "hasPreviousPage": false,
+            "hasNextPage": false,
+            "startCursor": "MQ==",
+            "endCursor": "Mg=="
+        }
+    }
+}
+```
+
 ## Federation
 
 Federation allows you split your GraphQL API into smaller services and link them back together so clients see a single larger API. More information can be found [here](https://www.apollographql.com/docs/federation). To enable federation you must:
