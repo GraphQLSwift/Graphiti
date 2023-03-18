@@ -343,6 +343,40 @@ class HelloWorldTests: XCTestCase {
         wait(for: [expectation], timeout: 10)
     }
 
+    func testInputRequest() throws {
+        let mutation = """
+        mutation addUser($user: UserInput!) {
+            addUser(user: $user) {
+                id,
+                name
+            }
+        }
+        """
+        let variables: [String: Map] = ["user": ["id": "123", "name": "bob"]]
+
+        let request = GraphQLRequest(
+            query: mutation,
+            variables: variables
+        )
+
+        let expected = GraphQLResult(
+            data: ["addUser": ["id": "123", "name": "bob"]]
+        )
+
+        let expectation = XCTestExpectation()
+
+        api.execute(
+            request: request,
+            context: api.context,
+            on: group
+        ).whenSuccess { result in
+            XCTAssertEqual(result, expected)
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 10)
+    }
+
     func testInputRecursive() throws {
         let mutation = """
         mutation addUser($user: UserInput!) {
