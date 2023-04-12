@@ -35,7 +35,7 @@ public final class SchemaBuilder<Resolver, Context> {
         coders = newCoders
         return self
     }
-    
+
     @discardableResult
     /// Allows for setting SDL for federated subgraphs.
     /// - Parameter newSDL: The new SDL to use

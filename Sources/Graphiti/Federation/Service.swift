@@ -8,6 +8,6 @@ let serviceType = try! GraphQLObjectType(
     name: "_Service",
     description: "Federation service object",
     fields: [
-        "sdl": GraphQLField(type: GraphQLString)
+        "sdl": GraphQLField(type: GraphQLString),
     ]
 )

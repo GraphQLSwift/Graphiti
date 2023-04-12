@@ -11,7 +11,7 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
     let isTypeOf: GraphQLIsTypeOf = { source, _, _ in
         source is ObjectType
     }
-    
+
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         let fieldDefs = try fields(typeProvider: typeProvider, coders: coders)
         let objectType = try GraphQLObjectType(
@@ -23,9 +23,9 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
             },
             isTypeOf: isTypeOf
         )
-        
+
         try typeProvider.add(type: ObjectType.self, as: objectType)
-        
+
         // If federation keys are included, validate and create resolver closure
         if !keys.isEmpty {
             let fieldNames = Array(fieldDefs.keys)
@@ -36,8 +36,8 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
                     coders: coders
                 )
             }
-            
-            let resolve: GraphQLFieldResolve = { source, args, context, eventLoopGroup, info in
+
+            let resolve: GraphQLFieldResolve = { source, args, context, eventLoopGroup, _ in
                 guard let s = source as? Resolver else {
                     throw GraphQLError(
                         message: "Expected source type \(ObjectType.self) but got \(type(of: source))"
@@ -49,7 +49,7 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
                         message: "Expected context type \(Context.self) but got \(type(of: context))"
                     )
                 }
-                
+
                 let keyMatch = self.keys.first { key in
                     key.mapMatchesArguments(args, coders: coders)
                 }
@@ -58,7 +58,7 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
                         message: "No matching key was found for representation \(args)."
                     )
                 }
-                
+
                 return try key.resolveMap(
                     resolver: s,
                     context: c,
@@ -67,7 +67,7 @@ public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent
                     coders: coders
                 )
             }
-            
+
             typeProvider.federatedTypes.append(objectType)
             typeProvider.federatedResolvers[name] = resolve
         }

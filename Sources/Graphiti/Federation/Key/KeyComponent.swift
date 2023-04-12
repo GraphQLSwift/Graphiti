@@ -2,21 +2,25 @@ import GraphQL
 import NIO
 
 public class KeyComponent<ObjectType, Resolver, Context> {
-    func mapMatchesArguments(_ map: Map, coders: Coders) -> Bool {
+    func mapMatchesArguments(_: Map, coders _: Coders) -> Bool {
         fatalError()
     }
-    
+
     func resolveMap(
-        resolver: Resolver,
-        context: Context,
-        map: Map,
-        eventLoopGroup: EventLoopGroup,
-        coders: Coders
+        resolver _: Resolver,
+        context _: Context,
+        map _: Map,
+        eventLoopGroup _: EventLoopGroup,
+        coders _: Coders
     ) throws -> EventLoopFuture<Any?> {
         fatalError()
     }
-    
-    func validate(againstFields fieldNames: [String], typeProvider: TypeProvider, coders: Coders) throws {
+
+    func validate(
+        againstFields _: [String],
+        typeProvider _: TypeProvider,
+        coders _: Coders
+    ) throws {
         fatalError()
     }
 }

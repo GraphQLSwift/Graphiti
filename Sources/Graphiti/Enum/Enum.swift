@@ -15,8 +15,8 @@ public final class Enum<
             name: name,
             description: description,
             values: values.reduce(into: [:]) { result, value in
-                result[value.value.rawValue] = GraphQLEnumValue(
-                    value: try MapEncoder().encode(value.value),
+                result[value.value.rawValue] = try GraphQLEnumValue(
+                    value: MapEncoder().encode(value.value),
                     description: value.description,
                     deprecationReason: value.deprecationReason
                 )

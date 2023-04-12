@@ -34,12 +34,13 @@ public extension API {
         on eventLoopGroup: EventLoopGroup,
         validationRules: [(ValidationContext) -> Visitor] = []
     ) -> EventLoopFuture<GraphQLResult> {
-        return execute(request: request.query,
-                       context: context,
-                       on: eventLoopGroup,
-                       variables: request.variables,
-                       operationName: request.operationName,
-                       validationRules: validationRules
+        return execute(
+            request: request.query,
+            context: context,
+            on: eventLoopGroup,
+            variables: request.variables,
+            operationName: request.operationName,
+            validationRules: validationRules
         )
     }
 

@@ -12,9 +12,9 @@ public class InputField<
     var defaultValue: AnyEncodable?
 
     override func field(typeProvider: TypeProvider) throws -> (String, InputObjectField) {
-        let field = InputObjectField(
-            type: try typeProvider.getInputType(from: FieldType.self, field: name),
-            defaultValue: try defaultValue.map {
+        let field = try InputObjectField(
+            type: typeProvider.getInputType(from: FieldType.self, field: name),
+            defaultValue: defaultValue.map {
                 try MapEncoder().encode($0)
             },
             description: description

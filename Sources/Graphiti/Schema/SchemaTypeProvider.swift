@@ -14,7 +14,7 @@ final class SchemaTypeProvider: TypeProvider {
         AnyType(String.self): GraphQLString,
         AnyType(Bool.self): GraphQLBoolean,
     ]
-    
+
     var federatedTypes: [GraphQLObjectType] = []
     var federatedResolvers: [String: GraphQLFieldResolve] = [:]
     var federatedSDL: String? = nil
