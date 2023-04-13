@@ -10,7 +10,7 @@ class ValidationRulesTests: XCTestCase {
         struct TestResolver {
             var helloWorld: String { "Hellow World" }
         }
-        
+
         let testSchema = try Schema<TestResolver, NoContext> {
             Query {
                 Field("helloWorld", at: \.helloWorld)
@@ -39,7 +39,10 @@ class ValidationRulesTests: XCTestCase {
                 validationRules: [NoIntrospectionRule]
             ).wait(),
             GraphQLResult(errors: [
-                .init(message: "GraphQL introspection is not allowed, but the query contained __schema or __type", locations: [.init(line: 2, column: 3)])
+                .init(
+                    message: "GraphQL introspection is not allowed, but the query contained __schema or __type",
+                    locations: [.init(line: 2, column: 3)]
+                ),
             ])
         )
     }

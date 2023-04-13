@@ -13,11 +13,11 @@ public class Field<ObjectType, Context, FieldType, Arguments: Decodable>: FieldC
         typeProvider: TypeProvider,
         coders: Coders
     ) throws -> (String, GraphQLField) {
-        let field = GraphQLField(
-            type: try typeProvider.getOutputType(from: FieldType.self, field: name),
+        let field = try GraphQLField(
+            type: typeProvider.getOutputType(from: FieldType.self, field: name),
             description: description,
             deprecationReason: deprecationReason,
-            args: try arguments(typeProvider: typeProvider, coders: coders),
+            args: arguments(typeProvider: typeProvider, coders: coders),
             resolve: { source, arguments, context, eventLoopGroup, _ in
                 guard let s = source as? ObjectType else {
                     throw GraphQLError(

@@ -1,15 +1,19 @@
 import GraphQL
 import NIO
 
-public class Key<ObjectType, Resolver, Context, Arguments: Codable>: KeyComponent<ObjectType, Resolver, Context> {
+public class Key<ObjectType, Resolver, Context, Arguments: Codable>: KeyComponent<
+    ObjectType,
+    Resolver,
+    Context
+> {
     let arguments: [ArgumentComponent<Arguments>]
     let resolve: AsyncResolve<Resolver, Context, Arguments, ObjectType?>
-    
+
     override func mapMatchesArguments(_ map: Map, coders: Coders) -> Bool {
         let args = try? coders.decoder.decode(Arguments.self, from: map)
         return args != nil
     }
-    
+
     override func resolveMap(
         resolver: Resolver,
         context: Context,
@@ -18,10 +22,14 @@ public class Key<ObjectType, Resolver, Context, Arguments: Codable>: KeyComponen
         coders: Coders
     ) throws -> EventLoopFuture<Any?> {
         let arguments = try coders.decoder.decode(Arguments.self, from: map)
-        return try self.resolve(resolver)(context, arguments, eventLoopGroup).map { $0 as Any? }
+        return try resolve(resolver)(context, arguments, eventLoopGroup).map { $0 as Any? }
     }
-    
-    override func validate(againstFields fieldNames: [String], typeProvider: TypeProvider, coders: Coders) throws {
+
+    override func validate(
+        againstFields fieldNames: [String],
+        typeProvider: TypeProvider,
+        coders: Coders
+    ) throws {
         // Ensure that every argument is included in the provided field list
         for (name, _) in try arguments(typeProvider: typeProvider, coders: coders) {
             if !fieldNames.contains(name) {
@@ -46,7 +54,7 @@ public class Key<ObjectType, Resolver, Context, Arguments: Codable>: KeyComponen
         asyncResolve: @escaping AsyncResolve<Resolver, Context, Arguments, ObjectType?>
     ) {
         self.arguments = arguments
-        self.resolve = asyncResolve
+        resolve = asyncResolve
     }
 
     convenience init(

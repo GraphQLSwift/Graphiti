@@ -8,10 +8,10 @@ public class Argument<ArgumentsType: Decodable, ArgumentType>: ArgumentComponent
         typeProvider: TypeProvider,
         coders: Coders
     ) throws -> (String, GraphQLArgument) {
-        let argument = GraphQLArgument(
-            type: try typeProvider.getInputType(from: ArgumentType.self, field: name),
+        let argument = try GraphQLArgument(
+            type: typeProvider.getInputType(from: ArgumentType.self, field: name),
             description: description,
-            defaultValue: try defaultValue.map { try coders.encoder.encode($0) }
+            defaultValue: defaultValue.map { try coders.encoder.encode($0) }
         )
 
         return (name, argument)

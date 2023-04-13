@@ -6,7 +6,7 @@ struct ProductContext {
             size: "small",
             weight: 1,
             unit: "kg"
-        )
+        ),
     ]
 
     static let users = [
@@ -40,7 +40,8 @@ struct ProductContext {
                 caseNumber: "1235",
                 description: "Studio Study"
             ),
-            outcome: nil),
+            outcome: nil
+        ),
     ]
 
     static let products = [

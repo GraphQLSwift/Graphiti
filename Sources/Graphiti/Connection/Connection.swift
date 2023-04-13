@@ -122,6 +122,7 @@ func connect<Node>(
     makeCursor: @escaping (Node) throws -> String
 ) throws -> Connection<Node> where Node: Encodable {
     let edges = try elements.map { element in
+        // swiftformat:disable:next hoistTry
         Edge<Node>(node: element, cursor: try makeCursor(element))
     }
 
