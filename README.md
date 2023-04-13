@@ -200,13 +200,12 @@ defer {
     try? group.syncShutdownGracefully()
 }
 
-api.execute(
+let result = try await api.execute(
     request: "{ message { content } }",
     context: Context(),
     on: group
-).whenSuccess { result in
-    print(result)
-}
+)
+print(result)
 ```
 
 The output will be:
