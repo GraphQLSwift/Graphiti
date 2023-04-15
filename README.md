@@ -200,13 +200,12 @@ defer {
     try? group.syncShutdownGracefully()
 }
 
-api.execute(
+let result = try await api.execute(
     request: "{ message { content } }",
     context: Context(),
     on: group
-).whenSuccess { result in
-    print(result)
-}
+)
+print(result)
 ```
 
 The output will be:
@@ -219,7 +218,19 @@ The output will be:
 
 #### Async resolvers
 
-To use async resolvers, just add one more parameter with type `EventLoopGroup` to the resolver function and change the return type to `EventLoopFuture<YouReturnType>`. Don't forget to import NIO.
+Resolver functions can also be `async`:
+
+```swift
+struct Resolver {
+    func message(context: Context, arguments: NoArguments) async -> Message {
+        await someAsyncMethodToGetMessage()
+    }
+}
+```
+
+#### NIO resolvers
+
+The resolver functions also support `NIO`-style concurrency. To do so, just add one more parameter with type `EventLoopGroup` to the resolver function and change the return type to `EventLoopFuture<YouReturnType>`. Don't forget to import NIO.
 
 ```swift
 import NIO
