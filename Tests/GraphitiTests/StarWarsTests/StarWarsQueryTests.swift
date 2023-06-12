@@ -3,7 +3,6 @@ import GraphQL
 import NIO
 import XCTest
 
-@available(OSX 10.15, *)
 class StarWarsQueryTests: XCTestCase {
     private let api = StarWarsAPI()
     private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
@@ -832,7 +831,6 @@ class StarWarsQueryTests: XCTestCase {
     }
 }
 
-@available(OSX 10.15, *)
 extension StarWarsQueryTests {
     static var allTests: [(String, (StarWarsQueryTests) -> () throws -> Void)] {
         return [
