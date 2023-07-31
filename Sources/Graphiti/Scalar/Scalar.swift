@@ -4,8 +4,9 @@ import OrderedCollections
 /// Represents a scalar type in the schema.
 ///
 /// It is **highly** recommended that you do not subclass this type.
-/// Instead, modify the encoding/decoding behavior through the `MapEncoder`/`MapDecoder` options available through
-/// `Coders` or a custom encoding/decoding on the `ScalarType` itself.
+/// Encoding/decoding behavior can be modified through the `MapEncoder`/`MapDecoder` options available through
+/// `Coders` or a custom encoding/decoding on the `ScalarType` itself. If you need very custom serialization controls,
+/// you may provide your own serialize, parseValue, and parseLiteral implementations.
 open class Scalar<Resolver, Context, ScalarType: Codable>: TypeComponent<Resolver, Context> {
     // TODO: Change this no longer be an open class
 
@@ -14,22 +15,34 @@ open class Scalar<Resolver, Context, ScalarType: Codable>: TypeComponent<Resolve
             name: name,
             description: description,
             serialize: { value in
-                guard let scalar = value as? ScalarType else {
-                    throw GraphQLError(
-                        message: "Serialize expected type \(ScalarType.self) but got \(type(of: value))"
-                    )
-                }
+                if let serialize = self.serialize {
+                    return try serialize(value, coders)
+                } else {
+                    guard let scalar = value as? ScalarType else {
+                        throw GraphQLError(
+                            message: "Serialize expected type \(ScalarType.self) but got \(type(of: value))"
+                        )
+                    }
 
-                return try self.serialize(scalar: scalar, encoder: coders.encoder)
+                    return try self.serialize(scalar: scalar, encoder: coders.encoder)
+                }
             },
             parseValue: { map in
-                let scalar = try self.parse(map: map, decoder: coders.decoder)
-                return try self.serialize(scalar: scalar, encoder: coders.encoder)
+                if let parseValue = self.parseValue {
+                    return try parseValue(map, coders)
+                } else {
+                    let scalar = try self.parse(map: map, decoder: coders.decoder)
+                    return try self.serialize(scalar: scalar, encoder: coders.encoder)
+                }
             },
             parseLiteral: { value in
-                let map = value.map
-                let scalar = try self.parse(map: map, decoder: coders.decoder)
-                return try self.serialize(scalar: scalar, encoder: coders.encoder)
+                if let parseLiteral = self.parseLiteral {
+                    return try parseLiteral(value, coders)
+                } else {
+                    let map = value.map
+                    let scalar = try self.parse(map: map, decoder: coders.decoder)
+                    return try self.serialize(scalar: scalar, encoder: coders.encoder)
+                }
             }
         )
 
@@ -40,18 +53,30 @@ open class Scalar<Resolver, Context, ScalarType: Codable>: TypeComponent<Resolve
         try typeProvider.mapName(ScalarType.self, to: name)
     }
 
+    // TODO: Remove open func, instead relying on a passed closure
     open func serialize(scalar: ScalarType, encoder: MapEncoder) throws -> Map {
         try encoder.encode(scalar)
     }
 
+    // TODO: Remove open func, instead relying on a passed closure
     open func parse(map: Map, decoder: MapDecoder) throws -> ScalarType {
         try decoder.decode(ScalarType.self, from: map)
     }
 
+    let serialize: ((Any, Coders) throws -> Map)?
+    let parseValue: ((Map, Coders) throws -> Map)?
+    let parseLiteral: ((GraphQL.Value, Coders) throws -> Map)?
+
     init(
         type _: ScalarType.Type,
-        name: String?
+        name: String?,
+        serialize: ((Any, Coders) throws -> Map)? = nil,
+        parseValue: ((Map, Coders) throws -> Map)? = nil,
+        parseLiteral: ((GraphQL.Value, Coders) throws -> Map)? = nil
     ) {
+        self.serialize = serialize
+        self.parseValue = parseValue
+        self.parseLiteral = parseLiteral
         super.init(
             name: name ?? Reflection.name(for: ScalarType.self),
             type: .scalar
@@ -62,11 +87,17 @@ open class Scalar<Resolver, Context, ScalarType: Codable>: TypeComponent<Resolve
 public extension Scalar {
     convenience init(
         _ type: ScalarType.Type,
-        as name: String? = nil
+        as name: String? = nil,
+        serialize: ((Any, Coders) throws -> Map)? = nil,
+        parseValue: ((Map, Coders) throws -> Map)? = nil,
+        parseLiteral: ((GraphQL.Value, Coders) throws -> Map)? = nil
     ) {
         self.init(
             type: type,
-            name: name
+            name: name,
+            serialize: serialize,
+            parseValue: parseValue,
+            parseLiteral: parseLiteral
         )
     }
 }
