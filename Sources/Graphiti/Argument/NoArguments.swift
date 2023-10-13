@@ -1,3 +1,3 @@
 public struct NoArguments: Decodable {
-    init() {}
+    public init() {}
 }
