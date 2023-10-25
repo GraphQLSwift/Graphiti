@@ -22,25 +22,23 @@ class ConnectionTests: XCTestCase {
         }
     }
 
-    let schema = {
-        try! Schema<ConnectionTypeResolver, NoContext> {
-            Type(Comment.self) {
-                Field("id", at: \.id)
-                Field("message", at: \.message)
-            }
+    let schema = try! Schema<ConnectionTypeResolver, NoContext> {
+        Type(Comment.self) {
+            Field("id", at: \.id)
+            Field("message", at: \.message)
+        }
 
-            ConnectionType(Comment.self)
+        ConnectionType(Comment.self)
 
-            Query {
-                Field("comments", at: ConnectionTypeResolver.comments) {
-                    Argument("first", at: \.first)
-                    Argument("last", at: \.last)
-                    Argument("after", at: \.after)
-                    Argument("before", at: \.before)
-                }
+        Query {
+            Field("comments", at: ConnectionTypeResolver.comments) {
+                Argument("first", at: \.first)
+                Argument("last", at: \.last)
+                Argument("after", at: \.after)
+                Argument("before", at: \.before)
             }
         }
-    }()
+    }
 
     let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
 
