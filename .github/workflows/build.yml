@@ -23,45 +23,44 @@ jobs:
       - name: Run format linting
         run: docker run --rm -v ${{ github.workspace }}:/repo ghcr.io/nicklockwood/swiftformat:latest /repo --lint
 
-  # Disabled until https://github.com/paulofaria/test-reporter is updated to Swift 5.4
   macos:
-    name: Build and test on macOS
+    name: Test on macOS
     runs-on: macOS-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set code coverage path 
-      run: echo "codecov_path=$(swift test --show-codecov-path)" >> $GITHUB_ENV
-    - name: Test and publish code coverage to Code Climate
-      uses: paulofaria/codeclimate-action@master
-      env:
-        CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+    - uses: maxim-lobanov/setup-xcode@v1
       with:
-        downloadUrl: https://github.com/paulofaria/test-reporter/releases/download/0.9.0/test-reporter-0.9.0-darwin-amd64
-        coverageCommand: swift test --enable-test-discovery --enable-code-coverage
-        coverageLocations: ${{ env.codecov_path }}:lcov-json
+        xcode-version: latest
+    - uses: actions/checkout@v3
+    - name: Build and test
+      run: swift test --parallel --enable-test-discovery
 
-  # ubuntu-latest is ubuntu-22.04 currently. Swift versions older than 5.7 don't have builds for 22.04. https://www.swift.org/download/ 
-  ubuntu-old:
-    name: Build ${{ matrix.swift }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-20.04] 
-        swift: ["5.4", "5.5", "5.6"]
+  linux:
+    name: Test on Linux
+    runs-on: ubuntu-latest
     steps:
     - uses: swift-actions/setup-swift@v1
-      with:
-        swift-version: ${{ matrix.swift }}
     - uses: actions/checkout@v3
     - name: Test
-      run: swift test
+      run: swift test --parallel --enable-code-coverage
+    - name: Get test coverage html
+      run: |
+        llvm-cov show \
+          $(swift build --show-bin-path)/GraphitiPackageTests.xctest \
+          --instr-profile $(swift build --show-bin-path)/codecov/default.profdata \
+          --ignore-filename-regex="\.build|Tests" \
+          --format html \
+          --output-dir=.test-coverage
+    - name: Upload test coverage html
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-coverage-report
+        path: .test-coverage
 
-  ubuntu-latest:
-    name: Build ${{ matrix.swift }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+  backcompat-ubuntu-22_04:
+    name: Test Swift ${{ matrix.swift }} on Ubuntu 22.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
-        os: [ubuntu-latest] 
         swift: ["5.7"]
     steps:
     - uses: swift-actions/setup-swift@v1
@@ -69,4 +68,19 @@ jobs:
         swift-version: ${{ matrix.swift }}
     - uses: actions/checkout@v3
     - name: Test
-      run: swift test
+      run: swift test --parallel
+
+  # Swift versions older than 5.7 don't have builds for ubuntu 22.04. https://www.swift.org/download/ 
+  backcompat-ubuntu-20_04:
+    name: Test Swift ${{ matrix.swift }} on Ubuntu 20.04
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        swift: ["5.4", "5.5", "5.6"]
+    steps:
+    - uses: swift-actions/setup-swift@v1
+      with:
+        swift-version: ${{ matrix.swift }}
+    - uses: actions/checkout@v3
+    - name: Test
+      run: swift test --parallel
