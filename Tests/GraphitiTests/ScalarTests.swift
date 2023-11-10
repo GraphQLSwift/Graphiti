@@ -8,7 +8,7 @@ class ScalarTests: XCTestCase {
     // MARK: Test UUID converts to String as expected
 
     func testUUIDOutput() throws {
-        struct UUIDOutput: Codable {
+        struct UUIDOutput {
             let value: UUID
         }
 
@@ -56,7 +56,7 @@ class ScalarTests: XCTestCase {
     }
 
     func testUUIDArg() throws {
-        struct UUIDOutput: Codable {
+        struct UUIDOutput {
             let value: UUID
         }
 
@@ -110,7 +110,7 @@ class ScalarTests: XCTestCase {
     }
 
     func testUUIDInput() throws {
-        struct UUIDOutput: Codable {
+        struct UUIDOutput {
             let value: UUID
         }
 
@@ -173,7 +173,7 @@ class ScalarTests: XCTestCase {
     // MARK: Test Date scalars convert to String using ISO8601 encoders
 
     func testDateOutput() throws {
-        struct DateOutput: Codable {
+        struct DateOutput {
             let value: Date
         }
 
@@ -226,7 +226,7 @@ class ScalarTests: XCTestCase {
     }
 
     func testDateArg() throws {
-        struct DateOutput: Codable {
+        struct DateOutput {
             let value: Date
         }
 
@@ -285,7 +285,7 @@ class ScalarTests: XCTestCase {
     }
 
     func testDateInput() throws {
-        struct DateOutput: Codable {
+        struct DateOutput {
             let value: Date
         }
 
@@ -353,7 +353,7 @@ class ScalarTests: XCTestCase {
     // MARK: Test a scalar that converts to a single-value Map (StringCodedCoordinate -> String)
 
     func testStringCoordOutput() throws {
-        struct CoordinateOutput: Codable {
+        struct CoordinateOutput {
             let value: StringCodedCoordinate
         }
 
@@ -401,7 +401,7 @@ class ScalarTests: XCTestCase {
     }
 
     func testStringCoordArg() throws {
-        struct CoordinateOutput: Codable {
+        struct CoordinateOutput {
             let value: StringCodedCoordinate
         }
 
@@ -455,7 +455,7 @@ class ScalarTests: XCTestCase {
     }
 
     func testStringCoordInput() throws {
-        struct CoordinateOutput: Codable {
+        struct CoordinateOutput {
             let value: StringCodedCoordinate
         }
 
@@ -518,7 +518,7 @@ class ScalarTests: XCTestCase {
     // MARK: Test a scalar that converts to a multi-value Map (Coordinate -> Dict)
 
     func testDictCoordOutput() throws {
-        struct CoordinateOutput: Codable {
+        struct CoordinateOutput {
             let value: DictCodedCoordinate
         }
 
@@ -570,7 +570,7 @@ class ScalarTests: XCTestCase {
     }
 
     func testDictCoordArg() throws {
-        struct CoordinateOutput: Codable {
+        struct CoordinateOutput {
             let value: DictCodedCoordinate
         }
 
@@ -628,7 +628,7 @@ class ScalarTests: XCTestCase {
     }
 
     func testDictCoordInput() throws {
-        struct CoordinateOutput: Codable {
+        struct CoordinateOutput {
             let value: DictCodedCoordinate
         }
 

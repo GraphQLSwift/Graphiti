@@ -625,7 +625,7 @@ class StarWarsQueryTests: XCTestCase {
     }
 
     func testNonNullableFieldsQuery() throws {
-        struct A: Codable {
+        struct A {
             func nullableA(context _: NoContext, arguments _: NoArguments) -> A? {
                 return A()
             }

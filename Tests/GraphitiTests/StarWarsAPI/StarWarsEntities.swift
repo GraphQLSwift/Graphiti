@@ -1,19 +1,19 @@
-public enum Episode: String, Codable, CaseIterable {
+public enum Episode: String, CaseIterable, Codable {
     case newHope = "NEWHOPE"
     case empire = "EMPIRE"
     case jedi = "JEDI"
 }
 
-public protocol Character: Codable {
+public protocol Character {
     var id: String { get }
     var name: String { get }
     var friends: [String] { get }
     var appearsIn: [Episode] { get }
 }
 
-public protocol SearchResult: Codable {}
+public protocol SearchResult {}
 
-public struct Planet: SearchResult, Codable {
+public struct Planet: SearchResult {
     public let id: String
     public let name: String
     public let diameter: Int
@@ -22,7 +22,7 @@ public struct Planet: SearchResult, Codable {
     public var residents: [Human]
 }
 
-public struct Human: Character, SearchResult, Codable {
+public struct Human: Character, SearchResult {
     public let id: String
     public let name: String
     public let friends: [String]
@@ -30,7 +30,7 @@ public struct Human: Character, SearchResult, Codable {
     public let homePlanet: Planet
 }
 
-public struct Droid: Character, SearchResult, Codable {
+public struct Droid: Character, SearchResult {
     public let id: String
     public let name: String
     public let friends: [String]

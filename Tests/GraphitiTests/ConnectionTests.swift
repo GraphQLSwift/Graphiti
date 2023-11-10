@@ -4,7 +4,7 @@ import NIO
 import XCTest
 
 class ConnectionTests: XCTestCase {
-    struct Comment: Codable, Identifiable {
+    struct Comment: Identifiable {
         let id: Int
         let message: String
     }
