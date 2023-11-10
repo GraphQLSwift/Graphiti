@@ -2,7 +2,7 @@ import Foundation
 import GraphQL
 import NIO
 
-public struct Connection<Node: Encodable>: Encodable {
+public struct Connection<Node> {
     public let edges: [Edge<Node>]
     public let pageInfo: PageInfo
 }
@@ -19,7 +19,7 @@ public extension Connection where Node: Identifiable, Node.ID: LosslessStringCon
 }
 
 @available(macOS 10.15, macCatalyst 13.0, iOS 13.0, tvOS 13, watchOS 6.0, *) // For Identifiable
-public extension EventLoopFuture where Value: Sequence, Value.Element: Encodable & Identifiable,
+public extension EventLoopFuture where Value: Sequence, Value.Element: Identifiable,
 Value.Element.ID: LosslessStringConvertible {
     func connection(from arguments: Paginatable) -> EventLoopFuture<Connection<Value.Element>> {
         connection(from: arguments, makeCursor: Connection<Value.Element>.cursor)
@@ -36,7 +36,7 @@ Value.Element.ID: LosslessStringConvertible {
     }
 }
 
-public extension EventLoopFuture where Value: Sequence, Value.Element: Encodable {
+public extension EventLoopFuture where Value: Sequence {
     func connection(
         from arguments: Paginatable,
         makeCursor: @escaping (Value.Element) throws -> String
@@ -66,7 +66,7 @@ public extension EventLoopFuture where Value: Sequence, Value.Element: Encodable
 }
 
 @available(macOS 10.15, macCatalyst 13.0, iOS 13.0, tvOS 13, watchOS 6.0, *) // For Identifiable
-public extension Sequence where Element: Encodable & Identifiable,
+public extension Sequence where Element: Identifiable,
 Element.ID: LosslessStringConvertible {
     func connection(from arguments: Paginatable) throws -> Connection<Element> {
         try connection(from: arguments, makeCursor: Connection<Element>.cursor)
@@ -81,7 +81,7 @@ Element.ID: LosslessStringConvertible {
     }
 }
 
-public extension Sequence where Element: Encodable {
+public extension Sequence {
     func connection(
         from arguments: Paginatable,
         makeCursor: @escaping (Element) throws -> String
@@ -120,7 +120,7 @@ func connect<Node>(
     to elements: [Node],
     arguments: PaginationArguments,
     makeCursor: @escaping (Node) throws -> String
-) throws -> Connection<Node> where Node: Encodable {
+) throws -> Connection<Node> {
     let edges = try elements.map { element in
         // swiftformat:disable:next hoistTry
         Edge<Node>(node: element, cursor: try makeCursor(element))
@@ -140,7 +140,7 @@ func connect<Node>(
     )
 }
 
-func slicingCursor<Node: Encodable>(
+func slicingCursor<Node>(
     edges: [Edge<Node>],
     arguments: PaginationArguments
 ) -> ArraySlice<Edge<Node>> {
@@ -166,7 +166,7 @@ func slicingCursor<Node: Encodable>(
     return edges
 }
 
-func slicingCount<Node: Encodable>(
+func slicingCount<Node>(
     edges: ArraySlice<Edge<Node>>,
     arguments: PaginationArguments
 ) throws -> [Edge<Node>] {
@@ -195,7 +195,7 @@ func slicingCount<Node: Encodable>(
     return Array(edges)
 }
 
-func hasPreviousPage<Node: Encodable>(
+func hasPreviousPage<Node>(
     edges: ArraySlice<Edge<Node>>,
     arguments: PaginationArguments
 ) -> Bool {
@@ -206,7 +206,7 @@ func hasPreviousPage<Node: Encodable>(
     return false
 }
 
-func hasNextPage<Node: Encodable>(
+func hasNextPage<Node>(
     edges: ArraySlice<Edge<Node>>,
     arguments: PaginationArguments
 ) -> Bool {

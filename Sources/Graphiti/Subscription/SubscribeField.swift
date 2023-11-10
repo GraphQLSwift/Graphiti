@@ -263,7 +263,7 @@ public class SubscriptionField<
 
 // MARK: AsyncResolve Initializers
 
-public extension SubscriptionField where FieldType: Encodable {
+public extension SubscriptionField {
     convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, FieldType>,
@@ -376,7 +376,7 @@ public extension SubscriptionField {
 
 // MARK: SimpleAsyncResolve Initializers
 
-public extension SubscriptionField where FieldType: Encodable {
+public extension SubscriptionField {
     convenience init(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, FieldType>,
@@ -491,7 +491,7 @@ public extension SubscriptionField {
 
 // MARK: SyncResolve Initializers
 
-public extension SubscriptionField where FieldType: Encodable {
+public extension SubscriptionField {
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
@@ -680,7 +680,7 @@ public extension SubscriptionField {
 
     // MARK: ConcurrentResolve Initializers
 
-    public extension SubscriptionField where FieldType: Encodable {
+    public extension SubscriptionField {
         @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
         convenience init(
             _ name: String,

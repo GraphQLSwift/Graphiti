@@ -112,7 +112,7 @@ public class Field<ObjectType, Context, FieldType, Arguments: Decodable>: FieldC
 
 // MARK: AsyncResolve Initializers
 
-public extension Field where FieldType: Encodable {
+public extension Field {
     convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -154,7 +154,7 @@ public extension Field {
 
 // MARK: SimpleAsyncResolve Initializers
 
-public extension Field where FieldType: Encodable {
+public extension Field {
     convenience init(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -196,7 +196,7 @@ public extension Field {
 
 // MARK: SyncResolve Initializers
 
-public extension Field where FieldType: Encodable {
+public extension Field {
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -298,7 +298,7 @@ public extension Field where Arguments == NoArguments {
 
     // MARK: ConcurrentResolve Initializers
 
-    public extension Field where FieldType: Encodable {
+    public extension Field {
         @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
         convenience init(
             _ name: String,
