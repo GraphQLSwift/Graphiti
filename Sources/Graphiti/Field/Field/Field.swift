@@ -196,7 +196,11 @@ public extension Field {
 
 // MARK: SyncResolve Initializers
 
+// '@_disfavoredOverload' is included below because otherwise `SimpleAsyncResolve` initializers also match this signature, causing the
+// calls to be ambiguous. We prefer that if an EventLoopFuture is returned from the resolve, that `SimpleAsyncResolve` is matched.
+
 public extension Field {
+    @_disfavoredOverload
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -205,6 +209,7 @@ public extension Field {
         self.init(name: name, arguments: [argument()], syncResolve: function)
     }
 
+    @_disfavoredOverload
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, FieldType>,
@@ -216,6 +221,7 @@ public extension Field {
 }
 
 public extension Field {
+    @_disfavoredOverload
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, ResolveType>,
@@ -225,6 +231,7 @@ public extension Field {
         self.init(name: name, arguments: [argument()], syncResolve: function)
     }
 
+    @_disfavoredOverload
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, ResolveType>,

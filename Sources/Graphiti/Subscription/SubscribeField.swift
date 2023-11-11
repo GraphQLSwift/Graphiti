@@ -491,7 +491,11 @@ public extension SubscriptionField {
 
 // MARK: SyncResolve Initializers
 
+// '@_disfavoredOverload' is included below because otherwise `SimpleAsyncResolve` initializers also match this signature, causing the
+// calls to be ambiguous. We prefer that if an EventLoopFuture is returned from the resolve, that `SimpleAsyncResolve` is matched.
+
 public extension SubscriptionField {
+    @_disfavoredOverload
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
@@ -511,6 +515,7 @@ public extension SubscriptionField {
         )
     }
 
+    @_disfavoredOverload
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
@@ -528,6 +533,7 @@ public extension SubscriptionField {
 }
 
 public extension SubscriptionField {
+    @_disfavoredOverload
     convenience init(
         _ name: String,
         as: FieldType.Type,
@@ -542,6 +548,7 @@ public extension SubscriptionField {
         self.init(name: name, arguments: [argument()], as: `as`, syncSubscribe: subFunc)
     }
 
+    @_disfavoredOverload
     convenience init(
         _ name: String,
         as: FieldType.Type,
@@ -557,6 +564,7 @@ public extension SubscriptionField {
         self.init(name: name, arguments: arguments(), as: `as`, syncSubscribe: subFunc)
     }
 
+    @_disfavoredOverload
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
@@ -577,6 +585,7 @@ public extension SubscriptionField {
         )
     }
 
+    @_disfavoredOverload
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
