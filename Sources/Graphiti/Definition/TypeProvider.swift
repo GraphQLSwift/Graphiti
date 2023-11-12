@@ -86,16 +86,6 @@ extension TypeProvider {
     }
 
     func getOutputType(from type: Any.Type, field: String) throws -> GraphQLOutputType {
-        // TODO: Remove this when Reflection error is fixed
-        guard Reflection.isEncodable(type: type) else {
-            throw GraphQLError(
-                message:
-                // TODO: Add field type and use "type.field" format.
-                "Cannot use type \"\(type)\" for field \"\(field)\". " +
-                    "Type does not conform to \"Encodable\"."
-            )
-        }
-
         let graphQLType: GraphQLType
 
         do {

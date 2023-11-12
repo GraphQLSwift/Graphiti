@@ -21,7 +21,7 @@ struct ID: Codable {
     }
 }
 
-struct User: Codable {
+struct User {
     let id: String
     let name: String?
     let friends: [User]?
@@ -53,7 +53,7 @@ struct UserInput: Codable {
     let friends: [UserInput]?
 }
 
-struct UserEvent: Codable {
+struct UserEvent {
     let user: User
 }
 

@@ -1,10 +1,10 @@
 protocol Edgeable {
-    associatedtype Node: Encodable
+    associatedtype Node
     var node: Node { get }
     var cursor: String { get }
 }
 
-public struct Edge<Node: Encodable>: Edgeable, Encodable {
+public struct Edge<Node>: Edgeable {
     public let node: Node
     public let cursor: String
 }

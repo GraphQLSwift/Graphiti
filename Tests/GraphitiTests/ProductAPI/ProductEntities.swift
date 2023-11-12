@@ -1,7 +1,7 @@
 import Foundation
 import Graphiti
 
-struct Product: Codable {
+struct Product {
     let id: String
     let sku: String?
     let package: String?
@@ -30,7 +30,7 @@ struct Product: Codable {
     }
 }
 
-struct DeprecatedProduct: Codable {
+struct DeprecatedProduct {
     let sku: String
     let package: String
     let reason: String?
@@ -42,11 +42,11 @@ struct DeprecatedProduct: Codable {
     }
 }
 
-struct ProductVariation: Codable {
+struct ProductVariation {
     let id: String
 }
 
-struct ProductResearch: Codable {
+struct ProductResearch {
     let study: CaseStudy
     let outcome: String?
 
@@ -59,18 +59,18 @@ struct ProductResearch: Codable {
     }
 }
 
-struct CaseStudy: Codable {
+struct CaseStudy {
     let caseNumber: String
     let description: String?
 }
 
-struct ProductDimension: Codable {
+struct ProductDimension {
     let size: String?
     let weight: Float?
     let unit: String?
 }
 
-struct ProductUser: Codable {
+struct ProductUser {
     let email: String
     let name: String?
     let totalProductsCreated: Int?

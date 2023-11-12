@@ -263,7 +263,7 @@ public class SubscriptionField<
 
 // MARK: AsyncResolve Initializers
 
-public extension SubscriptionField where FieldType: Encodable {
+public extension SubscriptionField {
     convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, FieldType>,
@@ -376,7 +376,7 @@ public extension SubscriptionField {
 
 // MARK: SimpleAsyncResolve Initializers
 
-public extension SubscriptionField where FieldType: Encodable {
+public extension SubscriptionField {
     convenience init(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, FieldType>,
@@ -491,7 +491,11 @@ public extension SubscriptionField {
 
 // MARK: SyncResolve Initializers
 
-public extension SubscriptionField where FieldType: Encodable {
+// '@_disfavoredOverload' is included below because otherwise `SimpleAsyncResolve` initializers also match this signature, causing the
+// calls to be ambiguous. We prefer that if an EventLoopFuture is returned from the resolve, that `SimpleAsyncResolve` is matched.
+
+public extension SubscriptionField {
+    @_disfavoredOverload
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
@@ -511,6 +515,7 @@ public extension SubscriptionField where FieldType: Encodable {
         )
     }
 
+    @_disfavoredOverload
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
@@ -528,6 +533,7 @@ public extension SubscriptionField where FieldType: Encodable {
 }
 
 public extension SubscriptionField {
+    @_disfavoredOverload
     convenience init(
         _ name: String,
         as: FieldType.Type,
@@ -542,6 +548,7 @@ public extension SubscriptionField {
         self.init(name: name, arguments: [argument()], as: `as`, syncSubscribe: subFunc)
     }
 
+    @_disfavoredOverload
     convenience init(
         _ name: String,
         as: FieldType.Type,
@@ -557,6 +564,7 @@ public extension SubscriptionField {
         self.init(name: name, arguments: arguments(), as: `as`, syncSubscribe: subFunc)
     }
 
+    @_disfavoredOverload
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
@@ -577,6 +585,7 @@ public extension SubscriptionField {
         )
     }
 
+    @_disfavoredOverload
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
@@ -680,7 +689,7 @@ public extension SubscriptionField {
 
     // MARK: ConcurrentResolve Initializers
 
-    public extension SubscriptionField where FieldType: Encodable {
+    public extension SubscriptionField {
         @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
         convenience init(
             _ name: String,

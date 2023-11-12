@@ -1,6 +1,6 @@
 import GraphQL
 
-public final class Type<Resolver, Context, ObjectType: Encodable>: TypeComponent<
+public final class Type<Resolver, Context, ObjectType>: TypeComponent<
     Resolver,
     Context
 > {

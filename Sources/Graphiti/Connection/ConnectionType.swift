@@ -3,7 +3,7 @@ import GraphQL
 public final class ConnectionType<
     Resolver,
     Context,
-    ObjectType: Encodable
+    ObjectType
 >: TypeComponent<
     Resolver,
     Context

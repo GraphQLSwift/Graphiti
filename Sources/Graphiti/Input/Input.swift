@@ -3,7 +3,7 @@ import GraphQL
 public final class Input<
     Resolver,
     Context,
-    InputObjectType: Decodable
+    InputObjectType
 >: TypeComponent<
     Resolver,
     Context

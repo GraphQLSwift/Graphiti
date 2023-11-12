@@ -1,5 +1,6 @@
 import Foundation
 
+// swiftformat:disable:next enumNamespaces
 struct ProductContext {
     static let dimensions = [
         ProductDimension(
