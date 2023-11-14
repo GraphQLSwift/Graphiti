@@ -5,6 +5,13 @@ public struct PaginationArguments: Paginatable {
     public let last: Int?
     public let after: String?
     public let before: String?
+    
+    public init(first: Int? = nil, last: Int? = nil, after: String? = nil, before: String? = nil) {
+        self.first = first
+        self.last = last
+        self.after = after
+        self.before = before
+    }
 
     init(_ arguments: Paginatable) {
         first = arguments.first
