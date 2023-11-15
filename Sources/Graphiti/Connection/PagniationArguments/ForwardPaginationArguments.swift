@@ -6,4 +6,9 @@ public protocol ForwardPaginatable: Decodable {
 public struct ForwardPaginationArguments: ForwardPaginatable {
     public let first: Int?
     public let after: String?
+
+    public init(first: Int?, after: String?) {
+        self.first = first
+        self.after = after
+    }
 }
