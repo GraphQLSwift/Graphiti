@@ -271,7 +271,7 @@ class HelloWorldTests: XCTestCase {
         wait(for: [expectationB], timeout: 10)
 
         query = """
-        query Query($id: String!) {
+        query Query($id: ID!) {
             id(id: $id)
         }
         """
