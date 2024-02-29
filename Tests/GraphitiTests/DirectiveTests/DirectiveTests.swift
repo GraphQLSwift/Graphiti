@@ -22,7 +22,7 @@ class DirectiveTests: XCTestCase {
         """
 
         let input: [String: Map] = [
-            "skipName": true
+            "skipName": true,
         ]
 
         let response = try await api.execute(
@@ -35,7 +35,7 @@ class DirectiveTests: XCTestCase {
         let expected = GraphQLResult(
             data: [
                 "hero": [
-                    "id": "2001"
+                    "id": "2001",
                 ],
             ]
         )
@@ -54,7 +54,7 @@ class DirectiveTests: XCTestCase {
         """
 
         let input: [String: Map] = [
-            "includeName": false
+            "includeName": false,
         ]
 
         let response = try await api.execute(
@@ -67,7 +67,7 @@ class DirectiveTests: XCTestCase {
         let expected = GraphQLResult(
             data: [
                 "hero": [
-                    "id": "2001"
+                    "id": "2001",
                 ],
             ]
         )
