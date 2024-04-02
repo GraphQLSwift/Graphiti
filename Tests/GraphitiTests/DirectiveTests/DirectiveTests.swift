@@ -11,7 +11,7 @@ class DirectiveTests: XCTestCase {
         try? self.group.syncShutdownGracefully()
     }
 
-    func testSkip() async throws {
+    func testSkip() throws {
         let query = """
         query FetchHeroNameWithSkip($skipName: Boolean!) {
             hero {
@@ -25,12 +25,12 @@ class DirectiveTests: XCTestCase {
             "skipName": true,
         ]
 
-        let response = try await api.execute(
+        let response = try api.execute(
             request: query,
             context: StarWarsContext(),
             on: group,
             variables: input
-        )
+        ).wait()
 
         let expected = GraphQLResult(
             data: [
@@ -43,7 +43,7 @@ class DirectiveTests: XCTestCase {
         XCTAssertEqual(response, expected)
     }
 
-    func testInclude() async throws {
+    func testInclude() throws {
         let query = """
         query FetchHeroNameWithSkip($includeName: Boolean!) {
             hero {
@@ -57,12 +57,12 @@ class DirectiveTests: XCTestCase {
             "includeName": false,
         ]
 
-        let response = try await api.execute(
+        let response = try api.execute(
             request: query,
             context: StarWarsContext(),
             on: group,
             variables: input
-        )
+        ).wait()
 
         let expected = GraphQLResult(
             data: [
