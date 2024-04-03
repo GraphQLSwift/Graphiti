@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/GraphQLSwift/GraphQL.git",
         "state": {
           "branch": null,
-          "revision": "17b96ed859072fca79dd562da2a79e1bc752756f",
-          "version": "2.4.1"
+          "revision": "3cf2dbce764e7ccff8447d0b7d4634c0438449d3",
+          "version": "2.9.2"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/apple/swift-atomics.git",
         "state": {
           "branch": null,
-          "revision": "919eb1d83e02121cdb434c7bfc1f0c66ef17febe",
-          "version": "1.0.2"
+          "revision": "cd142fd2f64be2100422d658e7411e39489da985",
+          "version": "1.2.0"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/apple/swift-collections",
         "state": {
           "branch": null,
-          "revision": "f504716c27d2e5d4144fa4794b12129301d17729",
-          "version": "1.0.3"
+          "revision": "94cf62b3ba8d4bed62680a282d4c25f9c63c2efb",
+          "version": "1.1.0"
         }
       },
       {
@@ -33,8 +33,17 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "a16e2f54a25b2af217044e5168997009a505930f",
-          "version": "2.42.0"
+          "revision": "fc63f0cf4e55a4597407a9fc95b16a2bc44b4982",
+          "version": "2.64.0"
+        }
+      },
+      {
+        "package": "swift-system",
+        "repositoryURL": "https://github.com/apple/swift-system.git",
+        "state": {
+          "branch": null,
+          "revision": "025bcb1165deab2e20d4eaba79967ce73013f496",
+          "version": "1.2.1"
         }
       }
     ]
