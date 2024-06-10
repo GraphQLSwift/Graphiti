@@ -353,7 +353,7 @@ import XCTest
                 )
                 subscribers.append(subscriber)
             }
-            return ConcurrentEventStream<T>.init(asyncStream)
+            return ConcurrentEventStream<T>(asyncStream)
         }
     }
 
