@@ -9,11 +9,13 @@ import OrderedCollections
 /// you may provide your own serialize, parseValue, and parseLiteral implementations.
 open class Scalar<Resolver, Context, ScalarType: Codable>: TypeComponent<Resolver, Context> {
     // TODO: Change this no longer be an open class
+    let specifiedByURL: String?
 
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         let scalarType = try GraphQLScalarType(
             name: name,
             description: description,
+            specifiedByURL: specifiedByURL,
             serialize: { value in
                 if let serialize = self.serialize {
                     return try serialize(value, coders)
@@ -70,10 +72,12 @@ open class Scalar<Resolver, Context, ScalarType: Codable>: TypeComponent<Resolve
     init(
         type _: ScalarType.Type,
         name: String?,
+        specifiedBy: String? = nil,
         serialize: ((Any, Coders) throws -> Map)? = nil,
         parseValue: ((Map, Coders) throws -> Map)? = nil,
         parseLiteral: ((GraphQL.Value, Coders) throws -> Map)? = nil
     ) {
+        specifiedByURL = specifiedBy
         self.serialize = serialize
         self.parseValue = parseValue
         self.parseLiteral = parseLiteral
@@ -88,6 +92,7 @@ public extension Scalar {
     convenience init(
         _ type: ScalarType.Type,
         as name: String? = nil,
+        specifiedBy: String? = nil,
         serialize: ((Any, Coders) throws -> Map)? = nil,
         parseValue: ((Map, Coders) throws -> Map)? = nil,
         parseLiteral: ((GraphQL.Value, Coders) throws -> Map)? = nil
@@ -95,6 +100,7 @@ public extension Scalar {
         self.init(
             type: type,
             name: name,
+            specifiedBy: specifiedBy,
             serialize: serialize,
             parseValue: parseValue,
             parseLiteral: parseLiteral

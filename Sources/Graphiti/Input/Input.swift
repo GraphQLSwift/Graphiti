@@ -8,13 +8,15 @@ public final class Input<
     Resolver,
     Context
 > {
+    let isOneOf: Bool
     let fields: [InputFieldComponent<InputObjectType, Context>]
 
     override func update(typeProvider: SchemaTypeProvider, coders _: Coders) throws {
         let inputObjectType = try GraphQLInputObjectType(
             name: name,
             description: description,
-            fields: fields(typeProvider: typeProvider)
+            fields: fields(typeProvider: typeProvider),
+            isOneOf: isOneOf
         )
 
         try typeProvider.add(type: InputObjectType.self, as: inputObjectType)
@@ -38,8 +40,10 @@ public final class Input<
     init(
         type _: InputObjectType.Type,
         name: String?,
+        isOneOf: Bool,
         fields: [InputFieldComponent<InputObjectType, Context>]
     ) {
+        self.isOneOf = isOneOf
         self.fields = fields
         super.init(
             name: name ?? Reflection.name(for: InputObjectType.self),
@@ -52,18 +56,20 @@ public extension Input {
     convenience init(
         _ type: InputObjectType.Type,
         as name: String? = nil,
+        isOneOf: Bool = false,
         @InputFieldComponentBuilder<InputObjectType, Context> _ fields: ()
             -> InputFieldComponent<InputObjectType, Context>
     ) {
-        self.init(type: type, name: name, fields: [fields()])
+        self.init(type: type, name: name, isOneOf: isOneOf, fields: [fields()])
     }
 
     convenience init(
         _ type: InputObjectType.Type,
         as name: String? = nil,
+        isOneOf: Bool = false,
         @InputFieldComponentBuilder<InputObjectType, Context> _ fields: ()
             -> [InputFieldComponent<InputObjectType, Context>]
     ) {
-        self.init(type: type, name: name, fields: fields())
+        self.init(type: type, name: name, isOneOf: isOneOf, fields: fields())
     }
 }
