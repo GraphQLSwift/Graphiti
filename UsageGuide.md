@@ -1,6 +1,8 @@
 
 # Usage Guide
 
+DELETEME
+
 The following sections build up a Graphiti schema and detail how to use some of the main features.
 
 ## Hello World
