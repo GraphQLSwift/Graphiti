@@ -10,6 +10,6 @@ final class AnyType: Hashable {
     }
 
     static func == (lhs: AnyType, rhs: AnyType) -> Bool {
-        return lhs.hashValue == rhs.hashValue
+        return lhs.type == rhs.type
     }
 }
