@@ -166,11 +166,11 @@ import XCTest
             }
             """
 
-            let subscriptionResult = try api.subscribe(
+            let subscriptionResult = try await api.subscribe(
                 request: request,
                 context: api.context,
                 on: group
-            ).wait()
+            )
             guard let subscription = subscriptionResult.stream else {
                 XCTFail(subscriptionResult.errors.description)
                 return

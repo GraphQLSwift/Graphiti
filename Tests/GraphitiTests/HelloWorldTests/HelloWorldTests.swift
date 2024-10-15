@@ -166,266 +166,179 @@ class HelloWorldTests: XCTestCase {
     }
 
     func testHello() throws {
-        let query = "{ hello }"
-        let expected = GraphQLResult(data: ["hello": "world"])
-
-        let expectation = XCTestExpectation()
-
-        api.execute(
-            request: query,
-            context: api.context,
-            on: group
-        ).whenSuccess { result in
-            XCTAssertEqual(result, expected)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 10)
+        XCTAssertEqual(
+            try api.execute(
+                request: "{ hello }",
+                context: api.context,
+                on: group
+            ).wait(),
+            GraphQLResult(data: ["hello": "world"])
+        )
     }
 
     func testFutureHello() throws {
-        let query = "{ futureHello }"
-        let expected = GraphQLResult(data: ["futureHello": "world"])
-
-        let expectation = XCTestExpectation()
-
-        api.execute(
-            request: query,
-            context: api.context,
-            on: group
-        ).whenSuccess { result in
-            XCTAssertEqual(result, expected)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 10)
+        XCTAssertEqual(
+            try api.execute(
+                request: "{ futureHello }",
+                context: api.context,
+                on: group
+            ).wait(),
+            GraphQLResult(data: ["futureHello": "world"])
+        )
     }
 
     func testBoyhowdy() throws {
-        let query = "{ boyhowdy }"
-
-        let expected = GraphQLResult(
-            errors: [
-                GraphQLError(
-                    message: "Cannot query field \"boyhowdy\" on type \"Query\".",
-                    locations: [SourceLocation(line: 1, column: 3)]
-                ),
-            ]
+        XCTAssertEqual(
+            try api.execute(
+                request: "{ boyhowdy }",
+                context: api.context,
+                on: group
+            ).wait(),
+            GraphQLResult(
+                errors: [
+                    GraphQLError(
+                        message: "Cannot query field \"boyhowdy\" on type \"Query\".",
+                        locations: [SourceLocation(line: 1, column: 3)]
+                    ),
+                ]
+            )
         )
-
-        let expectation = XCTestExpectation()
-
-        api.execute(
-            request: query,
-            context: api.context,
-            on: group
-        ).whenSuccess { result in
-            XCTAssertEqual(result, expected)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 10)
     }
 
     func testScalar() throws {
-        var query: String
-        var expected = GraphQLResult(data: ["float": 4.0])
+        XCTAssertEqual(
+            try api.execute(
+                request: """
+                query Query($float: Float!) {
+                    float(float: $float)
+                }
+                """,
+                context: api.context,
+                on: group,
+                variables: ["float": 4]
+            ).wait(),
+            GraphQLResult(data: ["float": 4.0])
+        )
 
-        query = """
-        query Query($float: Float!) {
-            float(float: $float)
-        }
-        """
+        XCTAssertEqual(
+            try api.execute(
+                request: """
+                query Query {
+                    float(float: 4)
+                }
+                """,
+                context: api.context,
+                on: group
+            ).wait(),
+            GraphQLResult(data: ["float": 4.0])
+        )
 
-        let expectationA = XCTestExpectation()
+        XCTAssertEqual(
+            try api.execute(
+                request: """
+                query Query($id: ID!) {
+                    id(id: $id)
+                }
+                """,
+                context: api.context,
+                on: group,
+                variables: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"]
+            ).wait(),
+            GraphQLResult(data: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"])
+        )
 
-        api.execute(
-            request: query,
-            context: api.context,
-            on: group,
-            variables: ["float": 4]
-        ).whenSuccess { result in
-            XCTAssertEqual(result, expected)
-            expectationA.fulfill()
-        }
-
-        wait(for: [expectationA], timeout: 10)
-
-        query = """
-        query Query {
-            float(float: 4)
-        }
-        """
-
-        let expectationB = XCTestExpectation()
-
-        api.execute(
-            request: query,
-            context: api.context,
-            on: group
-        ).whenSuccess { result in
-            XCTAssertEqual(result, expected)
-            expectationB.fulfill()
-        }
-
-        wait(for: [expectationB], timeout: 10)
-
-        query = """
-        query Query($id: ID!) {
-            id(id: $id)
-        }
-        """
-
-        expected = GraphQLResult(data: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"])
-
-        let expectationC = XCTestExpectation()
-
-        api.execute(
-            request: query,
-            context: api.context,
-            on: group,
-            variables: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"]
-        ).whenSuccess { result in
-            XCTAssertEqual(result, expected)
-            expectationC.fulfill()
-        }
-
-        wait(for: [expectationC], timeout: 10)
-
-        query = """
-        query Query {
-            id(id: "85b8d502-8190-40ab-b18f-88edd297d8b6")
-        }
-        """
-
-        let expectationD = XCTestExpectation()
-
-        api.execute(
-            request: query,
-            context: api.context,
-            on: group
-        ).whenSuccess { result in
-            XCTAssertEqual(result, expected)
-            expectationD.fulfill()
-        }
-
-        wait(for: [expectationD], timeout: 10)
+        XCTAssertEqual(
+            try api.execute(
+                request: """
+                query Query {
+                    id(id: "85b8d502-8190-40ab-b18f-88edd297d8b6")
+                }
+                """,
+                context: api.context,
+                on: group
+            ).wait(),
+            GraphQLResult(data: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"])
+        )
     }
 
     func testInput() throws {
-        let mutation = """
-        mutation addUser($user: UserInput!) {
-            addUser(user: $user) {
-                id,
-                name
-            }
-        }
-        """
-
-        let variables: [String: Map] = ["user": ["id": "123", "name": "bob"]]
-
-        let expected = GraphQLResult(
-            data: ["addUser": ["id": "123", "name": "bob"]]
+        XCTAssertEqual(
+            try api.execute(
+                request: """
+                mutation addUser($user: UserInput!) {
+                    addUser(user: $user) {
+                        id,
+                        name
+                    }
+                }
+                """,
+                context: api.context,
+                on: group,
+                variables: ["user": ["id": "123", "name": "bob"]]
+            ).wait(),
+            GraphQLResult(
+                data: ["addUser": ["id": "123", "name": "bob"]]
+            )
         )
-
-        let expectation = XCTestExpectation()
-
-        api.execute(
-            request: mutation,
-            context: api.context,
-            on: group,
-            variables: variables
-        ).whenSuccess { result in
-            XCTAssertEqual(result, expected)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 10)
     }
 
     func testInputRequest() throws {
-        let mutation = """
-        mutation addUser($user: UserInput!) {
-            addUser(user: $user) {
-                id,
-                name
-            }
-        }
-        """
-        let variables: [String: Map] = ["user": ["id": "123", "name": "bob"]]
-
-        let request = GraphQLRequest(
-            query: mutation,
-            variables: variables
+        XCTAssertEqual(
+            try api.execute(
+                request: GraphQLRequest(
+                    query: """
+                    mutation addUser($user: UserInput!) {
+                        addUser(user: $user) {
+                            id,
+                            name
+                        }
+                    }
+                    """,
+                    variables: ["user": ["id": "123", "name": "bob"]]
+                ),
+                context: api.context,
+                on: group
+            ).wait(),
+            GraphQLResult(
+                data: ["addUser": ["id": "123", "name": "bob"]]
+            )
         )
-
-        let expected = GraphQLResult(
-            data: ["addUser": ["id": "123", "name": "bob"]]
-        )
-
-        let expectation = XCTestExpectation()
-
-        api.execute(
-            request: request,
-            context: api.context,
-            on: group
-        ).whenSuccess { result in
-            XCTAssertEqual(result, expected)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 10)
     }
 
     func testInputRecursive() throws {
-        let mutation = """
-        mutation addUser($user: UserInput!) {
-            addUser(user: $user) {
-                id,
-                name,
-                friends {
-                    id,
-                    name
+        XCTAssertEqual(
+            try api.execute(
+                request: """
+                mutation addUser($user: UserInput!) {
+                    addUser(user: $user) {
+                        id,
+                        name,
+                        friends {
+                            id,
+                            name
+                        }
+                    }
                 }
-            }
-        }
-        """
-
-        let variables: [String: Map] =
-            ["user": ["id": "123", "name": "bob", "friends": [["id": "124", "name": "jeff"]]]]
-
-        let expected = GraphQLResult(
-            data: ["addUser": [
-                "id": "123",
-                "name": "bob",
-                "friends": [["id": "124", "name": "jeff"]],
-            ]]
+                """,
+                context: api.context,
+                on: group,
+                variables: [
+                    "user": [
+                        "id": "123",
+                        "name": "bob",
+                        "friends": [["id": "124", "name": "jeff"]],
+                    ],
+                ]
+            ).wait(),
+            GraphQLResult(
+                data: [
+                    "addUser": [
+                        "id": "123",
+                        "name": "bob",
+                        "friends": [["id": "124", "name": "jeff"]],
+                    ],
+                ]
+            )
         )
-
-        let expectation = XCTestExpectation()
-
-        api.execute(
-            request: mutation,
-            context: api.context,
-            on: group,
-            variables: variables
-        ).whenSuccess { result in
-            XCTAssertEqual(result, expected)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 10)
-    }
-}
-
-extension HelloWorldTests {
-    static var allTests: [(String, (HelloWorldTests) -> () throws -> Void)] {
-        return [
-            ("testHello", testHello),
-            ("testFutureHello", testFutureHello),
-            ("testBoyhowdy", testBoyhowdy),
-            ("testScalar", testScalar),
-            ("testInput", testInput),
-        ]
     }
 }
