@@ -36,25 +36,4 @@ enum ComponentType {
     case type
     case types
     case union
-
-    /// An index used to sort components into the correct schema build order. This order goes
-    /// from "least other type references" to "most". By building in this order we are able to satisfy
-    /// hard ordering requirements (interfaces MUST be built before inheriting types), as well as
-    /// reduce unnecessary TypeReferences.
-    var buildOrder: Int {
-        switch self {
-        case .none: return 0
-        case .scalar: return 1
-        case .enum: return 2
-        case .interface: return 3
-        case .input: return 4
-        case .connection: return 5
-        case .type: return 6
-        case .types: return 7
-        case .union: return 8
-        case .query: return 9
-        case .mutation: return 10
-        case .subscription: return 11
-        }
-    }
 }
