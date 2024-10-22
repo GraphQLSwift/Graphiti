@@ -23,7 +23,7 @@ public struct StarWarsAPI: API {
             Field("name", at: \.name)
                 .description("The name of the character.")
 
-            Field("friends", at: \.friends, as: [TypeReference<Character>].self)
+            Field("friends", at: Character.getFriends)
                 .description("The friends of the character, or an empty list if they have none.")
 
             Field("appearsIn", at: \.appearsIn)

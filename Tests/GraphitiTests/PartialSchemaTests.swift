@@ -12,7 +12,7 @@ class PartialSchemaTests: XCTestCase {
                     .description("The id of the character.")
                 Field("name", at: \.name)
                     .description("The name of the character.")
-                Field("friends", at: \.friends, as: [TypeReference<Character>].self)
+                Field("friends", at: \.friends)
                     .description(
                         "The friends of the character, or an empty list if they have none."
                     )
@@ -218,7 +218,7 @@ class PartialSchemaTests: XCTestCase {
                         .description("The id of the character.")
                     Field("name", at: \.name)
                         .description("The name of the character.")
-                    Field("friends", at: \.friends, as: [TypeReference<Character>].self)
+                    Field("friends", at: \.friends)
                         .description(
                             "The friends of the character, or an empty list if they have none."
                         )
