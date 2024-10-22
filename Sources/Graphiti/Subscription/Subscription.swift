@@ -11,7 +11,9 @@ public final class Subscription<Resolver, Context>: Component<Resolver, Context>
         typeProvider.subscription = try GraphQLObjectType(
             name: name,
             description: description,
-            fields: fields(typeProvider: typeProvider, coders: coders),
+            fields: {
+                try self.fields(typeProvider: typeProvider, coders: coders)
+            },
             isTypeOf: isTypeOf
         )
     }

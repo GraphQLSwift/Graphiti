@@ -13,30 +13,33 @@ public final class Type<Resolver, Context, ObjectType>: TypeComponent<
     }
 
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
-        let fieldDefs = try fields(typeProvider: typeProvider, coders: coders)
         let objectType = try GraphQLObjectType(
             name: name,
             description: description,
-            fields: fieldDefs,
-            interfaces: interfaces.map {
-                try typeProvider.getInterfaceType(from: $0)
+            fields: {
+                let fields = try self.fields(typeProvider: typeProvider, coders: coders)
+                // Validate federation keys, if present
+                for key in self.keys {
+                    try key.validate(
+                        againstFields: Array(fields.keys),
+                        typeProvider: typeProvider,
+                        coders: coders
+                    )
+                }
+                return fields
+            },
+            interfaces: {
+                try self.interfaces.map {
+                    try typeProvider.getInterfaceType(from: $0)
+                }
             },
             isTypeOf: isTypeOf
         )
 
         try typeProvider.add(type: ObjectType.self, as: objectType)
 
-        // If federation keys are included, validate and create resolver closure
+        // If federation keys are included, create resolver closure
         if !keys.isEmpty {
-            let fieldNames = Array(fieldDefs.keys)
-            for key in keys {
-                try key.validate(
-                    againstFields: fieldNames,
-                    typeProvider: typeProvider,
-                    coders: coders
-                )
-            }
-
             let resolve: GraphQLFieldResolve = { source, args, context, eventLoopGroup, _ in
                 guard let s = source as? Resolver else {
                     throw GraphQLError(

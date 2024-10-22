@@ -11,7 +11,9 @@ public final class Mutation<Resolver, Context>: Component<Resolver, Context> {
         typeProvider.mutation = try GraphQLObjectType(
             name: name,
             description: description,
-            fields: fields(typeProvider: typeProvider, coders: coders),
+            fields: {
+                try self.fields(typeProvider: typeProvider, coders: coders)
+            },
             isTypeOf: isTypeOf
         )
     }

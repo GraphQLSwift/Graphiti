@@ -10,7 +10,9 @@ public final class Interface<Resolver, Context, InterfaceType>: TypeComponent<
         let interfaceType = try GraphQLInterfaceType(
             name: name,
             description: description,
-            fields: fields(typeProvider: typeProvider, coders: coders),
+            fields: {
+                try self.fields(typeProvider: typeProvider, coders: coders)
+            },
             resolveType: nil
         )
 

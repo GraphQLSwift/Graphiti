@@ -15,7 +15,9 @@ public final class Input<
         let inputObjectType = try GraphQLInputObjectType(
             name: name,
             description: description,
-            fields: fields(typeProvider: typeProvider),
+            fields: {
+                try self.fields(typeProvider: typeProvider)
+            },
             isOneOf: isOneOf
         )
 
