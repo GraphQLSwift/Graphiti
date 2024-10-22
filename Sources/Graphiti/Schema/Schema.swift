@@ -13,7 +13,6 @@ public final class Schema<Resolver, Context> {
         typeProvider.federatedSDL = federatedSDL
 
         for component in components {
-            try component.setGraphQLName(typeProvider: typeProvider)
             try component.update(typeProvider: typeProvider, coders: coders)
         }
 

@@ -11,7 +11,6 @@ open class Component<Resolver, Context> {
     }
 
     func update(typeProvider _: SchemaTypeProvider, coders _: Coders) throws {}
-    func setGraphQLName(typeProvider _: SchemaTypeProvider) throws {}
 }
 
 public extension Component {

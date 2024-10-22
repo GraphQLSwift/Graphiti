@@ -24,10 +24,6 @@ public final class Input<
         try typeProvider.add(type: InputObjectType.self, as: inputObjectType)
     }
 
-    override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {
-        try typeProvider.mapName(InputObjectType.self, to: name)
-    }
-
     func fields(typeProvider: TypeProvider) throws -> InputObjectFieldMap {
         var map: InputObjectFieldMap = [:]
 

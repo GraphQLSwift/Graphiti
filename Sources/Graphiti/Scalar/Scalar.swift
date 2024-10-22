@@ -51,10 +51,6 @@ open class Scalar<Resolver, Context, ScalarType: Codable>: TypeComponent<Resolve
         try typeProvider.add(type: ScalarType.self, as: scalarType)
     }
 
-    override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {
-        try typeProvider.mapName(ScalarType.self, to: name)
-    }
-
     // TODO: Remove open func, instead relying on a passed closure
     open func serialize(scalar: ScalarType, encoder: MapEncoder) throws -> Map {
         try encoder.encode(scalar)

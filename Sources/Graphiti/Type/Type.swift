@@ -76,10 +76,6 @@ public final class Type<Resolver, Context, ObjectType>: TypeComponent<
         }
     }
 
-    override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {
-        try typeProvider.mapName(ObjectType.self, to: name)
-    }
-
     func fields(typeProvider: TypeProvider, coders: Coders) throws -> GraphQLFieldMap {
         var map: GraphQLFieldMap = [:]
 
