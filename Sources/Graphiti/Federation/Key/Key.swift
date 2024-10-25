@@ -92,30 +92,26 @@ public class Key<ObjectType, Resolver, Context, Arguments: Codable>: KeyComponen
     }
 }
 
-#if compiler(>=5.5) && canImport(_Concurrency)
-
-    public extension Key {
-        @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
-        convenience init(
-            arguments: [ArgumentComponent<Arguments>],
-            concurrentResolve: @escaping ConcurrentResolve<
-                Resolver,
-                Context,
-                Arguments,
-                ObjectType?
-            >
-        ) {
-            let asyncResolve: AsyncResolve<Resolver, Context, Arguments, ObjectType?> = { type in
-                { context, arguments, eventLoopGroup in
-                    let promise = eventLoopGroup.next().makePromise(of: ObjectType?.self)
-                    promise.completeWithTask {
-                        try await concurrentResolve(type)(context, arguments)
-                    }
-                    return promise.futureResult
+public extension Key {
+    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
+    convenience init(
+        arguments: [ArgumentComponent<Arguments>],
+        concurrentResolve: @escaping ConcurrentResolve<
+            Resolver,
+            Context,
+            Arguments,
+            ObjectType?
+        >
+    ) {
+        let asyncResolve: AsyncResolve<Resolver, Context, Arguments, ObjectType?> = { type in
+            { context, arguments, eventLoopGroup in
+                let promise = eventLoopGroup.next().makePromise(of: ObjectType?.self)
+                promise.completeWithTask {
+                    try await concurrentResolve(type)(context, arguments)
                 }
+                return promise.futureResult
             }
-            self.init(arguments: arguments, asyncResolve: asyncResolve)
         }
+        self.init(arguments: arguments, asyncResolve: asyncResolve)
     }
-
-#endif
+}
