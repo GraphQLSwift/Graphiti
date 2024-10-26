@@ -256,6 +256,10 @@ one that you've created yourself.
 
 For a progressive walkthrough, see the [Usage Guide](UsageGuide.md). The [Star Wars API](Tests/GraphitiTests/StarWarsAPI/StarWarsAPI.swift) provides a fairly complete example.
 
+## Support
+
+This package supports Swift versions in [alignment with Swift NIO](https://github.com/apple/swift-nio?tab=readme-ov-file#swift-versions).
+
 ## Contributing
 
 This repo uses [SwiftFormat](https://github.com/nicklockwood/SwiftFormat), and includes lint checks to enforce these formatting standards.
