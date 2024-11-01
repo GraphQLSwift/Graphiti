@@ -18,7 +18,9 @@ public final class Query<Resolver, Context>: Component<Resolver, Context> {
                 if !typeProvider.federatedTypes.isEmpty {
                     let federatedTypes = typeProvider.federatedTypes
                     guard let sdl = typeProvider.federatedSDL else {
-                        throw GraphQLError(message: "If federated types are included, SDL must be provided")
+                        throw GraphQLError(
+                            message: "If federated types are included, SDL must be provided"
+                        )
                     }
 
                     // Add subgraph types to provider (_Service, _Any, _Entity)
