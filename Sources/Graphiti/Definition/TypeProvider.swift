@@ -66,22 +66,12 @@ extension TypeProvider {
                     from: GraphQLList(graphQLType),
                     isOptional: isOptional
                 )
-            case .reference:
-                let name = getGraphQLName(of: type.wrappedType)
-                let referenceType = GraphQLTypeReference(name)
-
-                return try getGraphQLOptionalType(from: referenceType, isOptional: isOptional)
             }
         } else {
-            if let graphQLType = graphQLTypeMap[AnyType(type)] {
-                return try getGraphQLOptionalType(from: graphQLType, isOptional: isOptional)
-            } else {
-                // If we haven't seen this type yet, just store it as a type reference and resolve later.
-                let name = getGraphQLName(of: type)
-                let referenceType = GraphQLTypeReference(name)
-
-                return try getGraphQLOptionalType(from: referenceType, isOptional: isOptional)
+            guard let graphQLType = graphQLTypeMap[AnyType(type)] else {
+                throw GraphQLError(message: "Type not found \(type).")
             }
+            return try getGraphQLOptionalType(from: graphQLType, isOptional: isOptional)
         }
     }
 

@@ -1,7 +1,6 @@
 enum WrapperModifier {
     case optional
     case list
-    case reference
 }
 
 protocol Wrapper {
