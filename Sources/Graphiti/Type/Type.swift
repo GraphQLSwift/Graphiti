@@ -20,11 +20,7 @@ public final class Type<Resolver, Context, ObjectType>: TypeComponent<
                 let fields = try self.fields(typeProvider: typeProvider, coders: coders)
                 // Validate federation keys, if present
                 for key in self.keys {
-                    try key.validate(
-                        againstFields: Array(fields.keys),
-                        typeProvider: typeProvider,
-                        coders: coders
-                    )
+                    try key.validate(againstFields: Array(fields.keys))
                 }
                 return fields
             },
