@@ -22,7 +22,7 @@ class UnionTests: XCTestCase {
             Union(SearchResult.self, members: Planet.self, Human.self, Droid.self)
 
             Query {
-                Field("search", at: StarWarsResolver.search, as: [SearchResult].self) {
+                Field("search", at: StarWarsResolver.search) {
                     Argument("query", at: \.query)
                 }
             }
@@ -48,7 +48,7 @@ class UnionTests: XCTestCase {
             ])
 
             Query {
-                Field("search", at: StarWarsResolver.search, as: [SearchResult].self) {
+                Field("search", at: StarWarsResolver.search) {
                     Argument("query", at: \.query)
                 }
             }

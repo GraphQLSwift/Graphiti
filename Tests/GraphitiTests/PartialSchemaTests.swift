@@ -34,7 +34,7 @@ class PartialSchemaTests: XCTestCase {
 
         @FieldDefinitions
         override var query: Fields {
-            Field("hero", at: StarWarsResolver.hero, as: Character.self) {
+            Field("hero", at: StarWarsResolver.hero) {
                 Argument("episode", at: \.episode)
                     .description(
                         "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode."
@@ -61,7 +61,7 @@ class PartialSchemaTests: XCTestCase {
                 Field("name", at: \.name)
                 Field("appearsIn", at: \.appearsIn)
                 Field("homePlanet", at: \.homePlanet)
-                Field("friends", at: Human.getFriends, as: [Character].self)
+                Field("friends", at: Human.getFriends)
                     .description("The friends of the human, or an empty list if they have none.")
                 Field("secretBackstory", at: Human.getSecretBackstory)
                     .description("Where are they from and how they came to be who they are.")
@@ -71,7 +71,7 @@ class PartialSchemaTests: XCTestCase {
                 Field("name", at: \.name)
                 Field("appearsIn", at: \.appearsIn)
                 Field("primaryFunction", at: \.primaryFunction)
-                Field("friends", at: Droid.getFriends, as: [Character].self)
+                Field("friends", at: Droid.getFriends)
                     .description("The friends of the droid, or an empty list if they have none.")
                 Field("secretBackstory", at: Droid.getSecretBackstory)
                     .description("Where are they from and how they came to be who they are.")
@@ -89,7 +89,7 @@ class PartialSchemaTests: XCTestCase {
                 Argument("id", at: \.id)
                     .description("Id of the droid.")
             }
-            Field("search", at: StarWarsResolver.search, as: [SearchResult].self) {
+            Field("search", at: StarWarsResolver.search) {
                 Argument("query", at: \.query)
                     .defaultValue("R2-D2")
             }
@@ -238,7 +238,7 @@ class PartialSchemaTests: XCTestCase {
                 }.description("One of the films in the Star Wars Trilogy.")
             },
             query: {
-                Field("hero", at: StarWarsResolver.hero, as: Character.self) {
+                Field("hero", at: StarWarsResolver.hero) {
                     Argument("episode", at: \.episode)
                         .description(
                             "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode."
@@ -264,7 +264,7 @@ class PartialSchemaTests: XCTestCase {
                     Field("name", at: \.name)
                     Field("appearsIn", at: \.appearsIn)
                     Field("homePlanet", at: \.homePlanet)
-                    Field("friends", at: Human.getFriends, as: [Character].self)
+                    Field("friends", at: Human.getFriends)
                         .description(
                             "The friends of the human, or an empty list if they have none."
                         )
@@ -276,7 +276,7 @@ class PartialSchemaTests: XCTestCase {
                     Field("name", at: \.name)
                     Field("appearsIn", at: \.appearsIn)
                     Field("primaryFunction", at: \.primaryFunction)
-                    Field("friends", at: Droid.getFriends, as: [Character].self)
+                    Field("friends", at: Droid.getFriends)
                         .description(
                             "The friends of the droid, or an empty list if they have none."
                         )
@@ -294,7 +294,7 @@ class PartialSchemaTests: XCTestCase {
                     Argument("id", at: \.id)
                         .description("Id of the droid.")
                 }
-                Field("search", at: StarWarsResolver.search, as: [SearchResult].self) {
+                Field("search", at: StarWarsResolver.search) {
                     Argument("query", at: \.query)
                         .defaultValue("R2-D2")
                 }

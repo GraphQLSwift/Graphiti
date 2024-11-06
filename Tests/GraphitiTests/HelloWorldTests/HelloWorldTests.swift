@@ -126,7 +126,7 @@ struct HelloAPI: API {
 
         Input(UserInput.self) {
             InputField("id", at: \.id)
-            InputField("name", as: String?.self)
+            InputField("name", at: \.name)
             InputField("friends", at: \.friends)
         }
 

@@ -489,7 +489,7 @@ class ConnectionTests: XCTestCase {
 
         let schema = try Schema<Resolver, NoContext> {
             Type(ChatObject.self, as: "Chat") {
-                Field("messages", at: ChatObject.messages, as: Connection<MessageObject>.self) {
+                Field("messages", at: ChatObject.messages) {
                     Argument("first", at: \.first)
                     Argument("after", at: \.after)
                     Argument("last", at: \.last)
