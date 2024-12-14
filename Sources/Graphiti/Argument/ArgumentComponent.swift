@@ -9,6 +9,10 @@ public class ArgumentComponent<ArgumentsType: Decodable> {
     ) throws -> (String, GraphQLArgument) {
         fatalError()
     }
+
+    func getName() -> String {
+        fatalError()
+    }
 }
 
 public extension ArgumentComponent {

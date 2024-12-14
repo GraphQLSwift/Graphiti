@@ -17,6 +17,10 @@ public class Argument<ArgumentsType: Decodable, ArgumentType>: ArgumentComponent
         return (name, argument)
     }
 
+    override func getName() -> String {
+        return name
+    }
+
     init(name: String) {
         self.name = name
     }

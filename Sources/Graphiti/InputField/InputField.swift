@@ -39,25 +39,6 @@ public extension InputField {
     }
 }
 
-public extension InputField {
-    convenience init<KeyPathType>(
-        _ name: String,
-        at _: KeyPath<InputObjectType, KeyPathType>,
-        as _: FieldType.Type
-    ) {
-        self.init(name: name)
-    }
-}
-
-public extension InputField {
-    convenience init(
-        _ name: String,
-        as _: FieldType.Type
-    ) {
-        self.init(name: name)
-    }
-}
-
 public extension InputField where FieldType: Encodable {
     func defaultValue(_ defaultValue: FieldType) -> Self {
         self.defaultValue = AnyEncodable(defaultValue)

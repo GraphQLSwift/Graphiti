@@ -8,16 +8,14 @@ public final class Union<Resolver, Context, UnionType>: TypeComponent<Resolver, 
             name: name,
             description: description,
             resolveType: nil,
-            types: members.map {
-                try typeProvider.getObjectType(from: $0)
+            types: {
+                try self.members.map {
+                    try typeProvider.getObjectType(from: $0)
+                }
             }
         )
 
         try typeProvider.add(type: UnionType.self, as: unionType)
-    }
-
-    override func setGraphQLName(typeProvider: SchemaTypeProvider) throws {
-        try typeProvider.mapName(UnionType.self, to: name)
     }
 
     init(

@@ -23,7 +23,7 @@ public struct StarWarsAPI: API {
             Field("name", at: \.name)
                 .description("The name of the character.")
 
-            Field("friends", at: \.friends, as: [TypeReference<Character>].self)
+            Field("friends", at: Character.getFriends)
                 .description("The friends of the character, or an empty list if they have none.")
 
             Field("appearsIn", at: \.appearsIn)
@@ -52,7 +52,7 @@ public struct StarWarsAPI: API {
             Field("appearsIn", at: \.appearsIn)
             Field("homePlanet", at: \.homePlanet)
 
-            Field("friends", at: Human.getFriends, as: [Character].self)
+            Field("friends", at: Human.getFriends)
                 .description("The friends of the human, or an empty list if they have none.")
 
             Field("secretBackstory", at: Human.getSecretBackstory)
@@ -66,7 +66,7 @@ public struct StarWarsAPI: API {
             Field("appearsIn", at: \.appearsIn)
             Field("primaryFunction", at: \.primaryFunction)
 
-            Field("friends", at: Droid.getFriends, as: [Character].self)
+            Field("friends", at: Droid.getFriends)
                 .description("The friends of the droid, or an empty list if they have none.")
 
             Field("secretBackstory", at: Droid.getSecretBackstory)
@@ -77,7 +77,7 @@ public struct StarWarsAPI: API {
         Union(SearchResult.self, members: Planet.self, Human.self, Droid.self)
 
         Query {
-            Field("hero", at: StarWarsResolver.hero, as: Character.self) {
+            Field("hero", at: StarWarsResolver.hero) {
                 Argument("episode", at: \.episode)
                     .description(
                         "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode."
@@ -95,7 +95,7 @@ public struct StarWarsAPI: API {
                     .description("Id of the droid.")
             }
 
-            Field("search", at: StarWarsResolver.search, as: [SearchResult].self) {
+            Field("search", at: StarWarsResolver.search) {
                 Argument("query", at: \.query)
                     .defaultValue("R2-D2")
             }

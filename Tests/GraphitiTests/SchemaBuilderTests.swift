@@ -11,7 +11,7 @@ class SchemaBuilderTests: XCTestCase {
 
         // Add assets slightly out of order
         builder.addQuery {
-            Field("hero", at: StarWarsResolver.hero, as: Character.self) {
+            Field("hero", at: StarWarsResolver.hero) {
                 Argument("episode", at: \.episode)
                     .description(
                         "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode."
@@ -49,7 +49,7 @@ class SchemaBuilderTests: XCTestCase {
                 Field("name", at: \.name)
                 Field("appearsIn", at: \.appearsIn)
                 Field("homePlanet", at: \.homePlanet)
-                Field("friends", at: Human.getFriends, as: [Character].self)
+                Field("friends", at: Human.getFriends)
                     .description("The friends of the human, or an empty list if they have none.")
                 Field("secretBackstory", at: Human.getSecretBackstory)
                     .description("Where are they from and how they came to be who they are.")
@@ -59,7 +59,7 @@ class SchemaBuilderTests: XCTestCase {
                 Field("name", at: \.name)
                 Field("appearsIn", at: \.appearsIn)
                 Field("primaryFunction", at: \.primaryFunction)
-                Field("friends", at: Droid.getFriends, as: [Character].self)
+                Field("friends", at: Droid.getFriends)
                     .description("The friends of the droid, or an empty list if they have none.")
                 Field("secretBackstory", at: Droid.getSecretBackstory)
                     .description("Where are they from and how they came to be who they are.")
@@ -70,7 +70,7 @@ class SchemaBuilderTests: XCTestCase {
                     .description("The id of the character.")
                 Field("name", at: \.name)
                     .description("The name of the character.")
-                Field("friends", at: \.friends, as: [TypeReference<Character>].self)
+                Field("friends", at: \.friends)
                     .description(
                         "The friends of the character, or an empty list if they have none."
                     )
@@ -89,7 +89,7 @@ class SchemaBuilderTests: XCTestCase {
                 Argument("id", at: \.id)
                     .description("Id of the droid.")
             }
-            Field("search", at: StarWarsResolver.search, as: [SearchResult].self) {
+            Field("search", at: StarWarsResolver.search) {
                 Argument("query", at: \.query)
                     .defaultValue("R2-D2")
             }

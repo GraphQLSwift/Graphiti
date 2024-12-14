@@ -8,34 +8,37 @@ public final class Query<Resolver, Context>: Component<Resolver, Context> {
     }
 
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
-        var queryFields = try fields(typeProvider: typeProvider, coders: coders)
-
-        // Add federated types and queries if they exist
-        if !typeProvider.federatedTypes.isEmpty {
-            let federatedTypes = typeProvider.federatedTypes
-            guard let sdl = typeProvider.federatedSDL else {
-                throw GraphQLError(message: "If federated types are included, SDL must be provided")
-            }
-
-            // Add subgraph types to provider (_Service, _Any, _Entity)
-            let entity = entityType(federatedTypes)
-            typeProvider.types.append(serviceType)
-            typeProvider.types.append(anyType)
-            typeProvider.types.append(entity)
-
-            // Add subgraph queries (_entities, _service)
-            queryFields["_entities"] = entitiesQuery(
-                for: typeProvider.federatedResolvers,
-                entityType: entity,
-                coders: coders
-            )
-            queryFields["_service"] = serviceQuery(for: sdl)
-        }
-
         typeProvider.query = try GraphQLObjectType(
             name: name,
             description: description,
-            fields: queryFields,
+            fields: {
+                var queryFields = try self.fields(typeProvider: typeProvider, coders: coders)
+
+                // Add federated types and queries if they exist
+                if !typeProvider.federatedTypes.isEmpty {
+                    let federatedTypes = typeProvider.federatedTypes
+                    guard let sdl = typeProvider.federatedSDL else {
+                        throw GraphQLError(
+                            message: "If federated types are included, SDL must be provided"
+                        )
+                    }
+
+                    // Add subgraph types to provider (_Service, _Any, _Entity)
+                    let entity = entityType(federatedTypes)
+                    typeProvider.types.append(serviceType)
+                    typeProvider.types.append(anyType)
+                    typeProvider.types.append(entity)
+
+                    // Add subgraph queries (_entities, _service)
+                    queryFields["_entities"] = entitiesQuery(
+                        for: typeProvider.federatedResolvers,
+                        entityType: entity,
+                        coders: coders
+                    )
+                    queryFields["_service"] = serviceQuery(for: sdl)
+                }
+                return queryFields
+            },
             isTypeOf: isTypeOf
         )
     }

@@ -153,7 +153,7 @@ class DirectiveTests: XCTestCase {
             }
 
             Query {
-                Field("test", at: OneOfResolver.test, as: TestObject.self) {
+                Field("test", at: OneOfResolver.test) {
                     Argument("input", at: \.input)
                 }
             }

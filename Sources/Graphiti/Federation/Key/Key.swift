@@ -26,12 +26,10 @@ public class Key<ObjectType, Resolver, Context, Arguments: Codable>: KeyComponen
     }
 
     override func validate(
-        againstFields fieldNames: [String],
-        typeProvider: TypeProvider,
-        coders: Coders
+        againstFields fieldNames: [String]
     ) throws {
         // Ensure that every argument is included in the provided field list
-        for (name, _) in try arguments(typeProvider: typeProvider, coders: coders) {
+        for name in arguments.map({ $0.getName() }) {
             if !fieldNames.contains(name) {
                 throw GraphQLError(message: "Argument name not found in type fields: \(name)")
             }

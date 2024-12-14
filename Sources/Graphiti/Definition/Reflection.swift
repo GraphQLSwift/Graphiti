@@ -4,19 +4,6 @@ public enum Reflection {
         return description.hasSuffix("Protocol")
     }
 
-    @available(*, deprecated, message: "No longer used")
-    public static func isEncodable(type: Any.Type) -> Bool {
-        if isProtocol(type: type) {
-            return true
-        }
-
-        if let type = type as? Wrapper.Type {
-            return isEncodable(type: type.wrappedType)
-        }
-
-        return type is Encodable.Type
-    }
-
     public static func name<Subject>(for instance: Subject) -> String {
         var typeName: [Character] = []
         var genericArgument: [Character] = []

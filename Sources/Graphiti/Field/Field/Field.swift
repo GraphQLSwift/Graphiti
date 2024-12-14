@@ -131,27 +131,6 @@ public extension Field {
     }
 }
 
-public extension Field {
-    convenience init<ResolveType>(
-        _ name: String,
-        at function: @escaping AsyncResolve<ObjectType, Context, Arguments, ResolveType>,
-        as: FieldType.Type,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(name: name, arguments: [argument()], asyncResolve: function)
-    }
-
-    convenience init<ResolveType>(
-        _ name: String,
-        at function: @escaping AsyncResolve<ObjectType, Context, Arguments, ResolveType>,
-        as: FieldType.Type,
-        @ArgumentComponentBuilder<Arguments> _ arguments: ()
-            -> [ArgumentComponent<Arguments>] = { [] }
-    ) {
-        self.init(name: name, arguments: arguments(), asyncResolve: function)
-    }
-}
-
 // MARK: SimpleAsyncResolve Initializers
 
 public extension Field {
@@ -166,27 +145,6 @@ public extension Field {
     convenience init(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, FieldType>,
-        @ArgumentComponentBuilder<Arguments> _ arguments: ()
-            -> [ArgumentComponent<Arguments>] = { [] }
-    ) {
-        self.init(name: name, arguments: arguments(), simpleAsyncResolve: function)
-    }
-}
-
-public extension Field {
-    convenience init<ResolveType>(
-        _ name: String,
-        at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, ResolveType>,
-        as: FieldType.Type,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(name: name, arguments: [argument()], simpleAsyncResolve: function)
-    }
-
-    convenience init<ResolveType>(
-        _ name: String,
-        at function: @escaping SimpleAsyncResolve<ObjectType, Context, Arguments, ResolveType>,
-        as: FieldType.Type,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
     ) {
@@ -220,29 +178,6 @@ public extension Field {
     }
 }
 
-public extension Field {
-    @_disfavoredOverload
-    convenience init<ResolveType>(
-        _ name: String,
-        at function: @escaping SyncResolve<ObjectType, Context, Arguments, ResolveType>,
-        as: FieldType.Type,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(name: name, arguments: [argument()], syncResolve: function)
-    }
-
-    @_disfavoredOverload
-    convenience init<ResolveType>(
-        _ name: String,
-        at function: @escaping SyncResolve<ObjectType, Context, Arguments, ResolveType>,
-        as: FieldType.Type,
-        @ArgumentComponentBuilder<Arguments> _ arguments: ()
-            -> [ArgumentComponent<Arguments>] = { [] }
-    ) {
-        self.init(name: name, arguments: arguments(), syncResolve: function)
-    }
-}
-
 // MARK: Keypath Initializers
 
 public extension Field where Arguments == NoArguments {
@@ -251,22 +186,6 @@ public extension Field where Arguments == NoArguments {
         at keyPath: KeyPath<ObjectType, FieldType>
     ) {
         let syncResolve: SyncResolve<ObjectType, Context, NoArguments, FieldType> = { type in
-            { _, _ in
-                type[keyPath: keyPath]
-            }
-        }
-
-        self.init(name: name, arguments: [], syncResolve: syncResolve)
-    }
-}
-
-public extension Field where Arguments == NoArguments {
-    convenience init<ResolveType>(
-        _ name: String,
-        at keyPath: KeyPath<ObjectType, ResolveType>,
-        as _: FieldType.Type
-    ) {
-        let syncResolve: SyncResolve<ObjectType, Context, NoArguments, ResolveType> = { type in
             { _, _ in
                 type[keyPath: keyPath]
             }
@@ -317,29 +236,6 @@ public extension Field {
     convenience init(
         _ name: String,
         at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, FieldType>,
-        @ArgumentComponentBuilder<Arguments> _ arguments: ()
-            -> [ArgumentComponent<Arguments>] = { [] }
-    ) {
-        self.init(name: name, arguments: arguments(), concurrentResolve: function)
-    }
-}
-
-public extension Field {
-    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init<ResolveType>(
-        _ name: String,
-        at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, ResolveType>,
-        as: FieldType.Type,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(name: name, arguments: [argument()], concurrentResolve: function)
-    }
-
-    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init<ResolveType>(
-        _ name: String,
-        at function: @escaping ConcurrentResolve<ObjectType, Context, Arguments, ResolveType>,
-        as: FieldType.Type,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
     ) {

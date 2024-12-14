@@ -17,9 +17,7 @@ public class KeyComponent<ObjectType, Resolver, Context> {
     }
 
     func validate(
-        againstFields _: [String],
-        typeProvider _: TypeProvider,
-        coders _: Coders
+        againstFields _: [String]
     ) throws {
         fatalError()
     }
