@@ -21,7 +21,9 @@ public final class Schema<Resolver, Context> {
         }
 
         guard typeProvider.query != nil || !typeProvider.federatedResolvers.isEmpty else {
-            throw SchemaError(description: "Schema must contain at least 1 query or federated resolver")
+            throw SchemaError(
+                description: "Schema must contain at least 1 query or federated resolver"
+            )
         }
 
         schema = try GraphQLSchema(

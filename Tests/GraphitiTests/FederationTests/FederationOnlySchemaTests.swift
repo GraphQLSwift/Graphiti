@@ -16,7 +16,7 @@ final class FederationOnlySchemaTests: XCTestCase {
     struct User: Codable {
         let id: String
 
-        func profile(context: NoContext, args: NoArguments) async throws -> Profile {
+        func profile(context _: NoContext, args _: NoArguments) async throws -> Profile {
             if id == "1" {
                 return Profile(name: "User \(id)", email: nil)
             } else {
@@ -30,7 +30,7 @@ final class FederationOnlySchemaTests: XCTestCase {
     }
 
     struct FederationOnlyResolver {
-        func user(context: NoContext, key: User.Key) async throws -> User {
+        func user(context _: NoContext, key: User.Key) async throws -> User {
             User(id: key.id)
         }
     }
@@ -41,17 +41,17 @@ final class FederationOnlySchemaTests: XCTestCase {
     }
 
     static let federatedSDL: String =
-    """
-    type User @key(fields: "id") {
-        id: String!
-        profile: Profile!
-    }
+        """
+        type User @key(fields: "id") {
+            id: String!
+            profile: Profile!
+        }
 
-    type Profile {
-        name: String!
-        email: String
-    }
-    """
+        type Profile {
+            name: String!
+            email: String
+        }
+        """
 
     override func setUpWithError() throws {
         let schema = try SchemaBuilder(FederationOnlyResolver.self, NoContext.self)
@@ -100,24 +100,24 @@ final class FederationOnlySchemaTests: XCTestCase {
         ]
 
         let query =
-        """
-        query user($representations: [_Any!]!) {
-          _entities(representations: $representations) {
-            ... on User {
-              id
-            }
-          }
-        }   
-        """
+            """
+            query user($representations: [_Any!]!) {
+              _entities(representations: $representations) {
+                ... on User {
+                  id
+                }
+              }
+            }   
+            """
 
         try XCTAssertEqual(
             execute(request: query, variables: representations),
             GraphQLResult(data: [
                 "_entities": [
                     [
-                        "id": "1234"
-                    ]
-                ]
+                        "id": "1234",
+                    ],
+                ],
             ])
         )
     }
@@ -130,16 +130,16 @@ final class FederationOnlySchemaTests: XCTestCase {
         ]
 
         let query =
-        """
-        query user($representations: [_Any!]!) {
-          _entities(representations: $representations) {
-            ... on User {
-              id
-              profile { name, email }
-            }
-          }
-        }   
-        """
+            """
+            query user($representations: [_Any!]!) {
+              _entities(representations: $representations) {
+                ... on User {
+                  id
+                  profile { name, email }
+                }
+              }
+            }   
+            """
 
         try XCTAssertEqual(
             execute(request: query, variables: representations),
@@ -149,10 +149,10 @@ final class FederationOnlySchemaTests: XCTestCase {
                         "id": "1234",
                         "profile": [
                             "name": "User 1234",
-                            "email": "1234@example.com"
-                        ]
-                    ]
-                ]
+                            "email": "1234@example.com",
+                        ],
+                    ],
+                ],
             ])
         )
     }
@@ -165,16 +165,16 @@ final class FederationOnlySchemaTests: XCTestCase {
         ]
 
         let query =
-        """
-        query user($representations: [_Any!]!) {
-          _entities(representations: $representations) {
-            ... on User {
-              id
-              profile { name, email }
-            }
-          }
-        }   
-        """
+            """
+            query user($representations: [_Any!]!) {
+              _entities(representations: $representations) {
+                ... on User {
+                  id
+                  profile { name, email }
+                }
+              }
+            }   
+            """
 
         try XCTAssertEqual(
             execute(request: query, variables: representations),
@@ -184,10 +184,10 @@ final class FederationOnlySchemaTests: XCTestCase {
                         "id": "1",
                         "profile": [
                             "name": "User 1",
-                            "email": .null
-                        ]
-                    ]
-                ]
+                            "email": .null,
+                        ],
+                    ],
+                ],
             ])
         )
     }

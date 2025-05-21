@@ -318,8 +318,8 @@ class HelloWorldAsyncTests: XCTestCase {
     }
 }
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
 /// A very simple publish/subscriber used for testing
+@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
 class SimplePubSub<T> {
     private var subscribers: [Subscriber<T>]
 
