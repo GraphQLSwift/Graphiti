@@ -16,11 +16,12 @@ public final class Schema<Resolver, Context> {
             try component.update(typeProvider: typeProvider, coders: coders)
         }
 
-        guard let query = typeProvider.query else {
-            fatalError("Query type is required.")
+        guard typeProvider.query != nil || !typeProvider.federatedResolvers.isEmpty else {
+            fatalError("Schema must contain at least 1 query or federated resolver")
         }
+
         schema = try GraphQLSchema(
-            query: query,
+            query: typeProvider.query,
             mutation: typeProvider.mutation,
             subscription: typeProvider.subscription,
             types: typeProvider.types,
