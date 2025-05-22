@@ -51,7 +51,7 @@ jobs:
           --format html \
           --output-dir=.test-coverage
     - name: Upload test coverage html
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-coverage-report
         path: .test-coverage
