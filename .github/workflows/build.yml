@@ -41,7 +41,7 @@ jobs:
     - uses: swift-actions/setup-swift@v2
     - uses: actions/checkout@v3
     - name: Test
-      run: swift test --parallel --enable-code-coverage
+      run: swift test --enable-code-coverage
     - name: Get test coverage html
       run: |
         llvm-cov show \
