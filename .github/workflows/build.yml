@@ -35,44 +35,35 @@ jobs:
       run: swift test --parallel
 
   linux:
-    name: Test Swift ${{ matrix.swift }} on Ubuntu Latest
+    name: Test Swift ${{ matrix.swift }}
     runs-on: ubuntu-latest
+    container:
+      image: swift:${{ matrix.swift }}
     strategy:
       matrix:
-        swift: ["6.0", "6.1"]
+        swift: ["5.8", "5.9", "5.10", "6.0", "6.1"]
     steps:
-    - uses: swift-actions/setup-swift@v2
-      with:
-        swift-version: ${{ matrix.swift }}
-    - uses: actions/checkout@v3
-    - name: Test
-      run: swift test --parallel
-    # TODO: Add test coverage, but it's currently not working with Swift 6.1.0
-    # - name: Get test coverage html
-    #   run: |
-    #     llvm-cov show \
-    #       $(swift build --show-bin-path)/GraphitiPackageTests.xctest \
-    #       --instr-profile $(swift build --show-bin-path)/codecov/default.profdata \
-    #       --ignore-filename-regex="\.build|Tests" \
-    #       --format html \
-    #       --output-dir=.test-coverage
-    # - name: Upload test coverage html
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: test-coverage-report
-    #     path: .test-coverage
-
-  backcompat-ubuntu-22_04:
-    name: Test Swift ${{ matrix.swift }} on Ubuntu 22.04
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        swift: ["5.8", "5.9", "5.10"]
-    steps:
-    - uses: swift-actions/setup-swift@v2
-      with:
-        swift-version: ${{ matrix.swift }}
     - uses: actions/checkout@v3
     - name: Test
       run: swift test --parallel
 
+  # TODO: Add test coverage upload but it's currently not working with Swift 6.1.0/Ubuntu-latest
+  # test-coverage:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - name: Test
+  #     run: swift test --parallel --enable-code-coverage
+  #   - name: Get test coverage html
+  #     run: |
+  #       llvm-cov show \
+  #         $(swift build --show-bin-path)/GraphitiPackageTests.xctest \
+  #         --instr-profile $(swift build --show-bin-path)/codecov/default.profdata \
+  #         --ignore-filename-regex="\.build|Tests" \
+  #         --format html \
+  #         --output-dir=.test-coverage
+  #   - name: Upload test coverage html
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: test-coverage-report
+  #       path: .test-coverage
