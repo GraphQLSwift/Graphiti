@@ -35,13 +35,18 @@ jobs:
       run: swift test --parallel
 
   linux:
-    name: Test on Linux
+    name: Test Swift ${{ matrix.swift }} on Ubuntu Latest
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        swift: ["6.0", "6.1"]
     steps:
     - uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: ${{ matrix.swift }}
     - uses: actions/checkout@v3
     - name: Test
-      run: swift test --enable-code-coverage
+      run: swift test --parallel
     # TODO: Add test coverage, but it's currently not working with Swift 6.1.0
     # - name: Get test coverage html
     #   run: |
