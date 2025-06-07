@@ -1,6 +1,10 @@
 import GraphQL
 import NIO
 
+public struct SchemaError: Error, Equatable {
+    let description: String
+}
+
 public final class Schema<Resolver, Context> {
     public let schema: GraphQLSchema
 
@@ -16,11 +20,14 @@ public final class Schema<Resolver, Context> {
             try component.update(typeProvider: typeProvider, coders: coders)
         }
 
-        guard let query = typeProvider.query else {
-            fatalError("Query type is required.")
+        guard typeProvider.query != nil || !typeProvider.federatedResolvers.isEmpty else {
+            throw SchemaError(
+                description: "Schema must contain at least 1 query or federated resolver"
+            )
         }
+
         schema = try GraphQLSchema(
-            query: query,
+            query: typeProvider.query,
             mutation: typeProvider.mutation,
             subscription: typeProvider.subscription,
             types: typeProvider.types,

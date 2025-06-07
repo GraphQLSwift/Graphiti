@@ -140,6 +140,29 @@ class SchemaTests: XCTestCase {
             ])
         )
     }
+
+    func testSchemaWithNoQuery() {
+        struct User: Codable {
+            let id: String
+        }
+
+        struct TestResolver {}
+
+        do {
+            let _ = try Schema<TestResolver, NoContext> {
+                Type(User.self) {
+                    Field("id", at: \.id)
+                }
+            }
+        } catch {
+            XCTAssertEqual(
+                error as? SchemaError,
+                SchemaError(
+                    description: "Schema must contain at least 1 query or federated resolver"
+                )
+            )
+        }
+    }
 }
 
 private class TestAPI<Resolver, ContextType>: API {
