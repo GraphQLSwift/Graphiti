@@ -8,7 +8,7 @@ public final class Type<Resolver, Context, ObjectType>: TypeComponent<
     var keys: [KeyComponent<ObjectType, Resolver, Context>]
     let fields: [FieldComponent<ObjectType, Context>]
 
-    let isTypeOf: GraphQLIsTypeOf = { source, _, _ in
+    let isTypeOf: GraphQLIsTypeOf = { source, _ in
         source is ObjectType
     }
 
@@ -36,7 +36,7 @@ public final class Type<Resolver, Context, ObjectType>: TypeComponent<
 
         // If federation keys are included, create resolver closure
         if !keys.isEmpty {
-            let resolve: GraphQLFieldResolve = { source, args, context, eventLoopGroup, _ in
+            let resolve: GraphQLFieldResolve = { source, args, context, _ in
                 guard let s = source as? Resolver else {
                     throw GraphQLError(
                         message: "Expected source type \(ObjectType.self) but got \(type(of: source))"
@@ -58,11 +58,10 @@ public final class Type<Resolver, Context, ObjectType>: TypeComponent<
                     )
                 }
 
-                return try key.resolveMap(
+                return try await key.resolveMap(
                     resolver: s,
                     context: c,
                     map: args,
-                    eventLoopGroup: eventLoopGroup,
                     coders: coders
                 )
             }

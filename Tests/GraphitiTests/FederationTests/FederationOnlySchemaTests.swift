@@ -1,11 +1,9 @@
 import Foundation
 import Graphiti
 import GraphQL
-import NIO
 import XCTest
 
 final class FederationOnlySchemaTests: XCTestCase {
-    private var group: MultiThreadedEventLoopGroup!
     private var api: FederationOnlyAPI!
 
     struct Profile: Codable {
@@ -71,28 +69,22 @@ final class FederationOnlySchemaTests: XCTestCase {
                 }
             }
             .build()
-        group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
         api = FederationOnlyAPI(resolver: FederationOnlyResolver(), schema: schema)
     }
 
     override func tearDownWithError() throws {
-        try group.syncShutdownGracefully()
-        group = nil
         api = nil
     }
 
-    func execute(request: String, variables: [String: Map] = [:]) throws -> GraphQLResult {
-        try api
-            .execute(
-                request: request,
-                context: NoContext(),
-                on: group,
-                variables: variables
-            )
-            .wait()
+    func execute(request: String, variables: [String: Map] = [:]) async throws -> GraphQLResult {
+        try await api.execute(
+            request: request,
+            context: NoContext(),
+            variables: variables
+        )
     }
 
-    func testUserFederationSimple() throws {
+    func testUserFederationSimple() async throws {
         let representations: [String: Map] = [
             "representations": [
                 ["__typename": "User", "id": "1234"],
@@ -107,11 +99,12 @@ final class FederationOnlySchemaTests: XCTestCase {
                   id
                 }
               }
-            }   
+            }
             """
 
-        try XCTAssertEqual(
-            execute(request: query, variables: representations),
+        let result = try await execute(request: query, variables: representations)
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "_entities": [
                     [
@@ -122,7 +115,7 @@ final class FederationOnlySchemaTests: XCTestCase {
         )
     }
 
-    func testUserFederationNested() throws {
+    func testUserFederationNested() async throws {
         let representations: [String: Map] = [
             "representations": [
                 ["__typename": "User", "id": "1234"],
@@ -138,11 +131,12 @@ final class FederationOnlySchemaTests: XCTestCase {
                   profile { name, email }
                 }
               }
-            }   
+            }
             """
 
-        try XCTAssertEqual(
-            execute(request: query, variables: representations),
+        let result = try await execute(request: query, variables: representations)
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "_entities": [
                     [
@@ -157,7 +151,7 @@ final class FederationOnlySchemaTests: XCTestCase {
         )
     }
 
-    func testUserFederationNestedOptional() throws {
+    func testUserFederationNestedOptional() async throws {
         let representations: [String: Map] = [
             "representations": [
                 ["__typename": "User", "id": "1"],
@@ -173,11 +167,12 @@ final class FederationOnlySchemaTests: XCTestCase {
                   profile { name, email }
                 }
               }
-            }   
+            }
             """
 
-        try XCTAssertEqual(
-            execute(request: query, variables: representations),
+        let result = try await execute(request: query, variables: representations)
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "_entities": [
                     [

@@ -1,6 +1,5 @@
 @testable import Graphiti
 import GraphQL
-import NIO
 import XCTest
 
 struct ID: Codable {
@@ -63,17 +62,16 @@ final class HelloContext {
     }
 }
 
-struct HelloResolver {
+struct HelloResolver: Sendable {
     func hello(context: HelloContext, arguments _: NoArguments) -> String {
         context.hello()
     }
 
     func futureHello(
         context: HelloContext,
-        arguments _: NoArguments,
-        group: EventLoopGroup
-    ) -> EventLoopFuture<String> {
-        group.next().makeSucceededFuture(context.hello())
+        arguments _: NoArguments
+    ) -> String {
+        context.hello()
     }
 
     struct FloatArguments: Codable {
@@ -159,41 +157,36 @@ struct HelloAPI: API {
 
 class HelloWorldTests: XCTestCase {
     private let api = HelloAPI()
-    private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 
-    deinit {
-        try? self.group.syncShutdownGracefully()
-    }
-
-    func testHello() throws {
+    func testHello() async throws {
+        let result = try await api.execute(
+            request: "{ hello }",
+            context: api.context
+        )
         XCTAssertEqual(
-            try api.execute(
-                request: "{ hello }",
-                context: api.context,
-                on: group
-            ).wait(),
+            result,
             GraphQLResult(data: ["hello": "world"])
         )
     }
 
-    func testFutureHello() throws {
+    func testFutureHello() async throws {
+        let result = try await api.execute(
+            request: "{ futureHello }",
+            context: api.context
+        )
         XCTAssertEqual(
-            try api.execute(
-                request: "{ futureHello }",
-                context: api.context,
-                on: group
-            ).wait(),
+            result,
             GraphQLResult(data: ["futureHello": "world"])
         )
     }
 
-    func testBoyhowdy() throws {
+    func testBoyhowdy() async throws {
+        let result = try await api.execute(
+            request: "{ boyhowdy }",
+            context: api.context
+        )
         XCTAssertEqual(
-            try api.execute(
-                request: "{ boyhowdy }",
-                context: api.context,
-                on: group
-            ).wait(),
+            result,
             GraphQLResult(
                 errors: [
                     GraphQLError(
@@ -205,66 +198,87 @@ class HelloWorldTests: XCTestCase {
         )
     }
 
-    func testScalar() throws {
+    func testScalar() async throws {
+        var result = try await api.execute(
+            request: """
+            query Query($float: Float!) {
+                float(float: $float)
+            }
+            """,
+            context: api.context,
+            variables: ["float": 4]
+        )
         XCTAssertEqual(
-            try api.execute(
-                request: """
-                query Query($float: Float!) {
-                    float(float: $float)
-                }
-                """,
-                context: api.context,
-                on: group,
-                variables: ["float": 4]
-            ).wait(),
+            result,
             GraphQLResult(data: ["float": 4.0])
         )
 
+        result = try await api.execute(
+            request: """
+            query Query {
+                float(float: 4)
+            }
+            """,
+            context: api.context
+        )
         XCTAssertEqual(
-            try api.execute(
-                request: """
-                query Query {
-                    float(float: 4)
-                }
-                """,
-                context: api.context,
-                on: group
-            ).wait(),
+            result,
             GraphQLResult(data: ["float": 4.0])
         )
 
+        result = try await api.execute(
+            request: """
+            query Query($id: ID!) {
+                id(id: $id)
+            }
+            """,
+            context: api.context,
+            variables: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"]
+        )
         XCTAssertEqual(
-            try api.execute(
-                request: """
-                query Query($id: ID!) {
-                    id(id: $id)
-                }
-                """,
-                context: api.context,
-                on: group,
-                variables: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"]
-            ).wait(),
+            result,
             GraphQLResult(data: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"])
         )
 
+        result = try await api.execute(
+            request: """
+            query Query {
+                id(id: "85b8d502-8190-40ab-b18f-88edd297d8b6")
+            }
+            """,
+            context: api.context
+        )
         XCTAssertEqual(
-            try api.execute(
-                request: """
-                query Query {
-                    id(id: "85b8d502-8190-40ab-b18f-88edd297d8b6")
-                }
-                """,
-                context: api.context,
-                on: group
-            ).wait(),
+            result,
             GraphQLResult(data: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"])
         )
     }
 
-    func testInput() throws {
+    func testInput() async throws {
+        let result = try await api.execute(
+            request: """
+            mutation addUser($user: UserInput!) {
+                addUser(user: $user) {
+                    id,
+                    name
+                }
+            }
+            """,
+            context: api.context,
+            variables: ["user": ["id": "123", "name": "bob"]]
+        )
         XCTAssertEqual(
-            try api.execute(
-                request: """
+            result,
+            GraphQLResult(
+                data: ["addUser": ["id": "123", "name": "bob"]]
+            )
+        )
+    }
+
+    func testInputRequest() async throws {
+        let result = try await api.execute(
+            request: GraphQLRequest(
+                query: """
                 mutation addUser($user: UserInput!) {
                     addUser(user: $user) {
                         id,
@@ -272,64 +286,43 @@ class HelloWorldTests: XCTestCase {
                     }
                 }
                 """,
-                context: api.context,
-                on: group,
                 variables: ["user": ["id": "123", "name": "bob"]]
-            ).wait(),
+            ),
+            context: api.context
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(
                 data: ["addUser": ["id": "123", "name": "bob"]]
             )
         )
     }
 
-    func testInputRequest() throws {
-        XCTAssertEqual(
-            try api.execute(
-                request: GraphQLRequest(
-                    query: """
-                    mutation addUser($user: UserInput!) {
-                        addUser(user: $user) {
-                            id,
-                            name
-                        }
-                    }
-                    """,
-                    variables: ["user": ["id": "123", "name": "bob"]]
-                ),
-                context: api.context,
-                on: group
-            ).wait(),
-            GraphQLResult(
-                data: ["addUser": ["id": "123", "name": "bob"]]
-            )
-        )
-    }
-
-    func testInputRecursive() throws {
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                mutation addUser($user: UserInput!) {
-                    addUser(user: $user) {
+    func testInputRecursive() async throws {
+        let result = try await api.execute(
+            request: """
+            mutation addUser($user: UserInput!) {
+                addUser(user: $user) {
+                    id,
+                    name,
+                    friends {
                         id,
-                        name,
-                        friends {
-                            id,
-                            name
-                        }
+                        name
                     }
                 }
-                """,
-                context: api.context,
-                on: group,
-                variables: [
-                    "user": [
-                        "id": "123",
-                        "name": "bob",
-                        "friends": [["id": "124", "name": "jeff"]],
-                    ],
-                ]
-            ).wait(),
+            }
+            """,
+            context: api.context,
+            variables: [
+                "user": [
+                    "id": "123",
+                    "name": "bob",
+                    "friends": [["id": "124", "name": "jeff"]],
+                ],
+            ]
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(
                 data: [
                     "addUser": [

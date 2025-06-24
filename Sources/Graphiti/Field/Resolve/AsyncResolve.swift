@@ -1,9 +1,7 @@
-import NIO
 
-public typealias AsyncResolve<ObjectType, Context, Arguments, ResolveType> = (
+public typealias AsyncResolve<ObjectType, Context, Arguments, ResolveType> = @Sendable (
     _ object: ObjectType
 ) -> (
     _ context: Context,
-    _ arguments: Arguments,
-    _ eventLoopGroup: EventLoopGroup
-) throws -> EventLoopFuture<ResolveType>
+    _ arguments: Arguments
+) async throws -> ResolveType

@@ -1,6 +1,5 @@
 import Foundation
 import GraphQL
-import NIO
 
 struct EntityArguments: Codable {
     let representations: [Map]

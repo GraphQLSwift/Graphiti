@@ -1,13 +1,11 @@
 import Foundation
 import GraphQL
-import NIO
 
 public struct Connection<Node> {
     public let edges: [Edge<Node>]
     public let pageInfo: PageInfo
 }
 
-@available(macOS 10.15, macCatalyst 13.0, iOS 13.0, tvOS 13, watchOS 6.0, *) // For Identifiable
 public extension Connection where Node: Identifiable, Node.ID: LosslessStringConvertible {
     static func id(_ cursor: String) -> Node.ID? {
         cursor.base64Decoded().flatMap { Node.ID($0) }
@@ -18,54 +16,6 @@ public extension Connection where Node: Identifiable, Node.ID: LosslessStringCon
     }
 }
 
-@available(macOS 10.15, macCatalyst 13.0, iOS 13.0, tvOS 13, watchOS 6.0, *) // For Identifiable
-public extension EventLoopFuture where Value: Sequence, Value.Element: Identifiable,
-Value.Element.ID: LosslessStringConvertible {
-    func connection(from arguments: Paginatable) -> EventLoopFuture<Connection<Value.Element>> {
-        connection(from: arguments, makeCursor: Connection<Value.Element>.cursor)
-    }
-
-    func connection(from arguments: ForwardPaginatable)
-    -> EventLoopFuture<Connection<Value.Element>> {
-        connection(from: arguments, makeCursor: Connection<Value.Element>.cursor)
-    }
-
-    func connection(from arguments: BackwardPaginatable)
-    -> EventLoopFuture<Connection<Value.Element>> {
-        connection(from: arguments, makeCursor: Connection<Value.Element>.cursor)
-    }
-}
-
-public extension EventLoopFuture where Value: Sequence {
-    func connection(
-        from arguments: Paginatable,
-        makeCursor: @escaping (Value.Element) throws -> String
-    ) -> EventLoopFuture<Connection<Value.Element>> {
-        flatMapThrowing { value in
-            try value.connection(from: arguments, makeCursor: makeCursor)
-        }
-    }
-
-    func connection(
-        from arguments: ForwardPaginatable,
-        makeCursor: @escaping (Value.Element) throws -> String
-    ) -> EventLoopFuture<Connection<Value.Element>> {
-        flatMapThrowing { value in
-            try value.connection(from: arguments, makeCursor: makeCursor)
-        }
-    }
-
-    func connection(
-        from arguments: BackwardPaginatable,
-        makeCursor: @escaping (Value.Element) throws -> String
-    ) -> EventLoopFuture<Connection<Value.Element>> {
-        flatMapThrowing { value in
-            try value.connection(from: arguments, makeCursor: makeCursor)
-        }
-    }
-}
-
-@available(macOS 10.15, macCatalyst 13.0, iOS 13.0, tvOS 13, watchOS 6.0, *) // For Identifiable
 public extension Sequence where Element: Identifiable,
 Element.ID: LosslessStringConvertible {
     func connection(from arguments: Paginatable) throws -> Connection<Element> {

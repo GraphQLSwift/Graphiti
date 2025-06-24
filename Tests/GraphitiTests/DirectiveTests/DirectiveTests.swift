@@ -1,17 +1,11 @@
 @testable import Graphiti
 import GraphQL
-import NIO
 import XCTest
 
 class DirectiveTests: XCTestCase {
     private let api = StarWarsAPI()
-    private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 
-    deinit {
-        try? self.group.syncShutdownGracefully()
-    }
-
-    func testSkip() throws {
+    func testSkip() async throws {
         let query = """
         query FetchHeroNameWithSkip($skipName: Boolean!) {
             hero {
@@ -25,12 +19,11 @@ class DirectiveTests: XCTestCase {
             "skipName": true,
         ]
 
-        let response = try api.execute(
+        let response = try await api.execute(
             request: query,
             context: StarWarsContext(),
-            on: group,
             variables: input
-        ).wait()
+        )
 
         let expected = GraphQLResult(
             data: [
@@ -43,7 +36,7 @@ class DirectiveTests: XCTestCase {
         XCTAssertEqual(response, expected)
     }
 
-    func testInclude() throws {
+    func testInclude() async throws {
         let query = """
         query FetchHeroNameWithSkip($includeName: Boolean!) {
             hero {
@@ -57,12 +50,11 @@ class DirectiveTests: XCTestCase {
             "includeName": false,
         ]
 
-        let response = try api.execute(
+        let response = try await api.execute(
             request: query,
             context: StarWarsContext(),
-            on: group,
             variables: input
-        ).wait()
+        )
 
         let expected = GraphQLResult(
             data: [
@@ -75,20 +67,20 @@ class DirectiveTests: XCTestCase {
         XCTAssertEqual(response, expected)
     }
 
-    func testOneOfAcceptsGoodValue() throws {
-        try XCTAssertEqual(
-            OneOfAPI().execute(
-                request: """
-                query {
-                    test(input: {a: "abc"}) {
-                        a
-                        b
-                    }
+    func testOneOfAcceptsGoodValue() async throws {
+        let result = try await OneOfAPI().execute(
+            request: """
+            query {
+                test(input: {a: "abc"}) {
+                    a
+                    b
                 }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(
                 data: [
                     "test": [
@@ -100,20 +92,20 @@ class DirectiveTests: XCTestCase {
         )
     }
 
-    func testOneOfRejectsBadValue() throws {
-        try XCTAssertEqual(
-            OneOfAPI().execute(
-                request: """
-                query {
-                    test(input: {a: "abc", b: 123}) {
-                        a
-                        b
-                    }
+    func testOneOfRejectsBadValue() async throws {
+        let result = try await OneOfAPI().execute(
+            request: """
+            query {
+                test(input: {a: "abc", b: 123}) {
+                    a
+                    b
                 }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait().errors[0].message,
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result.errors[0].message,
             #"OneOf Input Object "TestInputObject" must specify exactly one key."#
         )
     }

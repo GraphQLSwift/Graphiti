@@ -1,7 +1,6 @@
 import Foundation
 @testable import Graphiti
 import GraphQL
-import NIO
 import XCTest
 
 class UnionTests: XCTestCase {

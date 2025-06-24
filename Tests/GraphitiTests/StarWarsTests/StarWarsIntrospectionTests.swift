@@ -1,32 +1,26 @@
 import GraphQL
-import NIO
 import XCTest
 
 @testable import Graphiti
 
 class StarWarsIntrospectionTests: XCTestCase {
     private let api = StarWarsAPI()
-    private let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 
-    deinit {
-        try? group.syncShutdownGracefully()
-    }
-
-    func testIntrospectionTypeQuery() throws {
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query IntrospectionTypeQuery {
-                    __schema {
-                        types {
-                            name
-                        }
+    func testIntrospectionTypeQuery() async throws {
+        let result = try await api.execute(
+            request: """
+            query IntrospectionTypeQuery {
+                __schema {
+                    types {
+                        name
                     }
                 }
-                """,
-                context: StarWarsContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: StarWarsContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(
                 data: [
                     "__schema": [
@@ -92,21 +86,21 @@ class StarWarsIntrospectionTests: XCTestCase {
         )
     }
 
-    func testIntrospectionQueryTypeQuery() throws {
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query IntrospectionQueryTypeQuery {
-                    __schema {
-                        queryType {
-                            name
-                        }
+    func testIntrospectionQueryTypeQuery() async throws {
+        let result = try await api.execute(
+            request: """
+            query IntrospectionQueryTypeQuery {
+                __schema {
+                    queryType {
+                        name
                     }
                 }
-                """,
-                context: StarWarsContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: StarWarsContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(
                 data: [
                     "__schema": [
@@ -119,19 +113,19 @@ class StarWarsIntrospectionTests: XCTestCase {
         )
     }
 
-    func testIntrospectionDroidTypeQuery() throws {
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query IntrospectionDroidTypeQuery {
-                    __type(name: \"Droid\") {
-                        name
-                    }
+    func testIntrospectionDroidTypeQuery() async throws {
+        let result = try await api.execute(
+            request: """
+            query IntrospectionDroidTypeQuery {
+                __type(name: \"Droid\") {
+                    name
                 }
-                """,
-                context: StarWarsContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: StarWarsContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(
                 data: [
                     "__type": [
@@ -142,20 +136,20 @@ class StarWarsIntrospectionTests: XCTestCase {
         )
     }
 
-    func testIntrospectionDroidKindQuery() throws {
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query IntrospectionDroidKindQuery {
-                    __type(name: \"Droid\") {
-                        name
-                        kind
-                    }
+    func testIntrospectionDroidKindQuery() async throws {
+        let result = try await api.execute(
+            request: """
+            query IntrospectionDroidKindQuery {
+                __type(name: \"Droid\") {
+                    name
+                    kind
                 }
-                """,
-                context: StarWarsContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: StarWarsContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(
                 data: [
                     "__type": [
@@ -167,20 +161,20 @@ class StarWarsIntrospectionTests: XCTestCase {
         )
     }
 
-    func testIntrospectionCharacterKindQuery() throws {
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query IntrospectionCharacterKindQuery {
-                    __type(name: \"Character\") {
-                        name
-                        kind
-                    }
+    func testIntrospectionCharacterKindQuery() async throws {
+        let result = try await api.execute(
+            request: """
+            query IntrospectionCharacterKindQuery {
+                __type(name: \"Character\") {
+                    name
+                    kind
                 }
-                """,
-                context: StarWarsContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: StarWarsContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(
                 data: [
                     "__type": [
@@ -192,26 +186,26 @@ class StarWarsIntrospectionTests: XCTestCase {
         )
     }
 
-    func testIntrospectionDroidFieldsQuery() throws {
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query IntrospectionDroidFieldsQuery {
-                    __type(name: \"Droid\") {
+    func testIntrospectionDroidFieldsQuery() async throws {
+        let result = try await api.execute(
+            request: """
+            query IntrospectionDroidFieldsQuery {
+                __type(name: \"Droid\") {
+                    name
+                    fields {
                         name
-                        fields {
+                        type {
                             name
-                            type {
-                                name
-                                kind
-                            }
+                            kind
                         }
                     }
                 }
-                """,
-                context: StarWarsContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: StarWarsContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(
                 data: [
                     "__type": [
@@ -266,30 +260,30 @@ class StarWarsIntrospectionTests: XCTestCase {
         )
     }
 
-    func testIntrospectionDroidNestedFieldsQuery() throws {
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query IntrospectionDroidNestedFieldsQuery {
-                    __type(name: \"Droid\") {
+    func testIntrospectionDroidNestedFieldsQuery() async throws {
+        let result = try await api.execute(
+            request: """
+            query IntrospectionDroidNestedFieldsQuery {
+                __type(name: \"Droid\") {
+                    name
+                    fields {
                         name
-                        fields {
+                        type {
                             name
-                            type {
+                            kind
+                            ofType {
                                 name
                                 kind
-                                ofType {
-                                    name
-                                    kind
-                                }
                             }
                         }
                     }
                 }
-                """,
-                context: StarWarsContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: StarWarsContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(
                 data: [
                     "__type": [
@@ -365,36 +359,36 @@ class StarWarsIntrospectionTests: XCTestCase {
         )
     }
 
-    func testIntrospectionFieldArgsQuery() throws {
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query IntrospectionFieldArgsQuery {
-                    __schema {
-                        queryType {
-                            fields {
+    func testIntrospectionFieldArgsQuery() async throws {
+        let result = try await api.execute(
+            request: """
+            query IntrospectionFieldArgsQuery {
+                __schema {
+                    queryType {
+                        fields {
+                            name
+                            args {
                                 name
-                                args {
+                                description
+                                type {
                                     name
-                                    description
-                                    type {
+                                    kind
+                                    ofType {
                                         name
                                         kind
-                                        ofType {
-                                            name
-                                            kind
-                                        }
                                     }
-                                    defaultValue
-                                 }
-                            }
+                                }
+                                defaultValue
+                                }
                         }
                     }
                 }
-                """,
-                context: StarWarsContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: StarWarsContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(
                 data: [
                     "__schema": [
@@ -477,20 +471,20 @@ class StarWarsIntrospectionTests: XCTestCase {
         )
     }
 
-    func testIntrospectionDroidDescriptionQuery() throws {
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query IntrospectionDroidDescriptionQuery {
-                    __type(name: \"Droid\") {
-                        name
-                        description
-                    }
+    func testIntrospectionDroidDescriptionQuery() async throws {
+        let result = try await api.execute(
+            request: """
+            query IntrospectionDroidDescriptionQuery {
+                __type(name: \"Droid\") {
+                    name
+                    description
                 }
-                """,
-                context: StarWarsContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: StarWarsContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(
                 data: [
                     "__type": [

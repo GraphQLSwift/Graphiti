@@ -9,9 +9,6 @@ Here is an example of a basic `"Hello world"` GraphQL schema:
 
 ```swift
 import Graphiti
-import NIO
-
-let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
 
 struct HelloResolver {
     func hello(context: NoContext, arguments: NoArguments) -> String {
@@ -35,8 +32,7 @@ This schema can be queried in Swift using the `execute` function. :
 ```swift
 let result = try await HelloAPI().execute(
     request: "{ hello }",
-    context: NoContext(),
-    on: eventLoopGroup
+    context: NoContext()
 )
 print(result)
 ```
@@ -53,9 +49,6 @@ Graphiti includes support for using Swift types in the schema itself. To connect
 
 ```swift
 import Graphiti
-import NIO
-
-let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
 
 struct Person: Codable {
     let name: String
@@ -98,8 +91,7 @@ let result = try await PointBreakAPI().execute(
       }
     }
     """,
-    context: NoContext(),
-    on: eventLoopGroup
+    context: NoContext()
 )
 ```
 
@@ -382,11 +374,10 @@ This schema can be subscribed to in Swift using the `subscribe` function. The ex
 let api = PointBreakAPI()
 let stream = try await api.subscribe(
     request: "subscription { fiftyYearStormAlert }",
-    context: NoContext(),
-    on: eventLoopGroup
-).stream!
-let resultStream = stream.map { result in
-    try print(result.wait())
+    context: NoContext()
+)
+for try await event in stream {
+    try print(event)
 }
 ```
 
@@ -504,7 +495,7 @@ The result of this query is a `GraphQLResult` that encodes to the following JSON
 Federation allows you split your GraphQL API into smaller services and link them back together so clients see a single larger API. More information can be found [here](https://www.apollographql.com/docs/federation). To enable federation you must:
 
 1. Define `Keys` on the entity types, which specify the primary key fields and the resolver function used to load an entity from that key.
-2. Provide the schema SDL to the schema itself. 
+2. Provide the schema SDL to the schema itself.
 
 Here's an example for the following schema:
 
@@ -532,7 +523,6 @@ extend type User @key(fields: "email") {
 ```swift
 import Foundation
 import Graphiti
-import NIO
 
 struct Product: Codable {
     let id: String
@@ -555,7 +545,7 @@ struct ProductResolver {
     struct UserArguments: Codable {
         let email: String
     }
-    
+
     func user(context: ProductContext, arguments: UserArguments) -> User? {
         context.getUser(email: arguments.email)
     }
@@ -569,7 +559,7 @@ final class ProductSchema: PartialSchema<ProductResolver, ProductContext> {
             Field("sku", at: \.sku)
             Field("createdBy", at: \.createdBy)
         }
-        
+
         Type(
             User.self,
             keys: {
@@ -597,9 +587,8 @@ let schema = try SchemaBuilder(ProductResolver.self, ProductContext.self)
     .build()
 
 let api = ProductAPI(resolver: ProductResolver(), schema: schema)
-let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 
-api.execute(
+try await api.execute(
     request: """
     query {
       _entities(representations: {__typename: "User", email: "abc@def.com"}) {
@@ -610,7 +599,6 @@ api.execute(
       }
     }
     """,
-    context: ProductContext(),
-    on: group
+    context: ProductContext()
 )
 ```

@@ -1,12 +1,11 @@
 import Foundation
 @testable import Graphiti
 import GraphQL
-import NIO
 import XCTest
 
 class SchemaTests: XCTestCase {
     // Tests that circularly dependent objects can be used in schema and resolved correctly
-    func testCircularDependencies() throws {
+    func testCircularDependencies() async throws {
         struct A: Codable {
             let name: String
             var b: B {
@@ -45,23 +44,20 @@ class SchemaTests: XCTestCase {
             schema: testSchema
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
-
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                  a {
-                    b {
-                      name
-                    }
-                  }
+        let result = try await api.execute(
+            request: """
+            query {
+                a {
+                b {
+                    name
                 }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
+                }
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "a": [
                     "b": [
@@ -73,7 +69,7 @@ class SchemaTests: XCTestCase {
     }
 
     // Tests that we can resolve type references for named types
-    func testTypeReferenceForNamedType() throws {
+    func testTypeReferenceForNamedType() async throws {
         struct LocationObject: Codable {
             let id: String
             let name: String
@@ -114,23 +110,20 @@ class SchemaTests: XCTestCase {
             schema: testSchema
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
-
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                  user {
-                    location {
-                      name
-                    }
-                  }
+        let result = try await api.execute(
+            request: """
+            query {
+                user {
+                location {
+                    name
                 }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
+                }
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "user": [
                     "location": [

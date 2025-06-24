@@ -1,6 +1,5 @@
 @testable import Graphiti
 import GraphQL
-import NIO
 import XCTest
 
 @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
@@ -17,22 +16,24 @@ extension HelloResolver {
         }.value
     }
 
-    func subscribeUser(context _: HelloContext, arguments _: NoArguments) -> EventStream<User> {
+    func subscribeUser(
+        context _: HelloContext,
+        arguments _: NoArguments
+    ) -> AsyncThrowingStream<User, Error> {
         pubsub.subscribe()
     }
 
     func futureSubscribeUser(
         context _: HelloContext,
-        arguments _: NoArguments,
-        group: EventLoopGroup
-    ) -> EventLoopFuture<EventStream<User>> {
-        group.next().makeSucceededFuture(pubsub.subscribe())
+        arguments _: NoArguments
+    ) -> AsyncThrowingStream<User, Error> {
+        pubsub.subscribe()
     }
 
     func asyncSubscribeUser(
         context _: HelloContext,
         arguments _: NoArguments
-    ) async -> EventStream<User> {
+    ) async -> AsyncThrowingStream<User, Error> {
         return await Task {
             pubsub.subscribe()
         }.value
@@ -123,15 +124,13 @@ struct HelloAsyncAPI: API {
 @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
 class HelloWorldAsyncTests: XCTestCase {
     private let api = HelloAsyncAPI()
-    private var group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 
     /// Tests that async version of API.execute works as expected
     func testAsyncExecute() async throws {
         let query = "{ hello }"
         let result = try await api.execute(
             request: query,
-            context: api.context,
-            on: group
+            context: api.context
         )
         XCTAssertEqual(
             result,
@@ -144,8 +143,7 @@ class HelloWorldAsyncTests: XCTestCase {
         let query = "{ asyncHello }"
         let result = try await api.execute(
             request: query,
-            context: api.context,
-            on: group
+            context: api.context
         )
         XCTAssertEqual(
             result,
@@ -164,24 +162,15 @@ class HelloWorldAsyncTests: XCTestCase {
         }
         """
 
-        let subscriptionResult = try await api.subscribe(
+        let subscription = try await api.subscribe(
             request: request,
-            context: api.context,
-            on: group
-        )
-        guard let subscription = subscriptionResult.stream else {
-            XCTFail(subscriptionResult.errors.description)
-            return
-        }
-        guard let stream = subscription as? ConcurrentEventStream else {
-            XCTFail("stream isn't ConcurrentEventStream")
-            return
-        }
-        var iterator = stream.stream.makeAsyncIterator()
+            context: api.context
+        ).get()
+        var iterator = subscription.makeAsyncIterator()
 
         pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
-        let result = try await iterator.next()?.get()
+        let result = try await iterator.next()
         XCTAssertEqual(
             result,
             GraphQLResult(data: [
@@ -206,24 +195,15 @@ class HelloWorldAsyncTests: XCTestCase {
         }
         """
 
-        let subscriptionResult = try await api.subscribe(
+        let subscription = try await api.subscribe(
             request: request,
-            context: api.context,
-            on: group
-        )
-        guard let subscription = subscriptionResult.stream else {
-            XCTFail(subscriptionResult.errors.description)
-            return
-        }
-        guard let stream = subscription as? ConcurrentEventStream else {
-            XCTFail("stream isn't ConcurrentEventStream")
-            return
-        }
-        var iterator = stream.stream.makeAsyncIterator()
+            context: api.context
+        ).get()
+        var iterator = subscription.makeAsyncIterator()
 
         pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
-        let result = try await iterator.next()?.get()
+        let result = try await iterator.next()
         XCTAssertEqual(
             result,
             GraphQLResult(data: [
@@ -248,24 +228,15 @@ class HelloWorldAsyncTests: XCTestCase {
         }
         """
 
-        let subscriptionResult = try await api.subscribe(
+        let subscription = try await api.subscribe(
             request: request,
-            context: api.context,
-            on: group
-        )
-        guard let subscription = subscriptionResult.stream else {
-            XCTFail(subscriptionResult.errors.description)
-            return
-        }
-        guard let stream = subscription as? ConcurrentEventStream else {
-            XCTFail("stream isn't ConcurrentEventStream")
-            return
-        }
-        var iterator = stream.stream.makeAsyncIterator()
+            context: api.context
+        ).get()
+        var iterator = subscription.makeAsyncIterator()
 
         pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
-        let result = try await iterator.next()?.get()
+        let result = try await iterator.next()
         XCTAssertEqual(
             result,
             GraphQLResult(data: [
@@ -288,24 +259,15 @@ class HelloWorldAsyncTests: XCTestCase {
         }
         """
 
-        let subscriptionResult = try await api.subscribe(
+        let subscription = try await api.subscribe(
             request: request,
-            context: api.context,
-            on: group
-        )
-        guard let subscription = subscriptionResult.stream else {
-            XCTFail(subscriptionResult.errors.description)
-            return
-        }
-        guard let stream = subscription as? ConcurrentEventStream else {
-            XCTFail("stream isn't ConcurrentEventStream")
-            return
-        }
-        var iterator = stream.stream.makeAsyncIterator()
+            context: api.context
+        ).get()
+        var iterator = subscription.makeAsyncIterator()
 
         pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
-        let result = try await iterator.next()?.get()
+        let result = try await iterator.next()
         XCTAssertEqual(
             result,
             GraphQLResult(data: [
@@ -339,8 +301,8 @@ class SimplePubSub<T> {
         }
     }
 
-    func subscribe() -> ConcurrentEventStream<T> {
-        let asyncStream = AsyncThrowingStream<T, Error> { continuation in
+    func subscribe() -> AsyncThrowingStream<T, Error> {
+        return AsyncThrowingStream<T, Error> { continuation in
             let subscriber = Subscriber<T>(
                 callback: { newValue in
                     continuation.yield(newValue)
@@ -351,7 +313,6 @@ class SimplePubSub<T> {
             )
             subscribers.append(subscriber)
         }
-        return ConcurrentEventStream<T>(asyncStream)
     }
 }
 

@@ -1,5 +1,4 @@
 import GraphQL
-import NIO
 
 public class Key<ObjectType, Resolver, Context, Arguments: Codable>: KeyComponent<
     ObjectType,
@@ -18,11 +17,10 @@ public class Key<ObjectType, Resolver, Context, Arguments: Codable>: KeyComponen
         resolver: Resolver,
         context: Context,
         map: Map,
-        eventLoopGroup: EventLoopGroup,
         coders: Coders
-    ) throws -> EventLoopFuture<Any?> {
+    ) async throws -> Any? {
         let arguments = try coders.decoder.decode(Arguments.self, from: map)
-        return try resolve(resolver)(context, arguments, eventLoopGroup).map { $0 as Any? }
+        return try await resolve(resolver)(context, arguments)
     }
 
     override func validate(
@@ -57,59 +55,14 @@ public class Key<ObjectType, Resolver, Context, Arguments: Codable>: KeyComponen
 
     convenience init(
         arguments: [ArgumentComponent<Arguments>],
-        simpleAsyncResolve: @escaping SimpleAsyncResolve<
-            Resolver,
-            Context,
-            Arguments,
-            ObjectType?
-        >
-    ) {
-        let asyncResolve: AsyncResolve<Resolver, Context, Arguments, ObjectType?> = { type in
-            { context, arguments, group in
-                // We hop to guarantee that the future will
-                // return in the same event loop group of the execution.
-                try simpleAsyncResolve(type)(context, arguments).hop(to: group.next())
-            }
-        }
-
-        self.init(arguments: arguments, asyncResolve: asyncResolve)
-    }
-
-    convenience init(
-        arguments: [ArgumentComponent<Arguments>],
         syncResolve: @escaping SyncResolve<Resolver, Context, Arguments, ObjectType?>
     ) {
         let asyncResolve: AsyncResolve<Resolver, Context, Arguments, ObjectType?> = { type in
-            { context, arguments, group in
-                let result = try syncResolve(type)(context, arguments)
-                return group.next().makeSucceededFuture(result)
+            { context, arguments in
+                try syncResolve(type)(context, arguments)
             }
         }
 
-        self.init(arguments: arguments, asyncResolve: asyncResolve)
-    }
-}
-
-public extension Key {
-    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init(
-        arguments: [ArgumentComponent<Arguments>],
-        concurrentResolve: @escaping ConcurrentResolve<
-            Resolver,
-            Context,
-            Arguments,
-            ObjectType?
-        >
-    ) {
-        let asyncResolve: AsyncResolve<Resolver, Context, Arguments, ObjectType?> = { type in
-            { context, arguments, eventLoopGroup in
-                let promise = eventLoopGroup.next().makePromise(of: ObjectType?.self)
-                promise.completeWithTask {
-                    try await concurrentResolve(type)(context, arguments)
-                }
-                return promise.futureResult
-            }
-        }
         self.init(arguments: arguments, asyncResolve: asyncResolve)
     }
 }

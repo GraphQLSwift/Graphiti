@@ -1,5 +1,4 @@
 import GraphQL
-import NIO
 
 public struct SchemaError: Error, Equatable {
     let description: String
@@ -65,49 +64,37 @@ public extension Schema {
         request: String,
         resolver: Resolver,
         context: Context,
-        eventLoopGroup: EventLoopGroup,
         variables: [String: Map] = [:],
         operationName: String? = nil,
-        validationRules: [(ValidationContext) -> Visitor] = []
-    ) -> EventLoopFuture<GraphQLResult> {
-        do {
-            return try graphql(
-                validationRules: GraphQL.specifiedRules + validationRules,
-                schema: schema,
-                request: request,
-                rootValue: resolver,
-                context: context,
-                eventLoopGroup: eventLoopGroup,
-                variableValues: variables,
-                operationName: operationName
-            )
-        } catch {
-            return eventLoopGroup.next().makeFailedFuture(error)
-        }
+        validationRules: [@Sendable (ValidationContext) -> Visitor] = []
+    ) async throws -> GraphQLResult {
+        return try await graphql(
+            schema: schema,
+            request: request,
+            rootValue: resolver,
+            context: context,
+            variableValues: variables,
+            operationName: operationName,
+            validationRules: GraphQL.specifiedRules + validationRules
+        )
     }
 
     func subscribe(
         request: String,
         resolver: Resolver,
         context: Context,
-        eventLoopGroup: EventLoopGroup,
         variables: [String: Map] = [:],
         operationName: String? = nil,
-        validationRules: [(ValidationContext) -> Visitor] = []
-    ) -> EventLoopFuture<SubscriptionResult> {
-        do {
-            return try graphqlSubscribe(
-                validationRules: GraphQL.specifiedRules + validationRules,
-                schema: schema,
-                request: request,
-                rootValue: resolver,
-                context: context,
-                eventLoopGroup: eventLoopGroup,
-                variableValues: variables,
-                operationName: operationName
-            )
-        } catch {
-            return eventLoopGroup.next().makeFailedFuture(error)
-        }
+        validationRules: [@Sendable (ValidationContext) -> Visitor] = []
+    ) async throws -> Result<AsyncThrowingStream<GraphQLResult, Error>, GraphQLErrors> {
+        return try await graphqlSubscribe(
+            schema: schema,
+            request: request,
+            rootValue: resolver,
+            context: context,
+            variableValues: variables,
+            operationName: operationName,
+            validationRules: GraphQL.specifiedRules + validationRules
+        )
     }
 }
