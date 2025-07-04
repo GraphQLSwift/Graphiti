@@ -450,7 +450,7 @@ public extension SubscriptionField {
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
-        as: FieldType.Type,
+        as _: FieldType.Type,
         atSub subFunc: @escaping SimpleAsyncResolve<
             ObjectType,
             Context,
@@ -470,7 +470,7 @@ public extension SubscriptionField {
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
-        as: FieldType.Type,
+        as _: FieldType.Type,
         atSub subFunc: @escaping SimpleAsyncResolve<
             ObjectType,
             Context,
@@ -568,7 +568,7 @@ public extension SubscriptionField {
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
-        as: FieldType.Type,
+        as _: FieldType.Type,
         atSub subFunc: @escaping SyncResolve<
             ObjectType,
             Context,
@@ -589,7 +589,7 @@ public extension SubscriptionField {
     convenience init<ResolveType>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
-        as: FieldType.Type,
+        as _: FieldType.Type,
         atSub subFunc: @escaping SyncResolve<
             ObjectType,
             Context,
@@ -780,7 +780,7 @@ public extension SubscriptionField {
             Arguments,
             ResolveType
         >,
-        as: FieldType.Type,
+        as _: FieldType.Type,
         atSub subFunc: @escaping ConcurrentResolve<
             ObjectType,
             Context,
@@ -806,7 +806,7 @@ public extension SubscriptionField {
             Arguments,
             ResolveType
         >,
-        as: FieldType.Type,
+        as _: FieldType.Type,
         atSub subFunc: @escaping ConcurrentResolve<
             ObjectType,
             Context,

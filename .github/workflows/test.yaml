@@ -1,0 +1,14 @@
+name: test
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  lint:
+    uses: graphqlswift/ci/.github/workflows/lint.yaml@main
+  test:
+    uses: graphqlswift/ci/.github/workflows/test.yaml@main
+    with:
+      include_android: false
