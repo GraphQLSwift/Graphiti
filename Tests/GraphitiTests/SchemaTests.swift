@@ -142,7 +142,7 @@ class SchemaTests: XCTestCase {
         struct TestResolver {}
 
         do {
-            let _ = try Schema<TestResolver, NoContext> {
+            _ = try Schema<TestResolver, NoContext> {
                 Type(User.self) {
                     Field("id", at: \.id)
                 }

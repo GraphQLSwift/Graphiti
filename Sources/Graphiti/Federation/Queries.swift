@@ -20,7 +20,9 @@ func entitiesQuery(
         type: GraphQLNonNull(GraphQLList(entityType)),
         description: "Return all entities matching the provided representations.",
         args: [
-            "representations": GraphQLArgument(type: GraphQLNonNull(GraphQLList(GraphQLNonNull(anyType)))),
+            "representations": GraphQLArgument(
+                type: GraphQLNonNull(GraphQLList(GraphQLNonNull(anyType)))
+            ),
         ],
         resolve: { source, args, context, info in
             let arguments = try coders.decoder.decode(EntityArguments.self, from: args)
