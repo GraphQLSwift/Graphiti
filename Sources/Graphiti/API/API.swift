@@ -1,8 +1,8 @@
 import GraphQL
 
 public protocol API {
-    associatedtype Resolver
-    associatedtype ContextType
+    associatedtype Resolver: Sendable
+    associatedtype ContextType: Sendable
     var resolver: Resolver { get }
     var schema: Schema<Resolver, ContextType> { get }
 }

@@ -1,10 +1,15 @@
 import GraphQL
 
-public class Key<ObjectType, Resolver, Context, Arguments: Codable>: KeyComponent<
+public class Key<
+    ObjectType: Sendable,
+    Resolver: Sendable,
+    Context: Sendable,
+    Arguments: Codable & Sendable
+>: KeyComponent<
     ObjectType,
     Resolver,
     Context
-> {
+>, @unchecked Sendable {
     let arguments: [ArgumentComponent<Arguments>]
     let resolve: AsyncResolve<Resolver, Context, Arguments, ObjectType?>
 
@@ -18,7 +23,7 @@ public class Key<ObjectType, Resolver, Context, Arguments: Codable>: KeyComponen
         context: Context,
         map: Map,
         coders: Coders
-    ) async throws -> Any? {
+    ) async throws -> (any Sendable)? {
         let arguments = try coders.decoder.decode(Arguments.self, from: map)
         return try await resolve(resolver)(context, arguments)
     }

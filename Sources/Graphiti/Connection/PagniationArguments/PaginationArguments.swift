@@ -1,6 +1,6 @@
 public protocol Paginatable: ForwardPaginatable, BackwardPaginatable {}
 
-public struct PaginationArguments: Paginatable {
+public struct PaginationArguments: Paginatable, Sendable {
     public let first: Int?
     public let last: Int?
     public let after: String?

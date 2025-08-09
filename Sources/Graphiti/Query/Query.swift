@@ -1,6 +1,6 @@
 import GraphQL
 
-public final class Query<Resolver, Context>: Component<Resolver, Context> {
+public final class Query<Resolver: Sendable, Context: Sendable>: Component<Resolver, Context> {
     let fields: [FieldComponent<Resolver, Context>]
 
     let isTypeOf: GraphQLIsTypeOf = { source, _ in

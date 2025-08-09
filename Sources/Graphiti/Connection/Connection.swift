@@ -1,7 +1,7 @@
 import Foundation
 import GraphQL
 
-public struct Connection<Node> {
+public struct Connection<Node: Sendable>: Sendable {
     public let edges: [Edge<Node>]
     public let pageInfo: PageInfo
 }
@@ -16,7 +16,7 @@ public extension Connection where Node: Identifiable, Node.ID: LosslessStringCon
     }
 }
 
-public extension Sequence where Element: Identifiable,
+public extension Sequence where Element: Sendable, Element: Identifiable,
 Element.ID: LosslessStringConvertible {
     func connection(from arguments: Paginatable) throws -> Connection<Element> {
         try connection(from: arguments, makeCursor: Connection<Element>.cursor)
@@ -31,7 +31,7 @@ Element.ID: LosslessStringConvertible {
     }
 }
 
-public extension Sequence {
+public extension Sequence where Element: Sendable {
     func connection(
         from arguments: Paginatable,
         makeCursor: @escaping (Element) throws -> String

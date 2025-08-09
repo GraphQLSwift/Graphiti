@@ -9,7 +9,7 @@ public extension Type {
     ///   - _:  The key value. The name of this argument must match a Type field.
     /// - Returns: Self for chaining.
     @discardableResult
-    func key<Arguments: Codable>(
+    func key<Arguments: Codable & Sendable>(
         at function: @escaping AsyncResolve<Resolver, Context, Arguments, ObjectType?>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) -> Self {
@@ -25,7 +25,7 @@ public extension Type {
     ///   - _:  The key values. The names of these arguments must match Type fields.
     /// - Returns: Self for chaining.
     @discardableResult
-    func key<Arguments: Codable>(
+    func key<Arguments: Codable & Sendable>(
         at function: @escaping AsyncResolve<Resolver, Context, Arguments, ObjectType?>,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
@@ -42,7 +42,7 @@ public extension Type {
     ///   - _:  The key value. The name of this argument must match a Type field.
     /// - Returns: Self for chaining.
     @discardableResult
-    func key<Arguments: Codable>(
+    func key<Arguments: Codable & Sendable>(
         at function: @escaping SyncResolve<Resolver, Context, Arguments, ObjectType?>,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
@@ -59,7 +59,7 @@ public extension Type {
     ///   - _:  The key values. The names of these arguments must match Type fields.
     /// - Returns: Self for chaining.
     @discardableResult
-    func key<Arguments: Codable>(
+    func key<Arguments: Codable & Sendable>(
         at function: @escaping SyncResolve<Resolver, Context, Arguments, ObjectType?>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) -> Self {

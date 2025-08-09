@@ -1,6 +1,6 @@
 import GraphQL
 
-open class Component<Resolver, Context> {
+open class Component<Resolver: Sendable, Context: Sendable> {
     let name: String
     var description: String?
     var componentType: ComponentType

@@ -328,7 +328,7 @@ import GraphQL
 
 let timer: Timer!
 
-struct PersonResolver {
+struct PersonResolver: Sendable {
     func people(context: NoContext, arguments: NoArguments) -> [Person] {
         return characters
     }
@@ -400,7 +400,7 @@ This package supports pagination using the [Relay-based GraphQL Cursor Connectio
 Here's an example using the schema above:
 
 ```swift
-struct Person: Codable, Identifiable {
+struct Person: Codable, Identifiable, Sendable {
     let id: Int
     let name: String
 }
@@ -410,7 +410,7 @@ let characters = [
     Person(id: 2, name: "Bodhi"),
 ]
 
-struct PersonResolver {
+struct PersonResolver: Sendable {
     func people(context: NoContext, arguments: PaginationArguments) throws -> Connection<Person> {
         return try characters.connection(from: arguments)
     }
@@ -524,25 +524,25 @@ extend type User @key(fields: "email") {
 import Foundation
 import Graphiti
 
-struct Product: Codable {
+struct Product: Codable, Sendable {
     let id: String
     let sku: String
     let createdBy: User
 }
 
-struct User: Codable {
+struct User: Codable, Sendable {
     let email: String
     let name: String?
     let totalProductsCreated: Int?
     let yearsOfEmployment: Int
 }
 
-struct ProductContext {
+struct ProductContext: Sendable {
     func getUser(email: String) -> User { ... }
 }
 
-struct ProductResolver {
-    struct UserArguments: Codable {
+struct ProductResolver: Sendable {
+    struct UserArguments: Codable, Sendable {
         let email: String
     }
 

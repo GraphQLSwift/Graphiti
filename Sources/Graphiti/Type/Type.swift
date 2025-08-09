@@ -1,6 +1,10 @@
 import GraphQL
 
-public final class Type<Resolver, Context, ObjectType>: TypeComponent<
+public final class Type<
+    Resolver: Sendable,
+    Context: Sendable,
+    ObjectType: Sendable
+>: TypeComponent<
     Resolver,
     Context
 > {
@@ -36,6 +40,7 @@ public final class Type<Resolver, Context, ObjectType>: TypeComponent<
 
         // If federation keys are included, create resolver closure
         if !keys.isEmpty {
+            let keys = self.keys
             let resolve: GraphQLFieldResolve = { source, args, context, _ in
                 guard let s = source as? Resolver else {
                     throw GraphQLError(
@@ -49,7 +54,7 @@ public final class Type<Resolver, Context, ObjectType>: TypeComponent<
                     )
                 }
 
-                let keyMatch = self.keys.first { key in
+                let keyMatch = keys.first { key in
                     key.mapMatchesArguments(args, coders: coders)
                 }
                 guard let key = keyMatch else {

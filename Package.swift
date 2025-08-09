@@ -15,5 +15,6 @@ let package = Package(
         .testTarget(name: "GraphitiTests", dependencies: ["Graphiti"], resources: [
             .copy("FederationTests/GraphQL"),
         ]),
-    ]
+    ],
+    swiftLanguageVersions: [.v5, .version("6")]
 )

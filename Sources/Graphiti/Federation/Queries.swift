@@ -26,8 +26,8 @@ func entitiesQuery(
         ],
         resolve: { source, args, context, info in
             let arguments = try coders.decoder.decode(EntityArguments.self, from: args)
-            return try await withThrowingTaskGroup(of: (Int, Any?).self) { group in
-                var results: [Any?] = arguments.representations.map { _ in nil }
+            return try await withThrowingTaskGroup(of: (Int, (any Sendable)?).self) { group in
+                var results: [(any Sendable)?] = arguments.representations.map { _ in nil }
                 for (index, representationMap) in arguments.representations.enumerated() {
                     group.addTask {
                         let representation = try coders.decoder.decode(

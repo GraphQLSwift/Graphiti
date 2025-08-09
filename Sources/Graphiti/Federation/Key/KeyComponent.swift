@@ -1,6 +1,6 @@
 import GraphQL
 
-public class KeyComponent<ObjectType, Resolver, Context> {
+public class KeyComponent<ObjectType, Resolver, Context>: @unchecked Sendable {
     func mapMatchesArguments(_: Map, coders _: Coders) -> Bool {
         fatalError()
     }
@@ -10,7 +10,7 @@ public class KeyComponent<ObjectType, Resolver, Context> {
         context _: Context,
         map _: Map,
         coders _: Coders
-    ) async throws -> Any? {
+    ) async throws -> (any Sendable)? {
         fatalError()
     }
 

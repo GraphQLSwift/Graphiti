@@ -1,8 +1,8 @@
 import GraphQL
 
 public final class Input<
-    Resolver,
-    Context,
+    Resolver: Sendable,
+    Context: Sendable,
     InputObjectType
 >: TypeComponent<
     Resolver,

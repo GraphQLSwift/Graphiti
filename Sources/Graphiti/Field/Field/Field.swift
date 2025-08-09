@@ -1,17 +1,23 @@
 import GraphQL
 
-public class Field<ObjectType, Context, FieldType, Arguments: Decodable>: FieldComponent<
+public class Field<
+    ObjectType: Sendable,
+    Context: Sendable,
+    FieldType: Sendable,
+    Arguments: Decodable & Sendable
+>: FieldComponent<
     ObjectType,
     Context
 > {
     let name: String
     let arguments: [ArgumentComponent<Arguments>]
-    let resolve: AsyncResolve<ObjectType, Context, Arguments, Any?>
+    let resolve: AsyncResolve<ObjectType, Context, Arguments, (any Sendable)?>
 
     override func field(
         typeProvider: TypeProvider,
         coders: Coders
     ) throws -> (String, GraphQLField) {
+        let resolve = self.resolve
         let field = try GraphQLField(
             type: typeProvider.getOutputType(from: FieldType.self, field: name),
             description: description,
@@ -31,7 +37,7 @@ public class Field<ObjectType, Context, FieldType, Arguments: Decodable>: FieldC
                 }
 
                 let a = try coders.decoder.decode(Arguments.self, from: arguments)
-                return try await self.resolve(s)(c, a)
+                return try await resolve(s)(c, a)
             }
         )
 
@@ -52,19 +58,19 @@ public class Field<ObjectType, Context, FieldType, Arguments: Decodable>: FieldC
     init(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
-        resolve: @escaping AsyncResolve<ObjectType, Context, Arguments, Any?>
+        resolve: @escaping AsyncResolve<ObjectType, Context, Arguments, (any Sendable)?>
     ) {
         self.name = name
         self.arguments = arguments
         self.resolve = resolve
     }
 
-    convenience init<ResolveType>(
+    convenience init<ResolveType: Sendable>(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         asyncResolve: @escaping AsyncResolve<ObjectType, Context, Arguments, ResolveType>
     ) {
-        let resolve: AsyncResolve<ObjectType, Context, Arguments, Any?> = { type in
+        let resolve: AsyncResolve<ObjectType, Context, Arguments, (any Sendable)?> = { type in
             { context, arguments in
                 try await asyncResolve(type)(context, arguments)
             }
@@ -72,7 +78,7 @@ public class Field<ObjectType, Context, FieldType, Arguments: Decodable>: FieldC
         self.init(name: name, arguments: arguments, resolve: resolve)
     }
 
-    convenience init<ResolveType>(
+    convenience init<ResolveType: Sendable>(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         syncResolve: @escaping SyncResolve<ObjectType, Context, Arguments, ResolveType>
@@ -143,3 +149,8 @@ public extension Field where Arguments == NoArguments {
         self.init(name: name, arguments: [], syncResolve: syncResolve)
     }
 }
+
+// We must conform KeyPath to unchecked sendable to allow keypath-based resolvers.
+// Despite the warning, we cannot add `@retroactive` and keep Swift 5 support.
+// Remove when support transitions to Swift 6.
+extension KeyPath: @unchecked Sendable {}

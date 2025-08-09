@@ -3,22 +3,24 @@ import GraphQL
 // Subscription resolver MUST return an Observer<Any>, not a specific type, due to lack of support for covariance generics in Swift
 
 public class SubscriptionField<
-    SourceEventType,
+    SourceEventType: Sendable,
     ObjectType,
     Context,
-    FieldType,
+    FieldType: Sendable,
     Arguments: Decodable,
-    SubSequence: AsyncSequence
+    SubSequence: AsyncSequence & Sendable
 >: FieldComponent<ObjectType, Context> where SubSequence.Element == SourceEventType {
     let name: String
     let arguments: [ArgumentComponent<Arguments>]
-    let resolve: AsyncResolve<SourceEventType, Context, Arguments, Any?>
+    let resolve: AsyncResolve<SourceEventType, Context, Arguments, (any Sendable)?>
     let subscribe: AsyncResolve<ObjectType, Context, Arguments, SubSequence>
 
     override func field(
         typeProvider: TypeProvider,
         coders: Coders
     ) throws -> (String, GraphQLField) {
+        let resolve = self.resolve
+        let subscribe = self.subscribe
         let field = try GraphQLField(
             type: typeProvider.getOutputType(from: FieldType.self, field: name),
             description: description,
@@ -38,7 +40,7 @@ public class SubscriptionField<
                 }
 
                 let args = try coders.decoder.decode(Arguments.self, from: arguments)
-                return try await self.resolve(_source)(_context, args)
+                return try await resolve(_source)(_context, args)
             },
             subscribe: { source, arguments, context, _ in
                 guard let _source = source as? ObjectType else {
@@ -54,8 +56,7 @@ public class SubscriptionField<
                 }
 
                 let args = try coders.decoder.decode(Arguments.self, from: arguments)
-                return try await self.subscribe(_source)(_context, args)
-                    .map { $0 as Any }
+                return try await subscribe(_source)(_context, args)
             }
         )
 
@@ -76,7 +77,7 @@ public class SubscriptionField<
     init(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
-        resolve: @escaping AsyncResolve<SourceEventType, Context, Arguments, Any?>,
+        resolve: @escaping AsyncResolve<SourceEventType, Context, Arguments, (any Sendable)?>,
         subscribe: @escaping AsyncResolve<
             ObjectType,
             Context,
@@ -90,7 +91,7 @@ public class SubscriptionField<
         self.subscribe = subscribe
     }
 
-    convenience init<ResolveType>(
+    convenience init<ResolveType: Sendable>(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         asyncResolve: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
@@ -101,7 +102,7 @@ public class SubscriptionField<
             SubSequence
         >
     ) {
-        let resolve: AsyncResolve<SourceEventType, Context, Arguments, Any?> = { type in
+        let resolve: AsyncResolve<SourceEventType, Context, Arguments, (any Sendable)?> = { type in
             { context, arguments in
                 try await asyncResolve(type)(context, arguments)
             }
@@ -120,7 +121,12 @@ public class SubscriptionField<
             SubSequence
         >
     ) {
-        let resolve: AsyncResolve<SourceEventType, Context, Arguments, Any?> = { source in
+        let resolve: AsyncResolve<
+            SourceEventType,
+            Context,
+            Arguments,
+            (any Sendable)?
+        > = { source in
             { _, _ in
                 source
             }
@@ -128,7 +134,7 @@ public class SubscriptionField<
         self.init(name: name, arguments: arguments, resolve: resolve, subscribe: asyncSubscribe)
     }
 
-    convenience init<ResolveType>(
+    convenience init<ResolveType: Sendable>(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         syncResolve: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
@@ -261,7 +267,7 @@ public extension SubscriptionField {
         self.init(name: name, arguments: arguments(), as: `as`, asyncSubscribe: subFunc)
     }
 
-    convenience init<ResolveType>(
+    convenience init<ResolveType: Sendable>(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         atSub subFunc: @escaping AsyncResolve<
@@ -280,7 +286,7 @@ public extension SubscriptionField {
         )
     }
 
-    convenience init<ResolveType>(
+    convenience init<ResolveType: Sendable>(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         atSub subFunc: @escaping AsyncResolve<
@@ -370,7 +376,7 @@ public extension SubscriptionField {
     }
 
     @_disfavoredOverload
-    convenience init<ResolveType>(
+    convenience init<ResolveType: Sendable>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as _: FieldType.Type,
@@ -391,7 +397,7 @@ public extension SubscriptionField {
     }
 
     @_disfavoredOverload
-    convenience init<ResolveType>(
+    convenience init<ResolveType: Sendable>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as _: FieldType.Type,
