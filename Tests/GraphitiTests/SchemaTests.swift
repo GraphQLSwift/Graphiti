@@ -158,7 +158,7 @@ class SchemaTests: XCTestCase {
     }
 }
 
-private class TestAPI<Resolver, ContextType>: API {
+private class TestAPI<Resolver: Sendable, ContextType: Sendable>: API {
     public let resolver: Resolver
     public let schema: Schema<Resolver, ContextType>
 

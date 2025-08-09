@@ -56,7 +56,7 @@ struct UserEvent {
     let user: User
 }
 
-final class HelloContext {
+final class HelloContext: Sendable {
     func hello() -> String {
         "world"
     }

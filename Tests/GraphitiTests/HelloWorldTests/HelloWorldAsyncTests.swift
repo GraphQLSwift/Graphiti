@@ -19,15 +19,15 @@ extension HelloResolver {
     func subscribeUser(
         context _: HelloContext,
         arguments _: NoArguments
-    ) -> AsyncThrowingStream<User, Error> {
-        pubsub.subscribe()
+    ) async -> AsyncThrowingStream<User, Error> {
+        await pubsub.subscribe()
     }
 
     func futureSubscribeUser(
         context _: HelloContext,
         arguments _: NoArguments
-    ) -> AsyncThrowingStream<User, Error> {
-        pubsub.subscribe()
+    ) async -> AsyncThrowingStream<User, Error> {
+        await pubsub.subscribe()
     }
 
     func asyncSubscribeUser(
@@ -35,7 +35,7 @@ extension HelloResolver {
         arguments _: NoArguments
     ) async -> AsyncThrowingStream<User, Error> {
         return await Task {
-            pubsub.subscribe()
+            await pubsub.subscribe()
         }.value
     }
 }
@@ -168,7 +168,7 @@ class HelloWorldAsyncTests: XCTestCase {
         ).get()
         var iterator = subscription.makeAsyncIterator()
 
-        pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
+        await pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
         let result = try await iterator.next()
         XCTAssertEqual(
@@ -201,7 +201,7 @@ class HelloWorldAsyncTests: XCTestCase {
         ).get()
         var iterator = subscription.makeAsyncIterator()
 
-        pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
+        await pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
         let result = try await iterator.next()
         XCTAssertEqual(
@@ -234,7 +234,7 @@ class HelloWorldAsyncTests: XCTestCase {
         ).get()
         var iterator = subscription.makeAsyncIterator()
 
-        pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
+        await pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
         let result = try await iterator.next()
         XCTAssertEqual(
@@ -265,7 +265,7 @@ class HelloWorldAsyncTests: XCTestCase {
         ).get()
         var iterator = subscription.makeAsyncIterator()
 
-        pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
+        await pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
         let result = try await iterator.next()
         XCTAssertEqual(
@@ -282,7 +282,7 @@ class HelloWorldAsyncTests: XCTestCase {
 
 /// A very simple publish/subscriber used for testing
 @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-class SimplePubSub<T> {
+actor SimplePubSub<T: Sendable>: Sendable {
     private var subscribers: [Subscriber<T>]
 
     init() {
@@ -316,7 +316,7 @@ class SimplePubSub<T> {
     }
 }
 
-struct Subscriber<T> {
+struct Subscriber<T: Sendable> {
     let callback: (T) -> Void
     let cancel: () -> Void
 }
