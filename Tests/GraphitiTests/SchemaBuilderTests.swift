@@ -67,7 +67,7 @@ class SchemaBuilderTests: XCTestCase {
                     .description("The id of the character.")
                 Field("name", at: \.name)
                     .description("The name of the character.")
-                Field("friends", at: \.friends)
+                Field("friends", at: Character.getFriends)
                     .description(
                         "The friends of the character, or an empty list if they have none."
                     )
