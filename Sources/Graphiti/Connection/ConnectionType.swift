@@ -1,9 +1,9 @@
 import GraphQL
 
 public final class ConnectionType<
-    Resolver,
-    Context,
-    ObjectType
+    Resolver: Sendable,
+    Context: Sendable,
+    ObjectType: Sendable
 >: TypeComponent<
     Resolver,
     Context

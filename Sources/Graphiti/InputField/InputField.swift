@@ -2,7 +2,7 @@ import GraphQL
 
 public class InputField<
     InputObjectType,
-    Context,
+    Context: Sendable,
     FieldType
 >: InputFieldComponent<
     InputObjectType,

@@ -1,17 +1,17 @@
-public enum Episode: String, CaseIterable, Codable {
+public enum Episode: String, CaseIterable, Codable, Sendable {
     case newHope = "NEWHOPE"
     case empire = "EMPIRE"
     case jedi = "JEDI"
 }
 
-public protocol Character {
+public protocol Character: Sendable {
     var id: String { get }
     var name: String { get }
     var friends: [String] { get }
     var appearsIn: [Episode] { get }
 }
 
-public protocol SearchResult {}
+public protocol SearchResult: Sendable {}
 
 public struct Planet: SearchResult {
     public let id: String

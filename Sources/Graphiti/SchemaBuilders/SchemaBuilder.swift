@@ -1,6 +1,6 @@
 /// A builder that allows modular creation of GraphQL schemas. You may independently components or query, mutation, or subscription fields.
 /// When ready to build and use the schema, run `build`
-public final class SchemaBuilder<Resolver, Context> {
+public final class SchemaBuilder<Resolver: Sendable, Context: Sendable> {
     private var coders: Coders
     private var federatedSDL: String?
     private var typeComponents: [TypeComponent<Resolver, Context>]

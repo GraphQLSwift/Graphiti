@@ -1,30 +1,32 @@
 import GraphQL
-import NIO
 
 // Subscription resolver MUST return an Observer<Any>, not a specific type, due to lack of support for covariance generics in Swift
 
 public class SubscriptionField<
-    SourceEventType,
+    SourceEventType: Sendable,
     ObjectType,
     Context,
-    FieldType,
-    Arguments: Decodable
->: FieldComponent<ObjectType, Context> {
+    FieldType: Sendable,
+    Arguments: Decodable,
+    SubSequence: AsyncSequence & Sendable
+>: FieldComponent<ObjectType, Context> where SubSequence.Element == SourceEventType {
     let name: String
     let arguments: [ArgumentComponent<Arguments>]
-    let resolve: AsyncResolve<SourceEventType, Context, Arguments, Any?>
-    let subscribe: AsyncResolve<ObjectType, Context, Arguments, EventStream<SourceEventType>>
+    let resolve: AsyncResolve<SourceEventType, Context, Arguments, (any Sendable)?>
+    let subscribe: AsyncResolve<ObjectType, Context, Arguments, SubSequence>
 
     override func field(
         typeProvider: TypeProvider,
         coders: Coders
     ) throws -> (String, GraphQLField) {
+        let resolve = self.resolve
+        let subscribe = self.subscribe
         let field = try GraphQLField(
             type: typeProvider.getOutputType(from: FieldType.self, field: name),
             description: description,
             deprecationReason: deprecationReason,
             args: arguments(typeProvider: typeProvider, coders: coders),
-            resolve: { source, arguments, context, eventLoopGroup, _ in
+            resolve: { source, arguments, context, _ in
                 guard let _source = source as? SourceEventType else {
                     throw GraphQLError(
                         message: "Expected source type \(SourceEventType.self) but got \(type(of: source))"
@@ -38,9 +40,9 @@ public class SubscriptionField<
                 }
 
                 let args = try coders.decoder.decode(Arguments.self, from: arguments)
-                return try self.resolve(_source)(_context, args, eventLoopGroup)
+                return try await resolve(_source)(_context, args)
             },
-            subscribe: { source, arguments, context, eventLoopGroup, _ in
+            subscribe: { source, arguments, context, _ in
                 guard let _source = source as? ObjectType else {
                     throw GraphQLError(
                         message: "Expected source type \(ObjectType.self) but got \(type(of: source))"
@@ -54,8 +56,7 @@ public class SubscriptionField<
                 }
 
                 let args = try coders.decoder.decode(Arguments.self, from: arguments)
-                return try self.subscribe(_source)(_context, args, eventLoopGroup)
-                    .map { $0.map { $0 as Any } }
+                return try await subscribe(_source)(_context, args)
             }
         )
 
@@ -76,12 +77,12 @@ public class SubscriptionField<
     init(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
-        resolve: @escaping AsyncResolve<SourceEventType, Context, Arguments, Any?>,
+        resolve: @escaping AsyncResolve<SourceEventType, Context, Arguments, (any Sendable)?>,
         subscribe: @escaping AsyncResolve<
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >
     ) {
         self.name = name
@@ -90,7 +91,7 @@ public class SubscriptionField<
         self.subscribe = subscribe
     }
 
-    convenience init<ResolveType>(
+    convenience init<ResolveType: Sendable>(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         asyncResolve: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
@@ -98,12 +99,12 @@ public class SubscriptionField<
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >
     ) {
-        let resolve: AsyncResolve<SourceEventType, Context, Arguments, Any?> = { type in
-            { context, arguments, eventLoopGroup in
-                try asyncResolve(type)(context, arguments, eventLoopGroup).map { $0 }
+        let resolve: AsyncResolve<SourceEventType, Context, Arguments, (any Sendable)?> = { type in
+            { context, arguments in
+                try await asyncResolve(type)(context, arguments)
             }
         }
         self.init(name: name, arguments: arguments, resolve: resolve, subscribe: asyncSubscribe)
@@ -117,88 +118,23 @@ public class SubscriptionField<
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >
     ) {
-        let resolve: AsyncResolve<SourceEventType, Context, Arguments, Any?> = { source in
-            { _, _, eventLoopGroup in
-                eventLoopGroup.next().makeSucceededFuture(source)
+        let resolve: AsyncResolve<
+            SourceEventType,
+            Context,
+            Arguments,
+            (any Sendable)?
+        > = { source in
+            { _, _ in
+                source
             }
         }
         self.init(name: name, arguments: arguments, resolve: resolve, subscribe: asyncSubscribe)
     }
 
-    convenience init<ResolveType>(
-        name: String,
-        arguments: [ArgumentComponent<Arguments>],
-        simpleAsyncResolve: @escaping SimpleAsyncResolve<
-            SourceEventType,
-            Context,
-            Arguments,
-            ResolveType
-        >,
-        simpleAsyncSubscribe: @escaping SimpleAsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >
-    ) {
-        let asyncResolve: AsyncResolve<SourceEventType, Context, Arguments, ResolveType> = { type in
-            { context, arguments, group in
-                // We hop to guarantee that the future will
-                // return in the same event loop group of the execution.
-                try simpleAsyncResolve(type)(context, arguments).hop(to: group.next())
-            }
-        }
-
-        let asyncSubscribe: AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        > = { type in
-            { context, arguments, group in
-                // We hop to guarantee that the future will
-                // return in the same event loop group of the execution.
-                try simpleAsyncSubscribe(type)(context, arguments).hop(to: group.next())
-            }
-        }
-        self.init(
-            name: name,
-            arguments: arguments,
-            asyncResolve: asyncResolve,
-            asyncSubscribe: asyncSubscribe
-        )
-    }
-
-    convenience init(
-        name: String,
-        arguments: [ArgumentComponent<Arguments>],
-        as: FieldType.Type,
-        simpleAsyncSubscribe: @escaping SimpleAsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >
-    ) {
-        let asyncSubscribe: AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        > = { type in
-            { context, arguments, group in
-                // We hop to guarantee that the future will
-                // return in the same event loop group of the execution.
-                try simpleAsyncSubscribe(type)(context, arguments).hop(to: group.next())
-            }
-        }
-        self.init(name: name, arguments: arguments, as: `as`, asyncSubscribe: asyncSubscribe)
-    }
-
-    convenience init<ResolveType>(
+    convenience init<ResolveType: Sendable>(
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         syncResolve: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
@@ -206,13 +142,12 @@ public class SubscriptionField<
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >
     ) {
         let asyncResolve: AsyncResolve<SourceEventType, Context, Arguments, ResolveType> = { type in
-            { context, arguments, group in
-                let result = try syncResolve(type)(context, arguments)
-                return group.next().makeSucceededFuture(result)
+            { context, arguments in
+                try syncResolve(type)(context, arguments)
             }
         }
 
@@ -220,11 +155,10 @@ public class SubscriptionField<
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         > = { type in
-            { context, arguments, group in
-                let result = try syncSubscribe(type)(context, arguments)
-                return group.next().makeSucceededFuture(result)
+            { context, arguments in
+                try syncSubscribe(type)(context, arguments)
             }
         }
         self.init(
@@ -243,18 +177,17 @@ public class SubscriptionField<
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >
     ) {
         let asyncSubscribe: AsyncResolve<
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         > = { type in
-            { context, arguments, group in
-                let result = try syncSubscribe(type)(context, arguments)
-                return group.next().makeSucceededFuture(result)
+            { context, arguments in
+                try syncSubscribe(type)(context, arguments)
             }
         }
         self.init(name: name, arguments: arguments, as: `as`, asyncSubscribe: asyncSubscribe)
@@ -271,7 +204,7 @@ public extension SubscriptionField {
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
@@ -290,7 +223,7 @@ public extension SubscriptionField {
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
@@ -312,7 +245,7 @@ public extension SubscriptionField {
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
@@ -326,7 +259,7 @@ public extension SubscriptionField {
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
@@ -334,14 +267,14 @@ public extension SubscriptionField {
         self.init(name: name, arguments: arguments(), as: `as`, asyncSubscribe: subFunc)
     }
 
-    convenience init<ResolveType>(
+    convenience init<ResolveType: Sendable>(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         atSub subFunc: @escaping AsyncResolve<
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
@@ -353,14 +286,14 @@ public extension SubscriptionField {
         )
     }
 
-    convenience init<ResolveType>(
+    convenience init<ResolveType: Sendable>(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         atSub subFunc: @escaping AsyncResolve<
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
@@ -374,128 +307,7 @@ public extension SubscriptionField {
     }
 }
 
-// MARK: SimpleAsyncResolve Initializers
-
 public extension SubscriptionField {
-    convenience init(
-        _ name: String,
-        at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, FieldType>,
-        atSub subFunc: @escaping SimpleAsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(
-            name: name,
-            arguments: [argument()],
-            simpleAsyncResolve: function,
-            simpleAsyncSubscribe: subFunc
-        )
-    }
-
-    convenience init(
-        _ name: String,
-        at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, FieldType>,
-        atSub subFunc: @escaping SimpleAsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >,
-        @ArgumentComponentBuilder<Arguments> _ arguments: ()
-            -> [ArgumentComponent<Arguments>] = { [] }
-    ) {
-        self.init(
-            name: name,
-            arguments: arguments(),
-            simpleAsyncResolve: function,
-            simpleAsyncSubscribe: subFunc
-        )
-    }
-}
-
-public extension SubscriptionField {
-    convenience init(
-        _ name: String,
-        as: FieldType.Type,
-        atSub subFunc: @escaping SimpleAsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(name: name, arguments: [argument()], as: `as`, simpleAsyncSubscribe: subFunc)
-    }
-
-    convenience init(
-        _ name: String,
-        as: FieldType.Type,
-        atSub subFunc: @escaping SimpleAsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >,
-        @ArgumentComponentBuilder<Arguments> _ arguments: ()
-            -> [ArgumentComponent<Arguments>] = { [] }
-    ) {
-        self.init(name: name, arguments: arguments(), as: `as`, simpleAsyncSubscribe: subFunc)
-    }
-
-    convenience init<ResolveType>(
-        _ name: String,
-        at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
-        as _: FieldType.Type,
-        atSub subFunc: @escaping SimpleAsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(
-            name: name,
-            arguments: [argument()],
-            simpleAsyncResolve: function,
-            simpleAsyncSubscribe: subFunc
-        )
-    }
-
-    convenience init<ResolveType>(
-        _ name: String,
-        at function: @escaping SimpleAsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
-        as _: FieldType.Type,
-        atSub subFunc: @escaping SimpleAsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >,
-        @ArgumentComponentBuilder<Arguments> _ arguments: ()
-            -> [ArgumentComponent<Arguments>] = { [] }
-    ) {
-        self.init(
-            name: name,
-            arguments: arguments(),
-            simpleAsyncResolve: function,
-            simpleAsyncSubscribe: subFunc
-        )
-    }
-}
-
-// MARK: SyncResolve Initializers
-
-// '@_disfavoredOverload' is included below because otherwise `SimpleAsyncResolve` initializers also match this signature, causing the
-// calls to be ambiguous. We prefer that if an EventLoopFuture is returned from the resolve, that `SimpleAsyncResolve` is matched.
-
-public extension SubscriptionField {
-    @_disfavoredOverload
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
@@ -503,7 +315,7 @@ public extension SubscriptionField {
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
@@ -515,7 +327,6 @@ public extension SubscriptionField {
         )
     }
 
-    @_disfavoredOverload
     convenience init(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
@@ -523,7 +334,7 @@ public extension SubscriptionField {
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
@@ -541,7 +352,7 @@ public extension SubscriptionField {
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
@@ -556,7 +367,7 @@ public extension SubscriptionField {
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
@@ -565,7 +376,7 @@ public extension SubscriptionField {
     }
 
     @_disfavoredOverload
-    convenience init<ResolveType>(
+    convenience init<ResolveType: Sendable>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as _: FieldType.Type,
@@ -573,7 +384,7 @@ public extension SubscriptionField {
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
@@ -586,7 +397,7 @@ public extension SubscriptionField {
     }
 
     @_disfavoredOverload
-    convenience init<ResolveType>(
+    convenience init<ResolveType: Sendable>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as _: FieldType.Type,
@@ -594,234 +405,12 @@ public extension SubscriptionField {
             ObjectType,
             Context,
             Arguments,
-            EventStream<SourceEventType>
+            SubSequence
         >,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
     ) {
         self.init(name: name, arguments: arguments(), syncResolve: function, syncSubscribe: subFunc)
-    }
-}
-
-public extension SubscriptionField {
-    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init<ResolveType>(
-        name: String,
-        arguments: [ArgumentComponent<Arguments>],
-        concurrentResolve: @escaping ConcurrentResolve<
-            SourceEventType,
-            Context,
-            Arguments,
-            ResolveType
-        >,
-        concurrentSubscribe: @escaping ConcurrentResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >
-    ) {
-        let asyncResolve: AsyncResolve<SourceEventType, Context, Arguments, ResolveType> = { type in
-            { context, arguments, eventLoopGroup in
-                let promise = eventLoopGroup.next().makePromise(of: ResolveType.self)
-                promise.completeWithTask {
-                    try await concurrentResolve(type)(context, arguments)
-                }
-                return promise.futureResult
-            }
-        }
-        let asyncSubscribe: AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        > = { type in
-            { context, arguments, eventLoopGroup in
-                let promise = eventLoopGroup.next()
-                    .makePromise(of: EventStream<SourceEventType>.self)
-                promise.completeWithTask {
-                    try await concurrentSubscribe(type)(context, arguments)
-                }
-                return promise.futureResult
-            }
-        }
-        self.init(
-            name: name,
-            arguments: arguments,
-            asyncResolve: asyncResolve,
-            asyncSubscribe: asyncSubscribe
-        )
-    }
-
-    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init(
-        name: String,
-        arguments: [ArgumentComponent<Arguments>],
-        as: FieldType.Type,
-        concurrentSubscribe: @escaping ConcurrentResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >
-    ) {
-        let asyncSubscribe: AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        > = { type in
-            { context, arguments, eventLoopGroup in
-                let promise = eventLoopGroup.next()
-                    .makePromise(of: EventStream<SourceEventType>.self)
-                promise.completeWithTask {
-                    try await concurrentSubscribe(type)(context, arguments)
-                }
-                return promise.futureResult
-            }
-        }
-        self.init(name: name, arguments: arguments, as: `as`, asyncSubscribe: asyncSubscribe)
-    }
-}
-
-// MARK: ConcurrentResolve Initializers
-
-public extension SubscriptionField {
-    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init(
-        _ name: String,
-        at function: @escaping ConcurrentResolve<
-            SourceEventType,
-            Context,
-            Arguments,
-            FieldType
-        >,
-        atSub subFunc: @escaping ConcurrentResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(
-            name: name,
-            arguments: [argument()],
-            concurrentResolve: function,
-            concurrentSubscribe: subFunc
-        )
-    }
-
-    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init(
-        _ name: String,
-        at function: @escaping ConcurrentResolve<
-            SourceEventType,
-            Context,
-            Arguments,
-            FieldType
-        >,
-        atSub subFunc: @escaping ConcurrentResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >,
-        @ArgumentComponentBuilder<Arguments> _ arguments: ()
-            -> [ArgumentComponent<Arguments>] = { [] }
-    ) {
-        self.init(
-            name: name,
-            arguments: arguments(),
-            concurrentResolve: function,
-            concurrentSubscribe: subFunc
-        )
-    }
-
-    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init(
-        _ name: String,
-        as: FieldType.Type,
-        atSub subFunc: @escaping ConcurrentResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >,
-        @ArgumentComponentBuilder<Arguments> _ arguments: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(name: name, arguments: [arguments()], as: `as`, concurrentSubscribe: subFunc)
-    }
-
-    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init(
-        _ name: String,
-        as: FieldType.Type,
-        atSub subFunc: @escaping ConcurrentResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >,
-        @ArgumentComponentBuilder<Arguments> _ arguments: ()
-            -> [ArgumentComponent<Arguments>] = { [] }
-    ) {
-        self.init(name: name, arguments: arguments(), as: `as`, concurrentSubscribe: subFunc)
-    }
-}
-
-public extension SubscriptionField {
-    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init<ResolveType>(
-        _ name: String,
-        at function: @escaping ConcurrentResolve<
-            SourceEventType,
-            Context,
-            Arguments,
-            ResolveType
-        >,
-        as _: FieldType.Type,
-        atSub subFunc: @escaping ConcurrentResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >,
-        @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
-    ) {
-        self.init(
-            name: name,
-            arguments: [argument()],
-            concurrentResolve: function,
-            concurrentSubscribe: subFunc
-        )
-    }
-
-    @available(macOS 10.15, iOS 15, watchOS 8, tvOS 15, *)
-    convenience init<ResolveType>(
-        _ name: String,
-        at function: @escaping ConcurrentResolve<
-            SourceEventType,
-            Context,
-            Arguments,
-            ResolveType
-        >,
-        as _: FieldType.Type,
-        atSub subFunc: @escaping ConcurrentResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            EventStream<SourceEventType>
-        >,
-        @ArgumentComponentBuilder<Arguments> _ arguments: ()
-            -> [ArgumentComponent<Arguments>] = { [] }
-    ) {
-        self.init(
-            name: name,
-            arguments: arguments(),
-            concurrentResolve: function,
-            concurrentSubscribe: subFunc
-        )
     }
 }
 

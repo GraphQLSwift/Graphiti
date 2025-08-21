@@ -1,6 +1,5 @@
 import Graphiti
 import GraphQL
-import NIO
 import XCTest
 
 class PartialSchemaTests: XCTestCase {
@@ -12,7 +11,7 @@ class PartialSchemaTests: XCTestCase {
                     .description("The id of the character.")
                 Field("name", at: \.name)
                     .description("The name of the character.")
-                Field("friends", at: \.friends)
+                Field("friends", at: Character.getFriends)
                     .description(
                         "The friends of the character, or an empty list if they have none."
                     )
@@ -96,13 +95,7 @@ class PartialSchemaTests: XCTestCase {
         }
     }
 
-    func testPartialSchemaWithBuilder() throws {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-
-        defer {
-            try? group.syncShutdownGracefully()
-        }
-
+    func testPartialSchemaWithBuilder() async throws {
         let builder = SchemaBuilder(StarWarsResolver.self, StarWarsContext.self)
 
         builder.use(partials: [BaseSchema(), SearchSchema()])
@@ -116,18 +109,18 @@ class PartialSchemaTests: XCTestCase {
 
         let api = PartialSchemaTestAPI(resolver: StarWarsResolver(), schema: schema)
 
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                    human(id: "1000") {
-                        name
-                    }
+        let result = try await api.execute(
+            request: """
+            query {
+                human(id: "1000") {
+                    name
                 }
-                """,
-                context: StarWarsContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: StarWarsContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "human": [
                     "name": "Luke Skywalker",
@@ -136,13 +129,7 @@ class PartialSchemaTests: XCTestCase {
         )
     }
 
-    func testPartialSchema() throws {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-
-        defer {
-            try? group.syncShutdownGracefully()
-        }
-
+    func testPartialSchema() async throws {
         /// Double check if static func works and the types are inferred properly
         let schema = try Schema.create(from: [BaseSchema(), SearchSchema()])
 
@@ -153,18 +140,18 @@ class PartialSchemaTests: XCTestCase {
 
         let api = PartialSchemaTestAPI(resolver: StarWarsResolver(), schema: schema)
 
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                    human(id: "1000") {
-                        name
-                    }
+        let result = try await api.execute(
+            request: """
+            query {
+                human(id: "1000") {
+                    name
                 }
-                """,
-                context: StarWarsContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: StarWarsContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "human": [
                     "name": "Luke Skywalker",
@@ -173,13 +160,7 @@ class PartialSchemaTests: XCTestCase {
         )
     }
 
-    func testPartialSchemaOutOfOrder() throws {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-
-        defer {
-            try? group.syncShutdownGracefully()
-        }
-
+    func testPartialSchemaOutOfOrder() async throws {
         /// Double check if ordering of partial schema doesn't matter
         let schema = try Schema.create(from: [SearchSchema(), BaseSchema()])
 
@@ -190,18 +171,18 @@ class PartialSchemaTests: XCTestCase {
 
         let api = PartialSchemaTestAPI(resolver: StarWarsResolver(), schema: schema)
 
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                    human(id: "1000") {
-                        name
-                    }
+        let result = try await api.execute(
+            request: """
+            query {
+                human(id: "1000") {
+                    name
                 }
-                """,
-                context: StarWarsContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: StarWarsContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "human": [
                     "name": "Luke Skywalker",
@@ -210,7 +191,7 @@ class PartialSchemaTests: XCTestCase {
         )
     }
 
-    func testInstancePartialSchema() throws {
+    func testInstancePartialSchema() async throws {
         let baseSchema = PartialSchema<StarWarsResolver, StarWarsContext>(
             types: {
                 Interface(Character.self) {
@@ -218,7 +199,7 @@ class PartialSchemaTests: XCTestCase {
                         .description("The id of the character.")
                     Field("name", at: \.name)
                         .description("The name of the character.")
-                    Field("friends", at: \.friends)
+                    Field("friends", at: Character.getFriends)
                         .description(
                             "The friends of the character, or an empty list if they have none."
                         )
@@ -301,12 +282,6 @@ class PartialSchemaTests: XCTestCase {
             }
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-
-        defer {
-            try? group.syncShutdownGracefully()
-        }
-
         /// Double check if ordering of partial schema doesn't matter
         let schema = try Schema.create(from: [searchSchema, baseSchema])
 
@@ -317,18 +292,18 @@ class PartialSchemaTests: XCTestCase {
 
         let api = PartialSchemaTestAPI(resolver: StarWarsResolver(), schema: schema)
 
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                    human(id: "1000") {
-                        name
-                    }
+        let result = try await api.execute(
+            request: """
+            query {
+                human(id: "1000") {
+                    name
                 }
-                """,
-                context: StarWarsContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: StarWarsContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "human": [
                     "name": "Luke Skywalker",

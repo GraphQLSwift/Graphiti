@@ -1,120 +1,117 @@
 import Graphiti
 import GraphQL
-import NIO
 import XCTest
 
 class DefaultValueTests: XCTestCase {
-    let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-
     func testBoolDefault() async throws {
+        let result = try await DefaultValueAPI().execute(
+            request: """
+            {
+                bool
+            }
+            """,
+            context: NoContext()
+        )
         XCTAssertEqual(
-            try DefaultValueAPI().execute(
-                request: """
-                {
-                  bool
-                }
-                """,
-                context: NoContext(),
-                on: eventLoopGroup
-            ).wait(),
+            result,
             .init(data: ["bool": true])
         )
     }
 
     func testIntDefault() async throws {
+        let result = try await DefaultValueAPI().execute(
+            request: """
+            {
+                int
+            }
+            """,
+            context: NoContext()
+        )
         XCTAssertEqual(
-            try DefaultValueAPI().execute(
-                request: """
-                {
-                  int
-                }
-                """,
-                context: NoContext(),
-                on: eventLoopGroup
-            ).wait(),
+            result,
             .init(data: ["int": 1])
         )
     }
 
     func testFloatDefault() async throws {
+        let result = try await DefaultValueAPI().execute(
+            request: """
+            {
+                float
+            }
+            """,
+            context: NoContext()
+        )
         XCTAssertEqual(
-            try DefaultValueAPI().execute(
-                request: """
-                {
-                  float
-                }
-                """,
-                context: NoContext(),
-                on: eventLoopGroup
-            ).wait(),
+            result,
             .init(data: ["float": 1.1])
         )
     }
 
     func testStringDefault() async throws {
+        let result = try await DefaultValueAPI().execute(
+            request: """
+            {
+                string
+            }
+            """,
+            context: NoContext()
+        )
         XCTAssertEqual(
-            try DefaultValueAPI().execute(
-                request: """
-                {
-                  string
-                }
-                """,
-                context: NoContext(),
-                on: eventLoopGroup
-            ).wait(),
+            result,
             .init(data: ["string": "hello"])
         )
     }
 
     func testEnumDefault() async throws {
+        let result = try await DefaultValueAPI().execute(
+            request: """
+            {
+                enum
+            }
+            """,
+            context: NoContext()
+        )
         XCTAssertEqual(
-            try DefaultValueAPI().execute(
-                request: """
-                {
-                  enum
-                }
-                """,
-                context: NoContext(),
-                on: eventLoopGroup
-            ).wait(),
+            result,
             .init(data: ["enum": "valueA"])
         )
     }
 
     func testArrayDefault() async throws {
+        let result = try await DefaultValueAPI().execute(
+            request: """
+            {
+                array
+            }
+            """,
+            context: NoContext()
+        )
         XCTAssertEqual(
-            try DefaultValueAPI().execute(
-                request: """
-                {
-                  array
-                }
-                """,
-                context: NoContext(),
-                on: eventLoopGroup
-            ).wait(),
+            result,
             .init(data: ["array": ["a", "b", "c"]])
         )
     }
 
     func testInputDefault() async throws {
         // Test input object argument default
-        XCTAssertEqual(
-            try DefaultValueAPI().execute(
-                request: """
-                {
-                  input {
-                    bool
-                    int
-                    float
-                    string
-                    enum
-                    array
-                  }
+        var result = try await DefaultValueAPI().execute(
+            request: """
+            {
+                input {
+                bool
+                int
+                float
+                string
+                enum
+                array
                 }
-                """,
-                context: NoContext(),
-                on: eventLoopGroup
-            ).wait(),
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result,
             .init(data: [
                 "input": [
                     "bool": true,
@@ -128,23 +125,23 @@ class DefaultValueTests: XCTestCase {
         )
 
         // Test input object field defaults
-        XCTAssertEqual(
-            try DefaultValueAPI().execute(
-                request: """
-                {
-                  input(input: {bool: true}) {
-                    bool
-                    int
-                    float
-                    string
-                    enum
-                    array
-                  }
+        result = try await DefaultValueAPI().execute(
+            request: """
+            {
+                input(input: {bool: true}) {
+                bool
+                int
+                float
+                string
+                enum
+                array
                 }
-                """,
-                context: NoContext(),
-                on: eventLoopGroup
-            ).wait(),
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result,
             .init(data: [
                 "input": [
                     "bool": true,

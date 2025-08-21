@@ -1,5 +1,30 @@
 # Migration
 
+## 2.0 to 3.0
+
+### NIO removal
+
+All NIO-based parameters and return types were removed, including all that used `EventLoopGroup` and `EventLoopFuture`s.
+
+As such, all `API.execute` and `API.subscribe` calls should have the `eventLoopGroup` argument removed, and the `await` keyword should be used. If access to an `eventLoopGroup` is required in the resolver, one should be passed via the `Context`.
+
+Also, all resolver closures have had the `eventLoopGroup` parameter removed, and all that return an `EventLoopFuture` should be converted to an `async` function.
+
+The documentation here may be very helpful in the conversion: https://www.swift.org/documentation/server/guides/libraries/concurrency-adoption-guidelines.html
+
+### Swift Concurrency checking
+
+With the conversion from NIO to Swift Concurrency, types used across async boundaries should conform to `Sendable` to avoid errors and warnings. This includes the Swift types and functions that back the GraphQL schema, including the `Resolver` and `Context` types. For more details on the conversion, see the [Sendable documentation](https://developer.apple.com/documentation/swift/sendable).
+
+### Subscription result changes
+
+The `API.subscribe(...)` will return a `Result<AsyncThrowingStream<GraphQLResult, Error>>`, instead of an `EventStream`. This means extracting the stream via a `.stream` call and downcasting to `ConcurrentEventStream` are no longer necessary.
+The `EventStream` and `SubscriptionResult` types have been removed.
+
+### GraphQL v4 upgrades
+
+See [the GraphQL v4 migration documentation](https://github.com/GraphQLSwift/GraphQL/blob/main/MIGRATION.md#3-to-4) for additional details.
+
 ## 1.0 to 2.0
 
 ### TypeReference removal

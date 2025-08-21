@@ -5,8 +5,8 @@
  * fetching this data from a backend service rather than from hardcoded
  * values in a more complex demo.
  */
-public final class StarWarsContext {
-    private static var tatooine = Planet(
+public final class StarWarsContext: Sendable {
+    private static let tatooine = Planet(
         id: "10001",
         name: "Tatooine",
         diameter: 10465,
@@ -15,7 +15,7 @@ public final class StarWarsContext {
         residents: []
     )
 
-    private static var alderaan = Planet(
+    private static let alderaan = Planet(
         id: "10002",
         name: "Alderaan",
         diameter: 12500,
@@ -24,12 +24,12 @@ public final class StarWarsContext {
         residents: []
     )
 
-    private static var planetData: [String: Planet] = [
+    private static let planetData: [String: Planet] = [
         "10001": tatooine,
         "10002": alderaan,
     ]
 
-    private static var luke = Human(
+    private static let luke = Human(
         id: "1000",
         name: "Luke Skywalker",
         friends: ["1002", "1003", "2000", "2001"],
@@ -37,7 +37,7 @@ public final class StarWarsContext {
         homePlanet: tatooine
     )
 
-    private static var vader = Human(
+    private static let vader = Human(
         id: "1001",
         name: "Darth Vader",
         friends: ["1004"],
@@ -45,7 +45,7 @@ public final class StarWarsContext {
         homePlanet: tatooine
     )
 
-    private static var han = Human(
+    private static let han = Human(
         id: "1002",
         name: "Han Solo",
         friends: ["1000", "1003", "2001"],
@@ -53,7 +53,7 @@ public final class StarWarsContext {
         homePlanet: alderaan
     )
 
-    private static var leia = Human(
+    private static let leia = Human(
         id: "1003",
         name: "Leia Organa",
         friends: ["1000", "1002", "2000", "2001"],
@@ -61,7 +61,7 @@ public final class StarWarsContext {
         homePlanet: alderaan
     )
 
-    private static var tarkin = Human(
+    private static let tarkin = Human(
         id: "1004",
         name: "Wilhuff Tarkin",
         friends: ["1001"],
@@ -69,7 +69,7 @@ public final class StarWarsContext {
         homePlanet: alderaan
     )
 
-    private static var humanData: [String: Human] = [
+    private static let humanData: [String: Human] = [
         "1000": luke,
         "1001": vader,
         "1002": han,
@@ -77,7 +77,7 @@ public final class StarWarsContext {
         "1004": tarkin,
     ]
 
-    private static var c3po = Droid(
+    private static let c3po = Droid(
         id: "2000",
         name: "C-3PO",
         friends: ["1000", "1002", "1003", "2001"],
@@ -85,7 +85,7 @@ public final class StarWarsContext {
         primaryFunction: "Protocol"
     )
 
-    private static var r2d2 = Droid(
+    private static let r2d2 = Droid(
         id: "2001",
         name: "R2-D2",
         friends: ["1000", "1002", "1003"],
@@ -93,7 +93,7 @@ public final class StarWarsContext {
         primaryFunction: "Astromech"
     )
 
-    private static var droidData: [String: Droid] = [
+    private static let droidData: [String: Droid] = [
         "2000": c3po,
         "2001": r2d2,
     ]

@@ -1,7 +1,7 @@
 import GraphQL
 
 public class ArgumentComponent<ArgumentsType: Decodable> {
-    var description: String? = nil
+    var description: String?
 
     func argument(
         typeProvider _: TypeProvider,

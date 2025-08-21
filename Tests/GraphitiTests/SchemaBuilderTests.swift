@@ -1,12 +1,9 @@
 import Graphiti
 import GraphQL
-import NIO
 import XCTest
 
 class SchemaBuilderTests: XCTestCase {
-    func testSchemaBuilder() throws {
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-
+    func testSchemaBuilder() async throws {
         let builder = SchemaBuilder(StarWarsResolver.self, StarWarsContext.self)
 
         // Add assets slightly out of order
@@ -70,7 +67,7 @@ class SchemaBuilderTests: XCTestCase {
                     .description("The id of the character.")
                 Field("name", at: \.name)
                     .description("The name of the character.")
-                Field("friends", at: \.friends)
+                Field("friends", at: Character.getFriends)
                     .description(
                         "The friends of the character, or an empty list if they have none."
                     )
@@ -104,18 +101,18 @@ class SchemaBuilderTests: XCTestCase {
 
         let api = SchemaBuilderTestAPI(resolver: StarWarsResolver(), schema: schema)
 
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                    human(id: "1000") {
-                        name
-                    }
+        let result = try await api.execute(
+            request: """
+            query {
+                human(id: "1000") {
+                    name
                 }
-                """,
-                context: StarWarsContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: StarWarsContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "human": [
                     "name": "Luke Skywalker",

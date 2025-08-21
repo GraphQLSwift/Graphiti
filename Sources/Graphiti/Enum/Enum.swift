@@ -1,8 +1,8 @@
 import GraphQL
 
 public final class Enum<
-    Resolver,
-    Context,
+    Resolver: Sendable,
+    Context: Sendable,
     EnumType: Encodable & RawRepresentable
 >: TypeComponent<
     Resolver,

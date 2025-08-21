@@ -1,6 +1,6 @@
 /// A partial schema that declare a set of type, query, mutation, and/or subscription definition
 /// which can be compiled together into 1 schema.
-open class PartialSchema<Resolver, Context> {
+open class PartialSchema<Resolver: Sendable, Context: Sendable> {
     /// A custom parameter attribute that constructs type definitions from closures.
     public typealias TypeDefinitions = TypeComponentBuilder<Resolver, Context>
 

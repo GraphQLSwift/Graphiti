@@ -1,4 +1,4 @@
-# Graphiti 
+# Graphiti
 
 Graphiti is a Swift library for building GraphQL schemas fast, safely and easily.
 
@@ -86,7 +86,7 @@ struct MessageAPI : API {
     let resolver: Resolver
     let schema: Schema<Resolver, Context>
 }
-        
+
 let api = MessageAPI(
     resolver: Resolver()
     schema: try! Schema<Resolver, Context> {
@@ -124,7 +124,7 @@ let api = MessageAPI(
     resolver: Resolver()
     schema: schema
 )
-``` 
+```
 
 </details>
 <details>
@@ -136,7 +136,7 @@ final class ChatSchema: PartialSchema<Resolver, Context> {
     public override var types: Types {
         Type(Message.self) {
             Field("content", at: \.content)
-        }        
+        }
     }
 
     @FieldDefinitions
@@ -152,7 +152,7 @@ let api = MessageAPI(
     resolver: Resolver()
     schema: schema
 )
-``` 
+```
 
 </details>
 
@@ -164,7 +164,7 @@ let chatSchema = PartialSchema<Resolver, Context>(
     types:  {
         Type(Message.self) {
             Field("content", at: \.content)
-        }        
+        }
     },
     query: {
         Field("message", at: Resolver.message)
@@ -178,7 +178,7 @@ let api = MessageAPI(
     resolver: Resolver()
     schema: schema
 )
-``` 
+```
 
 </details>
 
@@ -190,20 +190,10 @@ let api = MessageAPI(
 
 #### Querying
 
-To query the schema we need to pass in a NIO EventLoopGroup to feed the execute function alongside the query itself.
-
 ```swift
-import NIO
-
-let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-defer {
-    try? group.syncShutdownGracefully()
-}
-
 let result = try await api.execute(
     request: "{ message { content } }",
-    context: Context(),
-    on: group
+    context: Context()
 )
 print(result)
 ```
@@ -228,27 +218,13 @@ struct Resolver {
 }
 ```
 
-#### NIO resolvers
-
-The resolver functions also support `NIO`-style concurrency. To do so, just add one more parameter with type `EventLoopGroup` to the resolver function and change the return type to `EventLoopFuture<YouReturnType>`. Don't forget to import NIO.
-
-```swift
-import NIO
-
-struct Resolver {
-    func message(context: Context, arguments: NoArguments, group: EventLoopGroup) -> EventLoopFuture<Message> {
-        group.next().makeSucceededFuture(context.message())
-    }
-}
-```
-
 #### Subscription
 
 This library supports GraphQL subscriptions, and supports them through the Swift Concurrency `AsyncThrowingStream` type. See the [Usage Guide](UsageGuide.md#subscriptions) for details.
 
 If you are unable to use Swift Concurrency, you must create a concrete subclass of the `EventStream` class that implements event streaming
 functionality. If you don't feel like creating a subclass yourself, you can use the [GraphQLRxSwift](https://github.com/GraphQLSwift/GraphQLRxSwift) repository
-to integrate [RxSwift](https://github.com/ReactiveX/RxSwift) observables out-of-the-box. Or you can use that repository as a reference to connect a different 
+to integrate [RxSwift](https://github.com/ReactiveX/RxSwift) observables out-of-the-box. Or you can use that repository as a reference to connect a different
 stream library like [ReactiveSwift](https://github.com/ReactiveCocoa/ReactiveSwift), [OpenCombine](https://github.com/OpenCombine/OpenCombine), or
 one that you've created yourself.
 

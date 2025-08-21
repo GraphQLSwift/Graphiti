@@ -30,10 +30,10 @@ public extension Droid {
     }
 }
 
-public struct StarWarsResolver {
+public struct StarWarsResolver: Sendable {
     public init() {}
 
-    public struct HeroArguments: Codable {
+    public struct HeroArguments: Codable, Sendable {
         public let episode: Episode?
     }
 
@@ -41,7 +41,7 @@ public struct StarWarsResolver {
         context.getHero(of: arguments.episode)
     }
 
-    public struct HumanArguments: Codable {
+    public struct HumanArguments: Codable, Sendable {
         public let id: String
     }
 
@@ -49,7 +49,7 @@ public struct StarWarsResolver {
         context.getHuman(id: arguments.id)
     }
 
-    public struct DroidArguments: Codable {
+    public struct DroidArguments: Codable, Sendable {
         public let id: String
     }
 
@@ -57,7 +57,7 @@ public struct StarWarsResolver {
         context.getDroid(id: arguments.id)
     }
 
-    public struct SearchArguments: Codable {
+    public struct SearchArguments: Codable, Sendable {
         public let query: String
     }
 

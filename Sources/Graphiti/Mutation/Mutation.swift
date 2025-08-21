@@ -1,9 +1,9 @@
 import GraphQL
 
-public final class Mutation<Resolver, Context>: Component<Resolver, Context> {
+public final class Mutation<Resolver: Sendable, Context: Sendable>: Component<Resolver, Context> {
     let fields: [FieldComponent<Resolver, Context>]
 
-    let isTypeOf: GraphQLIsTypeOf = { source, _, _ in
+    let isTypeOf: GraphQLIsTypeOf = { source, _ in
         source is Resolver
     }
 

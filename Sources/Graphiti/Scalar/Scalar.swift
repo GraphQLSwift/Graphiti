@@ -7,44 +7,31 @@ import OrderedCollections
 /// Encoding/decoding behavior can be modified through the `MapEncoder`/`MapDecoder` options available through
 /// `Coders` or a custom encoding/decoding on the `ScalarType` itself. If you need very custom serialization controls,
 /// you may provide your own serialize, parseValue, and parseLiteral implementations.
-open class Scalar<Resolver, Context, ScalarType: Codable>: TypeComponent<Resolver, Context> {
+open class Scalar<
+    Resolver: Sendable,
+    Context: Sendable,
+    ScalarType: Codable
+>: TypeComponent<Resolver, Context> {
     // TODO: Change this no longer be an open class
     let specifiedByURL: String?
 
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
+        let serialize = self.serialize
+        let parseValue = self.parseValue
+        let parseLiteral = self.parseLiteral
+
         let scalarType = try GraphQLScalarType(
             name: name,
             description: description,
             specifiedByURL: specifiedByURL,
             serialize: { value in
-                if let serialize = self.serialize {
-                    return try serialize(value, coders)
-                } else {
-                    guard let scalar = value as? ScalarType else {
-                        throw GraphQLError(
-                            message: "Serialize expected type \(ScalarType.self) but got \(type(of: value))"
-                        )
-                    }
-
-                    return try self.serialize(scalar: scalar, encoder: coders.encoder)
-                }
+                try serialize(value, coders)
             },
             parseValue: { map in
-                if let parseValue = self.parseValue {
-                    return try parseValue(map, coders)
-                } else {
-                    let scalar = try self.parse(map: map, decoder: coders.decoder)
-                    return try self.serialize(scalar: scalar, encoder: coders.encoder)
-                }
+                try parseValue(map, coders)
             },
             parseLiteral: { value in
-                if let parseLiteral = self.parseLiteral {
-                    return try parseLiteral(value, coders)
-                } else {
-                    let map = value.map
-                    let scalar = try self.parse(map: map, decoder: coders.decoder)
-                    return try self.serialize(scalar: scalar, encoder: coders.encoder)
-                }
+                try parseLiteral(value, coders)
             }
         )
 
@@ -61,26 +48,49 @@ open class Scalar<Resolver, Context, ScalarType: Codable>: TypeComponent<Resolve
         try decoder.decode(ScalarType.self, from: map)
     }
 
-    let serialize: ((Any, Coders) throws -> Map)?
-    let parseValue: ((Map, Coders) throws -> Map)?
-    let parseLiteral: ((GraphQL.Value, Coders) throws -> Map)?
+    let serialize: @Sendable (Any, Coders) throws -> Map
+    let parseValue: @Sendable (Map, Coders) throws -> Map
+    let parseLiteral: @Sendable (GraphQL.Value, Coders) throws -> Map
 
     init(
         type _: ScalarType.Type,
         name: String?,
         specifiedBy: String? = nil,
-        serialize: ((Any, Coders) throws -> Map)? = nil,
-        parseValue: ((Map, Coders) throws -> Map)? = nil,
-        parseLiteral: ((GraphQL.Value, Coders) throws -> Map)? = nil
+        serialize: (@Sendable (Any, Coders) throws -> Map)? = nil,
+        parseValue: (@Sendable (Map, Coders) throws -> Map)? = nil,
+        parseLiteral: (@Sendable (GraphQL.Value, Coders) throws -> Map)? = nil
     ) {
         specifiedByURL = specifiedBy
-        self.serialize = serialize
-        self.parseValue = parseValue
-        self.parseLiteral = parseLiteral
+        self.serialize = serialize ?? Self.defaultSerialize
+        self.parseValue = parseValue ?? Self.defaultParseValue
+        self.parseLiteral = parseLiteral ?? Self.defaultParseLiteral
         super.init(
             name: name ?? Reflection.name(for: ScalarType.self),
             type: .scalar
         )
+    }
+
+    @Sendable
+    private static func defaultSerialize(value: Any, coders: Coders) throws -> Map {
+        guard let scalar = value as? ScalarType else {
+            throw GraphQLError(
+                message: "Serialize expected type \(ScalarType.self) but got \(type(of: value))"
+            )
+        }
+        return try coders.encoder.encode(scalar)
+    }
+
+    @Sendable
+    private static func defaultParseValue(map: Map, coders: Coders) throws -> Map {
+        let scalar = try coders.decoder.decode(ScalarType.self, from: map)
+        return try coders.encoder.encode(scalar)
+    }
+
+    @Sendable
+    private static func defaultParseLiteral(value: GraphQL.Value, coders: Coders) throws -> Map {
+        let map = value.map
+        let scalar = try coders.decoder.decode(ScalarType.self, from: map)
+        return try coders.encoder.encode(scalar)
     }
 }
 
@@ -89,9 +99,9 @@ public extension Scalar {
         _ type: ScalarType.Type,
         as name: String? = nil,
         specifiedBy: String? = nil,
-        serialize: ((Any, Coders) throws -> Map)? = nil,
-        parseValue: ((Map, Coders) throws -> Map)? = nil,
-        parseLiteral: ((GraphQL.Value, Coders) throws -> Map)? = nil
+        serialize: (@Sendable (Any, Coders) throws -> Map)? = nil,
+        parseValue: (@Sendable (Map, Coders) throws -> Map)? = nil,
+        parseLiteral: (@Sendable (GraphQL.Value, Coders) throws -> Map)? = nil
     ) {
         self.init(
             type: type,

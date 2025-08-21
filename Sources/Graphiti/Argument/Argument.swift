@@ -2,7 +2,7 @@ import GraphQL
 
 public class Argument<ArgumentsType: Decodable, ArgumentType>: ArgumentComponent<ArgumentsType> {
     let name: String
-    var defaultValue: AnyEncodable? = nil
+    var defaultValue: AnyEncodable?
 
     override func argument(
         typeProvider: TypeProvider,

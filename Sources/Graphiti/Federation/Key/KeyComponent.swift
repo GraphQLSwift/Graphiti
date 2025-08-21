@@ -1,7 +1,6 @@
 import GraphQL
-import NIO
 
-public class KeyComponent<ObjectType, Resolver, Context> {
+public class KeyComponent<ObjectType, Resolver, Context>: @unchecked Sendable {
     func mapMatchesArguments(_: Map, coders _: Coders) -> Bool {
         fatalError()
     }
@@ -10,9 +9,8 @@ public class KeyComponent<ObjectType, Resolver, Context> {
         resolver _: Resolver,
         context _: Context,
         map _: Map,
-        eventLoopGroup _: EventLoopGroup,
         coders _: Coders
-    ) throws -> EventLoopFuture<Any?> {
+    ) async throws -> (any Sendable)? {
         fatalError()
     }
 

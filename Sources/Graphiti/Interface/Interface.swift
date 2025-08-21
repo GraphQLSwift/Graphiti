@@ -1,6 +1,10 @@
 import GraphQL
 
-public final class Interface<Resolver, Context, InterfaceType>: TypeComponent<
+public final class Interface<
+    Resolver: Sendable,
+    Context: Sendable,
+    InterfaceType
+>: TypeComponent<
     Resolver,
     Context
 > {

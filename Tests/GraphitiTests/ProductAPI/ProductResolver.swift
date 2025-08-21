@@ -1,7 +1,6 @@
 import Foundation
 import Graphiti
 import GraphQL
-import NIO
 
 struct ProductResolver {
     var sdl: String

@@ -1,13 +1,12 @@
 import Foundation
 @testable import Graphiti
 import GraphQL
-import NIO
 import XCTest
 
 class ScalarTests: XCTestCase {
     // MARK: Test UUID converts to String as expected
 
-    func testUUIDOutput() throws {
+    func testUUIDOutput() async throws {
         struct UUIDOutput {
             let value: UUID
         }
@@ -32,21 +31,18 @@ class ScalarTests: XCTestCase {
             schema: testSchema
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
-
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                  uuid {
-                    value
-                  }
+        let result = try await api.execute(
+            request: """
+            query {
+                uuid {
+                value
                 }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "uuid": [
                     "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
@@ -55,7 +51,7 @@ class ScalarTests: XCTestCase {
         )
     }
 
-    func testUUIDArg() throws {
+    func testUUIDArg() async throws {
         struct UUIDOutput {
             let value: UUID
         }
@@ -86,21 +82,18 @@ class ScalarTests: XCTestCase {
             schema: testSchema
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
-
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                  uuid (value: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F") {
-                    value
-                  }
+        let result = try await api.execute(
+            request: """
+            query {
+                uuid (value: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F") {
+                value
                 }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "uuid": [
                     "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
@@ -109,7 +102,7 @@ class ScalarTests: XCTestCase {
         )
     }
 
-    func testUUIDInput() throws {
+    func testUUIDInput() async throws {
         struct UUIDOutput {
             let value: UUID
         }
@@ -147,21 +140,18 @@ class ScalarTests: XCTestCase {
             schema: testSchema
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
-
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                  uuid (input: {value: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"}) {
-                    value
-                  }
+        let result = try await api.execute(
+            request: """
+            query {
+                uuid (input: {value: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"}) {
+                value
                 }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "uuid": [
                     "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
@@ -172,7 +162,7 @@ class ScalarTests: XCTestCase {
 
     // MARK: Test Date scalars convert to String using ISO8601 encoders
 
-    func testDateOutput() throws {
+    func testDateOutput() async throws {
         struct DateOutput {
             let value: Date
         }
@@ -202,21 +192,18 @@ class ScalarTests: XCTestCase {
             schema: testSchema
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
-
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                  date {
-                    value
-                  }
+        let result = try await api.execute(
+            request: """
+            query {
+                date {
+                value
                 }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "date": [
                     "value": "2001-01-01T00:00:00Z",
@@ -225,7 +212,7 @@ class ScalarTests: XCTestCase {
         )
     }
 
-    func testDateArg() throws {
+    func testDateArg() async throws {
         struct DateOutput {
             let value: Date
         }
@@ -261,21 +248,18 @@ class ScalarTests: XCTestCase {
             schema: testSchema
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
-
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                  date (value: "2001-01-01T00:00:00Z") {
-                    value
-                  }
+        let result = try await api.execute(
+            request: """
+            query {
+                date (value: "2001-01-01T00:00:00Z") {
+                value
                 }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "date": [
                     "value": "2001-01-01T00:00:00Z",
@@ -284,7 +268,7 @@ class ScalarTests: XCTestCase {
         )
     }
 
-    func testDateInput() throws {
+    func testDateInput() async throws {
         struct DateOutput {
             let value: Date
         }
@@ -327,21 +311,18 @@ class ScalarTests: XCTestCase {
             schema: testSchema
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
-
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                  date (input: {value: "2001-01-01T00:00:00Z"}) {
-                    value
-                  }
+        let result = try await api.execute(
+            request: """
+            query {
+                date (input: {value: "2001-01-01T00:00:00Z"}) {
+                value
                 }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "date": [
                     "value": "2001-01-01T00:00:00Z",
@@ -352,7 +333,7 @@ class ScalarTests: XCTestCase {
 
     // MARK: Test a scalar that converts to a single-value Map (StringCodedCoordinate -> String)
 
-    func testStringCoordOutput() throws {
+    func testStringCoordOutput() async throws {
         struct CoordinateOutput {
             let value: StringCodedCoordinate
         }
@@ -377,21 +358,18 @@ class ScalarTests: XCTestCase {
             schema: testSchema
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
-
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                  coord {
-                    value
-                  }
+        let result = try await api.execute(
+            request: """
+            query {
+                coord {
+                value
                 }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "coord": [
                     "value": "(0.0, 0.0)",
@@ -400,7 +378,7 @@ class ScalarTests: XCTestCase {
         )
     }
 
-    func testStringCoordArg() throws {
+    func testStringCoordArg() async throws {
         struct CoordinateOutput {
             let value: StringCodedCoordinate
         }
@@ -431,21 +409,18 @@ class ScalarTests: XCTestCase {
             schema: testSchema
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
-
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                  coord (value: "(0.0, 0.0)") {
-                    value
-                  }
+        let result = try await api.execute(
+            request: """
+            query {
+                coord (value: "(0.0, 0.0)") {
+                value
                 }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "coord": [
                     "value": "(0.0, 0.0)",
@@ -454,7 +429,7 @@ class ScalarTests: XCTestCase {
         )
     }
 
-    func testStringCoordInput() throws {
+    func testStringCoordInput() async throws {
         struct CoordinateOutput {
             let value: StringCodedCoordinate
         }
@@ -492,21 +467,18 @@ class ScalarTests: XCTestCase {
             schema: testSchema
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
-
-        XCTAssertEqual(
-            try api.execute(
-                request: """
-                query {
-                  coord (input: {value: "(0.0, 0.0)"}) {
-                    value
-                  }
+        let result = try await api.execute(
+            request: """
+            query {
+                coord (input: {value: "(0.0, 0.0)"}) {
+                value
                 }
-                """,
-                context: NoContext(),
-                on: group
-            ).wait(),
+            }
+            """,
+            context: NoContext()
+        )
+        XCTAssertEqual(
+            result,
             GraphQLResult(data: [
                 "coord": [
                     "value": "(0.0, 0.0)",
@@ -517,7 +489,7 @@ class ScalarTests: XCTestCase {
 
     // MARK: Test a scalar that converts to a multi-value Map (Coordinate -> Dict)
 
-    func testDictCoordOutput() throws {
+    func testDictCoordOutput() async throws {
         struct CoordinateOutput {
             let value: DictCodedCoordinate
         }
@@ -542,11 +514,8 @@ class ScalarTests: XCTestCase {
             schema: testSchema
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
-
         // Test individual fields because we can't be confident we'll match the ordering of Map's OrderedDictionary
-        let result = try api.execute(
+        let result = try await api.execute(
             request: """
             query {
               coord {
@@ -554,9 +523,9 @@ class ScalarTests: XCTestCase {
               }
             }
             """,
-            context: NoContext(),
-            on: group
-        ).wait()
+            context: NoContext()
+        )
+
         let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
 
         XCTAssertEqual(
@@ -569,7 +538,7 @@ class ScalarTests: XCTestCase {
         )
     }
 
-    func testDictCoordArg() throws {
+    func testDictCoordArg() async throws {
         struct CoordinateOutput {
             let value: DictCodedCoordinate
         }
@@ -600,11 +569,8 @@ class ScalarTests: XCTestCase {
             schema: testSchema
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
-
         // Test individual fields because we can't be confident we'll match the ordering of Map's OrderedDictionary
-        let result = try api.execute(
+        let result = try await api.execute(
             request: """
             query {
               coord (value: {latitude: 0.0, longitude: 0.0}) {
@@ -612,9 +578,9 @@ class ScalarTests: XCTestCase {
               }
             }
             """,
-            context: NoContext(),
-            on: group
-        ).wait()
+            context: NoContext()
+        )
+
         let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
 
         XCTAssertEqual(
@@ -627,7 +593,7 @@ class ScalarTests: XCTestCase {
         )
     }
 
-    func testDictCoordInput() throws {
+    func testDictCoordInput() async throws {
         struct CoordinateOutput {
             let value: DictCodedCoordinate
         }
@@ -665,11 +631,8 @@ class ScalarTests: XCTestCase {
             schema: testSchema
         )
 
-        let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        defer { try? group.syncShutdownGracefully() }
-
         // Test individual fields because we can't be confident we'll match the ordering of Map's OrderedDictionary
-        let result = try api.execute(
+        let result = try await api.execute(
             request: """
             query {
               coord (input: {value: {latitude: 0.0, longitude: 0.0}}) {
@@ -677,9 +640,9 @@ class ScalarTests: XCTestCase {
               }
             }
             """,
-            context: NoContext(),
-            on: group
-        ).wait()
+            context: NoContext()
+        )
+
         let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
 
         XCTAssertEqual(
@@ -693,7 +656,7 @@ class ScalarTests: XCTestCase {
     }
 }
 
-private class TestAPI<Resolver, ContextType>: API {
+private class TestAPI<Resolver: Sendable, ContextType: Sendable>: API {
     public let resolver: Resolver
     public let schema: Schema<Resolver, ContextType>
 
