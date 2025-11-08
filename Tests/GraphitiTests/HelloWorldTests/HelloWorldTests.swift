@@ -40,10 +40,6 @@ struct User {
             friends = nil
         }
     }
-
-    func toEvent(context _: HelloContext, arguments _: NoArguments) throws -> UserEvent {
-        return UserEvent(user: self)
-    }
 }
 
 struct UserInput: Codable {

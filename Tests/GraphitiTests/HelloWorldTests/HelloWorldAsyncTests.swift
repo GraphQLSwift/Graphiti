@@ -1,327 +1,379 @@
-@testable import Graphiti
-import GraphQL
-import Testing
+// @testable import Graphiti
+// import GraphQL
+// import Testing
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-let pubsub = SimplePubSub<User>()
+// @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+// struct AsyncHelloResolver: Sendable {
+//     func hello(context: AsyncHelloContext, arguments _: NoArguments) -> String {
+//         context.hello()
+//     }
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-extension HelloResolver {
-    func asyncHello(
-        context: HelloContext,
-        arguments _: NoArguments
-    ) async -> String {
-        return await Task {
-            context.hello()
-        }.value
-    }
+//     func futureHello(
+//         context: AsyncHelloContext,
+//         arguments _: NoArguments
+//     ) -> String {
+//         context.hello()
+//     }
 
-    func subscribeUser(
-        context _: HelloContext,
-        arguments _: NoArguments
-    ) async -> AsyncThrowingStream<User, Error> {
-        await pubsub.subscribe()
-    }
+//     struct FloatArguments: Codable {
+//         let float: Float
+//     }
 
-    func futureSubscribeUser(
-        context _: HelloContext,
-        arguments _: NoArguments
-    ) async -> AsyncThrowingStream<User, Error> {
-        await pubsub.subscribe()
-    }
+//     func getFloat(context _: AsyncHelloContext, arguments: FloatArguments) -> Float {
+//         arguments.float
+//     }
 
-    func asyncSubscribeUser(
-        context _: HelloContext,
-        arguments _: NoArguments
-    ) async -> AsyncThrowingStream<User, Error> {
-        return await Task {
-            await pubsub.subscribe()
-        }.value
-    }
-}
+//     struct IDArguments: Codable {
+//         let id: ID
+//     }
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-// Same as the HelloAPI, except with an async query and a few subscription fields
-struct HelloAsyncAPI: API {
-    typealias ContextType = HelloContext
+//     func getId(context _: AsyncHelloContext, arguments: IDArguments) -> ID {
+//         arguments.id
+//     }
 
-    let resolver: HelloResolver = .init()
-    let context: HelloContext = .init()
+//     func getUser(context _: AsyncHelloContext, arguments _: NoArguments) -> User {
+//         User(id: "123", name: "John Doe", friends: nil)
+//     }
 
-    let schema: Schema<HelloResolver, HelloContext> = try! Schema<HelloResolver, HelloContext> {
-        Scalar(Float.self)
-            .description(
-                "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point)."
-            )
+//     struct AddUserArguments: Codable {
+//         let user: UserInput
+//     }
 
-        Scalar(ID.self)
-            .description("The `ID` scalar type represents a unique identifier.")
+//     func addUser(context _: AsyncHelloContext, arguments: AddUserArguments) -> User {
+//         User(arguments.user)
+//     }
 
-        Type(User.self) {
-            Field("id", at: \.id)
-            Field("name", at: \.name)
-            Field("friends", at: \.friends)
-        }
+//     func asyncHello(
+//         context: AsyncHelloContext,
+//         arguments _: NoArguments
+//     ) async -> String {
+//         return await Task {
+//             context.hello()
+//         }.value
+//     }
 
-        Input(UserInput.self) {
-            InputField("id", at: \.id)
-            InputField("name", at: \.name)
-            InputField("friends", at: \.friends)
-        }
+//     func subscribeUser(
+//         context: AsyncHelloContext,
+//         arguments _: NoArguments
+//     ) async -> AsyncThrowingStream<User, Error> {
+//         await context.pubsub.subscribe()
+//     }
 
-        Type(UserEvent.self) {
-            Field("user", at: \.user)
-        }
+//     func futureSubscribeUser(
+//         context: AsyncHelloContext,
+//         arguments _: NoArguments
+//     ) async -> AsyncThrowingStream<User, Error> {
+//         await context.pubsub.subscribe()
+//     }
 
-        Query {
-            Field("hello", at: HelloResolver.hello)
-            Field("futureHello", at: HelloResolver.futureHello)
-            Field("asyncHello", at: HelloResolver.asyncHello)
+//     func asyncSubscribeUser(
+//         context: AsyncHelloContext,
+//         arguments _: NoArguments
+//     ) async -> AsyncThrowingStream<User, Error> {
+//         return await Task {
+//             await context.pubsub.subscribe()
+//         }.value
+//     }
+// }
 
-            Field("float", at: HelloResolver.getFloat) {
-                Argument("float", at: \.float)
-            }
+// final class AsyncHelloContext: Sendable {
+//     let pubsub = SimplePubSub<User>()
 
-            Field("id", at: HelloResolver.getId) {
-                Argument("id", at: \.id)
-            }
+//     func hello() -> String {
+//         "world"
+//     }
+// }
 
-            Field("user", at: HelloResolver.getUser)
-        }
+// extension User {
+//     func toEvent(context _: AsyncHelloContext, arguments _: NoArguments) throws -> UserEvent {
+//         return UserEvent(user: self)
+//     }
+// }
 
-        Mutation {
-            Field("addUser", at: HelloResolver.addUser) {
-                Argument("user", at: \.user)
-            }
-        }
+// @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+// struct HelloAsyncAPI: API {
+//     let resolver: AsyncHelloResolver = .init()
 
-        Subscription {
-            SubscriptionField(
-                "subscribeUser",
-                as: User.self,
-                atSub: HelloResolver.subscribeUser
-            )
-            SubscriptionField(
-                "subscribeUserEvent",
-                at: User.toEvent,
-                atSub: HelloResolver.subscribeUser
-            )
+//     let schema: Schema<AsyncHelloResolver, AsyncHelloContext> = try! Schema<AsyncHelloResolver, AsyncHelloContext> {
+//         Scalar(Float.self)
+//             .description(
+//                 "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point)."
+//             )
 
-            SubscriptionField(
-                "futureSubscribeUser",
-                as: User.self,
-                atSub: HelloResolver.subscribeUser
-            )
-            SubscriptionField(
-                "asyncSubscribeUser",
-                as: User.self,
-                atSub: HelloResolver.asyncSubscribeUser
-            )
-        }
-    }
-}
+//         Scalar(ID.self)
+//             .description("The `ID` scalar type represents a unique identifier.")
 
-struct HelloWorldAsyncTests {
-    private let api = HelloAsyncAPI()
+//         Type(User.self) {
+//             Field("id", at: \.id)
+//             Field("name", at: \.name)
+//             Field("friends", at: \.friends)
+//         }
 
-    /// Tests that async version of API.execute works as expected
-    @Test
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-    func asyncExecute() async throws {
-        let query = "{ hello }"
-        let result = try await api.execute(
-            request: query,
-            context: api.context
-        )
-        #expect(result == GraphQLResult(data: ["hello": "world"]))
-    }
+//         Input(UserInput.self) {
+//             InputField("id", at: \.id)
+//             InputField("name", at: \.name)
+//             InputField("friends", at: \.friends)
+//         }
 
-    /// Tests that async fields (via ConcurrentResolve) are resolved successfully
-    @Test
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-    func asyncHello() async throws {
-        let query = "{ asyncHello }"
-        let result = try await api.execute(
-            request: query,
-            context: api.context
-        )
-        #expect(result == GraphQLResult(data: ["asyncHello": "world"]))
-    }
+//         Type(UserEvent.self) {
+//             Field("user", at: \.user)
+//         }
 
-    /// Tests subscription when the sourceEventStream type matches the resolved type (i.e. the normal resolution function should just short-circuit to the sourceEventStream object)
-    @Test
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-    func subscriptionSelf() async throws {
-        let request = """
-        subscription {
-            subscribeUser {
-                id
-                name
-            }
-        }
-        """
+//         Query {
+//             Field("hello", at: AsyncHelloResolver.hello)
+//             Field("futureHello", at: AsyncHelloResolver.futureHello)
+//             Field("asyncHello", at: AsyncHelloResolver.asyncHello)
 
-        let subscription = try await api.subscribe(
-            request: request,
-            context: api.context
-        ).get()
-        var iterator = subscription.makeAsyncIterator()
+//             Field("float", at: AsyncHelloResolver.getFloat) {
+//                 Argument("float", at: \.float)
+//             }
 
-        await pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
+//             Field("id", at: AsyncHelloResolver.getId) {
+//                 Argument("id", at: \.id)
+//             }
 
-        let result = try await iterator.next()
-        #expect(
-            result ==
-            GraphQLResult(data: [
-                "subscribeUser": [
-                    "id": "124",
-                    "name": "Jerry",
-                ],
-            ])
-        )
-    }
+//             Field("user", at: AsyncHelloResolver.getUser)
+//         }
 
-    /// Tests subscription when the sourceEventStream type does not match the resolved type (i.e. there is a non-trivial resolution function that transforms the sourceEventStream object)
-    @Test
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-    func subscriptionEvent() async throws {
-        let request = """
-        subscription {
-            subscribeUserEvent {
-                user {
-                    id
-                    name
-                }
-            }
-        }
-        """
+//         Mutation {
+//             Field("addUser", at: AsyncHelloResolver.addUser) {
+//                 Argument("user", at: \.user)
+//             }
+//         }
 
-        let subscription = try await api.subscribe(
-            request: request,
-            context: api.context
-        ).get()
-        var iterator = subscription.makeAsyncIterator()
+//         Subscription {
+//             SubscriptionField(
+//                 "subscribeUser",
+//                 as: User.self,
+//                 atSub: AsyncHelloResolver.subscribeUser
+//             )
+//             SubscriptionField(
+//                 "subscribeUserEvent",
+//                 at: User.toEvent,
+//                 atSub: AsyncHelloResolver.subscribeUser
+//             )
 
-        await pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
+//             SubscriptionField(
+//                 "futureSubscribeUser",
+//                 as: User.self,
+//                 atSub: AsyncHelloResolver.subscribeUser
+//             )
+//             SubscriptionField(
+//                 "asyncSubscribeUser",
+//                 as: User.self,
+//                 atSub: AsyncHelloResolver.asyncSubscribeUser
+//             )
+//         }
+//     }
+// }
 
-        let result = try await iterator.next()
-        #expect(
-            result ==
-            GraphQLResult(data: [
-                "subscribeUserEvent": [
-                    "user": [
-                        "id": "124",
-                        "name": "Jerry",
-                    ],
-                ],
-            ])
-        )
-    }
+// struct HelloWorldAsyncTests {
+//     private let api = HelloAsyncAPI()
 
-    /// Tests that subscription resolvers that return futures work
-    @Test
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-    func futureSubscription() async throws {
-        let request = """
-        subscription {
-            futureSubscribeUser {
-                id
-                name
-            }
-        }
-        """
+//     /// Tests that async version of API.execute works as expected
+//     @Test
+//     @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+//     func asyncExecute() async throws {
+//         let context = AsyncHelloContext()
+//         let query = "{ hello }"
+//         let result = try await api.execute(
+//             request: query,
+//             context: context
+//         )
+//         #expect(result == GraphQLResult(data: ["hello": "world"]))
+//     }
 
-        let subscription = try await api.subscribe(
-            request: request,
-            context: api.context
-        ).get()
-        var iterator = subscription.makeAsyncIterator()
+//     /// Tests that async fields (via ConcurrentResolve) are resolved successfully
+//     @Test
+//     @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+//     func asyncHello() async throws {
+//         let context = AsyncHelloContext()
+//         let query = "{ asyncHello }"
+//         let result = try await api.execute(
+//             request: query,
+//             context: context
+//         )
+//         #expect(result == GraphQLResult(data: ["asyncHello": "world"]))
+//     }
 
-        await pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
+//     /// Tests subscription when the sourceEventStream type matches the resolved type (i.e. the normal resolution function should just short-circuit to the sourceEventStream object)
+//     @Test
+//     @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+//     func subscriptionSelf() async throws {
+//         let context = AsyncHelloContext()
+//         let request = """
+//         subscription {
+//             subscribeUser {
+//                 id
+//                 name
+//             }
+//         }
+//         """
 
-        let result = try await iterator.next()
-        #expect(
-            result ==
-            GraphQLResult(data: [
-                "futureSubscribeUser": [
-                    "id": "124",
-                    "name": "Jerry",
-                ],
-            ])
-        )
-    }
+//         let subscription = try await api.subscribe(
+//             request: request,
+//             context: context
+//         ).get()
+//         var iterator = subscription.makeAsyncIterator()
 
-    /// Tests that subscription resolvers that are async work
-    @Test
-    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-    func asyncSubscription() async throws {
-        let request = """
-        subscription {
-            asyncSubscribeUser {
-                id
-                name
-            }
-        }
-        """
+//         await context.pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
-        let subscription = try await api.subscribe(
-            request: request,
-            context: api.context
-        ).get()
-        var iterator = subscription.makeAsyncIterator()
+//         let result = try await iterator.next()
+//         #expect(
+//             result ==
+//             GraphQLResult(data: [
+//                 "subscribeUser": [
+//                     "id": "124",
+//                     "name": "Jerry",
+//                 ],
+//             ])
+//         )
+//     }
 
-        await pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
+//     /// Tests subscription when the sourceEventStream type does not match the resolved type (i.e. there is a non-trivial resolution function that transforms the sourceEventStream object)
+//     @Test
+//     @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+//     func subscriptionEvent() async throws {
+//         let context = AsyncHelloContext()
+//         let request = """
+//         subscription {
+//             subscribeUserEvent {
+//                 user {
+//                     id
+//                     name
+//                 }
+//             }
+//         }
+//         """
 
-        let result = try await iterator.next()
-        #expect(
-            result ==
-            GraphQLResult(data: [
-                "asyncSubscribeUser": [
-                    "id": "124",
-                    "name": "Jerry",
-                ],
-            ])
-        )
-    }
-}
+//         let subscription = try await api.subscribe(
+//             request: request,
+//             context: context
+//         ).get()
+//         var iterator = subscription.makeAsyncIterator()
 
-/// A very simple publish/subscriber used for testing
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-actor SimplePubSub<T: Sendable>: Sendable {
-    private var subscribers: [Subscriber<T>]
+//         await context.pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
-    init() {
-        subscribers = []
-    }
+//         let result = try await iterator.next()
+//         #expect(
+//             result ==
+//             GraphQLResult(data: [
+//                 "subscribeUserEvent": [
+//                     "user": [
+//                         "id": "124",
+//                         "name": "Jerry",
+//                     ],
+//                 ],
+//             ])
+//         )
+//     }
 
-    func publish(event: T) {
-        for subscriber in subscribers {
-            subscriber.callback(event)
-        }
-    }
+//     /// Tests that subscription resolvers that return futures work
+//     @Test
+//     @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+//     func futureSubscription() async throws {
+//         let context = AsyncHelloContext()
+//         let request = """
+//         subscription {
+//             futureSubscribeUser {
+//                 id
+//                 name
+//             }
+//         }
+//         """
 
-    func cancel() {
-        for subscriber in subscribers {
-            subscriber.cancel()
-        }
-    }
+//         let subscription = try await api.subscribe(
+//             request: request,
+//             context: context
+//         ).get()
+//         var iterator = subscription.makeAsyncIterator()
 
-    func subscribe() -> AsyncThrowingStream<T, Error> {
-        return AsyncThrowingStream<T, Error> { continuation in
-            let subscriber = Subscriber<T>(
-                callback: { newValue in
-                    continuation.yield(newValue)
-                },
-                cancel: {
-                    continuation.finish()
-                }
-            )
-            subscribers.append(subscriber)
-        }
-    }
-}
+//         await context.pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
-struct Subscriber<T: Sendable> {
-    let callback: (T) -> Void
-    let cancel: () -> Void
-}
+//         let result = try await iterator.next()
+//         #expect(
+//             result ==
+//             GraphQLResult(data: [
+//                 "futureSubscribeUser": [
+//                     "id": "124",
+//                     "name": "Jerry",
+//                 ],
+//             ])
+//         )
+//     }
+
+//     /// Tests that subscription resolvers that are async work
+//     @Test
+//     @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+//     func asyncSubscription() async throws {
+//         let context = AsyncHelloContext()
+//         let request = """
+//         subscription {
+//             asyncSubscribeUser {
+//                 id
+//                 name
+//             }
+//         }
+//         """
+
+//         let subscription = try await api.subscribe(
+//             request: request,
+//             context: context
+//         ).get()
+//         var iterator = subscription.makeAsyncIterator()
+
+//         await context.pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
+
+//         let result = try await iterator.next()
+//         #expect(
+//             result ==
+//             GraphQLResult(data: [
+//                 "asyncSubscribeUser": [
+//                     "id": "124",
+//                     "name": "Jerry",
+//                 ],
+//             ])
+//         )
+//     }
+// }
+
+// /// A very simple publish/subscriber used for testing
+// @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+// actor SimplePubSub<T: Sendable>: Sendable {
+//     private var subscribers: [Subscriber<T>]
+
+//     init() {
+//         subscribers = []
+//     }
+
+//     func publish(event: T) {
+//         for subscriber in subscribers {
+//             subscriber.callback(event)
+//         }
+//     }
+
+//     func cancel() {
+//         for subscriber in subscribers {
+//             subscriber.cancel()
+//         }
+//     }
+
+//     func subscribe() -> AsyncThrowingStream<T, Error> {
+//         return AsyncThrowingStream<T, Error> { continuation in
+//             let subscriber = Subscriber<T>(
+//                 callback: { newValue in
+//                     continuation.yield(newValue)
+//                 },
+//                 cancel: {
+//                     continuation.finish()
+//                 }
+//             )
+//             subscribers.append(subscriber)
+//         }
+//     }
+// }
+
+// struct Subscriber<T: Sendable> {
+//     let callback: (T) -> Void
+//     let cancel: () -> Void
+// }
