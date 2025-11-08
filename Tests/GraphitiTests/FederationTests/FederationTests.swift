@@ -12,7 +12,7 @@ struct FederationTests {
             .use(partials: [ProductSchema()])
             .setFederatedSDL(to: sdl)
             .build()
-        api = try ProductAPI(resolver: ProductResolver(sdl: sdl), schema: schema)
+        api = ProductAPI(resolver: ProductResolver(sdl: sdl), schema: schema)
     }
 
     // Test Queries from https://github.com/apollographql/apollo-federation-subgraph-compatibility/blob/main/COMPATIBILITY.md
@@ -238,7 +238,7 @@ extension FederationTests {
         else {
             throw FederationTestsError.couldNotLoadFile
         }
-        return try String(contentsOf: url)
+        return try String(contentsOf: url, encoding: .utf8)
     }
 
     static func query(_ name: String) throws -> String {
@@ -251,7 +251,7 @@ extension FederationTests {
         else {
             throw FederationTestsError.couldNotLoadFile
         }
-        return try String(contentsOf: url)
+        return try String(contentsOf: url, encoding: .utf8)
     }
 
     func execute(request: String, variables: [String: Map] = [:]) async throws -> GraphQLResult {

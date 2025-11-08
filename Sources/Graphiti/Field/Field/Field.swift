@@ -151,6 +151,4 @@ public extension Field where Arguments == NoArguments {
 }
 
 // We must conform KeyPath to unchecked sendable to allow keypath-based resolvers.
-// Despite the warning, we cannot add `@retroactive` and keep Swift 5 support.
-// Remove when support transitions to Swift 6.
-extension KeyPath: @unchecked Sendable {}
+extension KeyPath: @retroactive @unchecked Sendable {}
