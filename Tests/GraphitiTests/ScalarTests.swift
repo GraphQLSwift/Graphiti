@@ -657,8 +657,8 @@ struct ScalarTests {
 }
 
 private class TestAPI<Resolver: Sendable, ContextType: Sendable>: API {
-    public let resolver: Resolver
-    public let schema: Schema<Resolver, ContextType>
+    let resolver: Resolver
+    let schema: Schema<Resolver, ContextType>
 
     init(resolver: Resolver, schema: Schema<Resolver, ContextType>) {
         self.resolver = resolver
