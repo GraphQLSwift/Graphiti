@@ -1,6 +1,6 @@
 @testable import Graphiti
 import GraphQL
-import XCTest
+import Testing
 
 struct ID: Codable {
     let id: String
@@ -155,50 +155,44 @@ struct HelloAPI: API {
     }
 }
 
-class HelloWorldTests: XCTestCase {
+struct HelloWorldTests {
     private let api = HelloAPI()
 
-    func testHello() async throws {
+    @Test func hello() async throws {
         let result = try await api.execute(
             request: "{ hello }",
             context: api.context
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: ["hello": "world"])
-        )
+        #expect(result == GraphQLResult(data: ["hello": "world"]))
     }
 
-    func testFutureHello() async throws {
+    @Test func futureHello() async throws {
         let result = try await api.execute(
             request: "{ futureHello }",
             context: api.context
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: ["futureHello": "world"])
-        )
+        #expect(result == GraphQLResult(data: ["futureHello": "world"]))
     }
 
-    func testBoyhowdy() async throws {
+    @Test func boyhowdy() async throws {
         let result = try await api.execute(
             request: "{ boyhowdy }",
             context: api.context
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(
-                errors: [
-                    GraphQLError(
-                        message: "Cannot query field \"boyhowdy\" on type \"Query\".",
-                        locations: [SourceLocation(line: 1, column: 3)]
-                    ),
-                ]
-            )
+        #expect(
+            result ==
+                GraphQLResult(
+                    errors: [
+                        GraphQLError(
+                            message: "Cannot query field \"boyhowdy\" on type \"Query\".",
+                            locations: [SourceLocation(line: 1, column: 3)]
+                        ),
+                    ]
+                )
         )
     }
 
-    func testScalar() async throws {
+    @Test func scalar() async throws {
         var result = try await api.execute(
             request: """
             query Query($float: Float!) {
@@ -208,10 +202,7 @@ class HelloWorldTests: XCTestCase {
             context: api.context,
             variables: ["float": 4]
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: ["float": 4.0])
-        )
+        #expect(result == GraphQLResult(data: ["float": 4.0]))
 
         result = try await api.execute(
             request: """
@@ -221,10 +212,7 @@ class HelloWorldTests: XCTestCase {
             """,
             context: api.context
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: ["float": 4.0])
-        )
+        #expect(result == GraphQLResult(data: ["float": 4.0]))
 
         result = try await api.execute(
             request: """
@@ -235,10 +223,7 @@ class HelloWorldTests: XCTestCase {
             context: api.context,
             variables: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"]
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"])
-        )
+        #expect(result == GraphQLResult(data: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"]))
 
         result = try await api.execute(
             request: """
@@ -248,13 +233,10 @@ class HelloWorldTests: XCTestCase {
             """,
             context: api.context
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"])
-        )
+        #expect(result == GraphQLResult(data: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"]))
     }
 
-    func testInput() async throws {
+    @Test func input() async throws {
         let result = try await api.execute(
             request: """
             mutation addUser($user: UserInput!) {
@@ -267,15 +249,15 @@ class HelloWorldTests: XCTestCase {
             context: api.context,
             variables: ["user": ["id": "123", "name": "bob"]]
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(
-                data: ["addUser": ["id": "123", "name": "bob"]]
-            )
+        #expect(
+            result ==
+                GraphQLResult(
+                    data: ["addUser": ["id": "123", "name": "bob"]]
+                )
         )
     }
 
-    func testInputRequest() async throws {
+    @Test func inputRequest() async throws {
         let result = try await api.execute(
             request: GraphQLRequest(
                 query: """
@@ -290,15 +272,15 @@ class HelloWorldTests: XCTestCase {
             ),
             context: api.context
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(
-                data: ["addUser": ["id": "123", "name": "bob"]]
-            )
+        #expect(
+            result ==
+                GraphQLResult(
+                    data: ["addUser": ["id": "123", "name": "bob"]]
+                )
         )
     }
 
-    func testInputRecursive() async throws {
+    @Test func inputRecursive() async throws {
         let result = try await api.execute(
             request: """
             mutation addUser($user: UserInput!) {
@@ -321,17 +303,17 @@ class HelloWorldTests: XCTestCase {
                 ],
             ]
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(
-                data: [
-                    "addUser": [
-                        "id": "123",
-                        "name": "bob",
-                        "friends": [["id": "124", "name": "jeff"]],
-                    ],
-                ]
-            )
+        #expect(
+            result ==
+                GraphQLResult(
+                    data: [
+                        "addUser": [
+                            "id": "123",
+                            "name": "bob",
+                            "friends": [["id": "124", "name": "jeff"]],
+                        ],
+                    ]
+                )
         )
     }
 }

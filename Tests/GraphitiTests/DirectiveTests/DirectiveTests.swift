@@ -1,11 +1,11 @@
 @testable import Graphiti
 import GraphQL
-import XCTest
+import Testing
 
-class DirectiveTests: XCTestCase {
+struct DirectiveTests {
     private let api = StarWarsAPI()
 
-    func testSkip() async throws {
+    @Test func skip() async throws {
         let query = """
         query FetchHeroNameWithSkip($skipName: Boolean!) {
             hero {
@@ -33,10 +33,10 @@ class DirectiveTests: XCTestCase {
             ]
         )
 
-        XCTAssertEqual(response, expected)
+        #expect(response == expected)
     }
 
-    func testInclude() async throws {
+    @Test func include() async throws {
         let query = """
         query FetchHeroNameWithSkip($includeName: Boolean!) {
             hero {
@@ -64,10 +64,10 @@ class DirectiveTests: XCTestCase {
             ]
         )
 
-        XCTAssertEqual(response, expected)
+        #expect(response == expected)
     }
 
-    func testOneOfAcceptsGoodValue() async throws {
+    @Test func oneOfAcceptsGoodValue() async throws {
         let result = try await OneOfAPI().execute(
             request: """
             query {
@@ -79,20 +79,20 @@ class DirectiveTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(
-                data: [
-                    "test": [
-                        "a": "abc",
-                        "b": .null,
-                    ],
-                ]
-            )
+        #expect(
+            result ==
+                GraphQLResult(
+                    data: [
+                        "test": [
+                            "a": "abc",
+                            "b": .null,
+                        ],
+                    ]
+                )
         )
     }
 
-    func testOneOfRejectsBadValue() async throws {
+    @Test func oneOfRejectsBadValue() async throws {
         let result = try await OneOfAPI().execute(
             request: """
             query {
@@ -104,9 +104,9 @@ class DirectiveTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result.errors[0].message,
-            #"OneOf Input Object "TestInputObject" must specify exactly one key."#
+        #expect(
+            result.errors[0].message ==
+                #"OneOf Input Object "TestInputObject" must specify exactly one key."#
         )
     }
 

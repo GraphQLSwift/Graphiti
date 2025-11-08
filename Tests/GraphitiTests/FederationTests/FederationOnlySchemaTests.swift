@@ -1,10 +1,10 @@
 import Foundation
 import Graphiti
 import GraphQL
-import XCTest
+import Testing
 
-final class FederationOnlySchemaTests: XCTestCase {
-    private var api: FederationOnlyAPI!
+struct FederationOnlySchemaTests {
+    private var api: FederationOnlyAPI
 
     struct Profile: Codable {
         let name: String
@@ -51,7 +51,7 @@ final class FederationOnlySchemaTests: XCTestCase {
         }
         """
 
-    override func setUpWithError() throws {
+    init() throws {
         let schema = try SchemaBuilder(FederationOnlyResolver.self, NoContext.self)
             .setFederatedSDL(to: Self.federatedSDL)
             .add {
@@ -72,10 +72,6 @@ final class FederationOnlySchemaTests: XCTestCase {
         api = FederationOnlyAPI(resolver: FederationOnlyResolver(), schema: schema)
     }
 
-    override func tearDownWithError() throws {
-        api = nil
-    }
-
     func execute(request: String, variables: [String: Map] = [:]) async throws -> GraphQLResult {
         try await api.execute(
             request: request,
@@ -84,7 +80,7 @@ final class FederationOnlySchemaTests: XCTestCase {
         )
     }
 
-    func testUserFederationSimple() async throws {
+    @Test func userFederationSimple() async throws {
         let representations: [String: Map] = [
             "representations": [
                 ["__typename": "User", "id": "1234"],
@@ -103,19 +99,19 @@ final class FederationOnlySchemaTests: XCTestCase {
             """
 
         let result = try await execute(request: query, variables: representations)
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "_entities": [
-                    [
-                        "id": "1234",
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "_entities": [
+                        [
+                            "id": "1234",
+                        ],
                     ],
-                ],
-            ])
+                ])
         )
     }
 
-    func testUserFederationNested() async throws {
+    @Test func userFederationNested() async throws {
         let representations: [String: Map] = [
             "representations": [
                 ["__typename": "User", "id": "1234"],
@@ -135,23 +131,23 @@ final class FederationOnlySchemaTests: XCTestCase {
             """
 
         let result = try await execute(request: query, variables: representations)
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "_entities": [
-                    [
-                        "id": "1234",
-                        "profile": [
-                            "name": "User 1234",
-                            "email": "1234@example.com",
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "_entities": [
+                        [
+                            "id": "1234",
+                            "profile": [
+                                "name": "User 1234",
+                                "email": "1234@example.com",
+                            ],
                         ],
                     ],
-                ],
-            ])
+                ])
         )
     }
 
-    func testUserFederationNestedOptional() async throws {
+    @Test func userFederationNestedOptional() async throws {
         let representations: [String: Map] = [
             "representations": [
                 ["__typename": "User", "id": "1"],
@@ -171,19 +167,19 @@ final class FederationOnlySchemaTests: XCTestCase {
             """
 
         let result = try await execute(request: query, variables: representations)
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "_entities": [
-                    [
-                        "id": "1",
-                        "profile": [
-                            "name": "User 1",
-                            "email": .null,
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "_entities": [
+                        [
+                            "id": "1",
+                            "profile": [
+                                "name": "User 1",
+                                "email": .null,
+                            ],
                         ],
                     ],
-                ],
-            ])
+                ])
         )
     }
 }

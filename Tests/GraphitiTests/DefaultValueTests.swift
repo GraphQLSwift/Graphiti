@@ -1,9 +1,9 @@
 import Graphiti
 import GraphQL
-import XCTest
+import Testing
 
-class DefaultValueTests: XCTestCase {
-    func testBoolDefault() async throws {
+struct DefaultValueTests {
+    @Test func boolDefault() async throws {
         let result = try await DefaultValueAPI().execute(
             request: """
             {
@@ -12,13 +12,13 @@ class DefaultValueTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(data: ["bool": true])
+        #expect(
+            result ==
+                .init(data: ["bool": true])
         )
     }
 
-    func testIntDefault() async throws {
+    @Test func intDefault() async throws {
         let result = try await DefaultValueAPI().execute(
             request: """
             {
@@ -27,13 +27,13 @@ class DefaultValueTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(data: ["int": 1])
+        #expect(
+            result ==
+                .init(data: ["int": 1])
         )
     }
 
-    func testFloatDefault() async throws {
+    @Test func floatDefault() async throws {
         let result = try await DefaultValueAPI().execute(
             request: """
             {
@@ -42,13 +42,13 @@ class DefaultValueTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(data: ["float": 1.1])
+        #expect(
+            result ==
+                .init(data: ["float": 1.1])
         )
     }
 
-    func testStringDefault() async throws {
+    @Test func stringDefault() async throws {
         let result = try await DefaultValueAPI().execute(
             request: """
             {
@@ -57,13 +57,13 @@ class DefaultValueTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(data: ["string": "hello"])
+        #expect(
+            result ==
+                .init(data: ["string": "hello"])
         )
     }
 
-    func testEnumDefault() async throws {
+    @Test func enumDefault() async throws {
         let result = try await DefaultValueAPI().execute(
             request: """
             {
@@ -72,13 +72,13 @@ class DefaultValueTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(data: ["enum": "valueA"])
+        #expect(
+            result ==
+                .init(data: ["enum": "valueA"])
         )
     }
 
-    func testArrayDefault() async throws {
+    @Test func arrayDefault() async throws {
         let result = try await DefaultValueAPI().execute(
             request: """
             {
@@ -87,13 +87,13 @@ class DefaultValueTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(data: ["array": ["a", "b", "c"]])
+        #expect(
+            result ==
+                .init(data: ["array": ["a", "b", "c"]])
         )
     }
 
-    func testInputDefault() async throws {
+    @Test func inputDefault() async throws {
         // Test input object argument default
         var result = try await DefaultValueAPI().execute(
             request: """
@@ -110,18 +110,18 @@ class DefaultValueTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(data: [
-                "input": [
-                    "bool": true,
-                    "int": 1,
-                    "float": 1.1,
-                    "string": "hello",
-                    "enum": "valueA",
-                    "array": ["a", "b", "c"],
-                ],
-            ])
+        #expect(
+            result ==
+                .init(data: [
+                    "input": [
+                        "bool": true,
+                        "int": 1,
+                        "float": 1.1,
+                        "string": "hello",
+                        "enum": "valueA",
+                        "array": ["a", "b", "c"],
+                    ],
+                ])
         )
 
         // Test input object field defaults
@@ -140,18 +140,18 @@ class DefaultValueTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(data: [
-                "input": [
-                    "bool": true,
-                    "int": 1,
-                    "float": 1.1,
-                    "string": "hello",
-                    "enum": "valueA",
-                    "array": ["a", "b", "c"],
-                ],
-            ])
+        #expect(
+            result ==
+                .init(data: [
+                    "input": [
+                        "bool": true,
+                        "int": 1,
+                        "float": 1.1,
+                        "string": "hello",
+                        "enum": "valueA",
+                        "array": ["a", "b", "c"],
+                    ],
+                ])
         )
     }
 }

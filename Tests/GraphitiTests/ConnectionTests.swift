@@ -1,8 +1,8 @@
 import Foundation
 import Graphiti
-import XCTest
+import Testing
 
-class ConnectionTests: XCTestCase {
+struct ConnectionTests {
     struct Comment: Identifiable {
         let id: Int
         let message: String
@@ -40,7 +40,7 @@ class ConnectionTests: XCTestCase {
     }
 
     /// Test that connection objects work as expected
-    func testConnection() async throws {
+    @Test func connection() async throws {
         let result = try await schema.execute(
             request: """
             {
@@ -64,48 +64,48 @@ class ConnectionTests: XCTestCase {
             resolver: .init(),
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(
-                data: [
-                    "comments": [
-                        "edges": [
-                            [
-                                "cursor": "MQ==",
-                                "node": [
-                                    "id": 1,
-                                    "message": "Hello",
+        #expect(
+            result ==
+                .init(
+                    data: [
+                        "comments": [
+                            "edges": [
+                                [
+                                    "cursor": "MQ==",
+                                    "node": [
+                                        "id": 1,
+                                        "message": "Hello",
+                                    ],
+                                ],
+                                [
+                                    "cursor": "Mg==",
+                                    "node": [
+                                        "id": 2,
+                                        "message": "What's up?",
+                                    ],
+                                ],
+                                [
+                                    "cursor": "Mw==",
+                                    "node": [
+                                        "id": 3,
+                                        "message": "Goodbye",
+                                    ],
                                 ],
                             ],
-                            [
-                                "cursor": "Mg==",
-                                "node": [
-                                    "id": 2,
-                                    "message": "What's up?",
-                                ],
-                            ],
-                            [
-                                "cursor": "Mw==",
-                                "node": [
-                                    "id": 3,
-                                    "message": "Goodbye",
-                                ],
+                            "pageInfo": [
+                                "hasPreviousPage": false,
+                                "hasNextPage": false,
+                                "startCursor": "MQ==",
+                                "endCursor": "Mw==",
                             ],
                         ],
-                        "pageInfo": [
-                            "hasPreviousPage": false,
-                            "hasNextPage": false,
-                            "startCursor": "MQ==",
-                            "endCursor": "Mw==",
-                        ],
-                    ],
-                ]
-            )
+                    ]
+                )
         )
     }
 
     /// Test that `first` argument works as intended
-    func testFirst() async throws {
+    @Test func first() async throws {
         let result = try await schema.execute(
             request: """
             {
@@ -128,33 +128,33 @@ class ConnectionTests: XCTestCase {
             resolver: .init(),
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(
-                data: [
-                    "comments": [
-                        "edges": [
-                            [
-                                "node": [
-                                    "id": 1,
-                                    "message": "Hello",
+        #expect(
+            result ==
+                .init(
+                    data: [
+                        "comments": [
+                            "edges": [
+                                [
+                                    "node": [
+                                        "id": 1,
+                                        "message": "Hello",
+                                    ],
                                 ],
                             ],
+                            "pageInfo": [
+                                "hasPreviousPage": false,
+                                "hasNextPage": true,
+                                "startCursor": "MQ==",
+                                "endCursor": "MQ==",
+                            ],
                         ],
-                        "pageInfo": [
-                            "hasPreviousPage": false,
-                            "hasNextPage": true,
-                            "startCursor": "MQ==",
-                            "endCursor": "MQ==",
-                        ],
-                    ],
-                ]
-            )
+                    ]
+                )
         )
     }
 
     /// Test that `after` argument works as intended
-    func testAfter() async throws {
+    @Test func after() async throws {
         let result = try await schema.execute(
             request: """
             {
@@ -177,39 +177,39 @@ class ConnectionTests: XCTestCase {
             resolver: .init(),
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(
-                data: [
-                    "comments": [
-                        "edges": [
-                            [
-                                "node": [
-                                    "id": 2,
-                                    "message": "What's up?",
+        #expect(
+            result ==
+                .init(
+                    data: [
+                        "comments": [
+                            "edges": [
+                                [
+                                    "node": [
+                                        "id": 2,
+                                        "message": "What's up?",
+                                    ],
+                                ],
+                                [
+                                    "node": [
+                                        "id": 3,
+                                        "message": "Goodbye",
+                                    ],
                                 ],
                             ],
-                            [
-                                "node": [
-                                    "id": 3,
-                                    "message": "Goodbye",
-                                ],
+                            "pageInfo": [
+                                "hasPreviousPage": false,
+                                "hasNextPage": false,
+                                "startCursor": "Mg==",
+                                "endCursor": "Mw==",
                             ],
                         ],
-                        "pageInfo": [
-                            "hasPreviousPage": false,
-                            "hasNextPage": false,
-                            "startCursor": "Mg==",
-                            "endCursor": "Mw==",
-                        ],
-                    ],
-                ]
-            )
+                    ]
+                )
         )
     }
 
     /// Test that mixing `first` and `after` arguments works as intended
-    func testFirstAfter() async throws {
+    @Test func firstAfter() async throws {
         let result = try await schema.execute(
             request: """
             {
@@ -232,33 +232,33 @@ class ConnectionTests: XCTestCase {
             resolver: .init(),
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(
-                data: [
-                    "comments": [
-                        "edges": [
-                            [
-                                "node": [
-                                    "id": 2,
-                                    "message": "What's up?",
+        #expect(
+            result ==
+                .init(
+                    data: [
+                        "comments": [
+                            "edges": [
+                                [
+                                    "node": [
+                                        "id": 2,
+                                        "message": "What's up?",
+                                    ],
                                 ],
                             ],
+                            "pageInfo": [
+                                "hasPreviousPage": false,
+                                "hasNextPage": true,
+                                "startCursor": "Mg==",
+                                "endCursor": "Mg==",
+                            ],
                         ],
-                        "pageInfo": [
-                            "hasPreviousPage": false,
-                            "hasNextPage": true,
-                            "startCursor": "Mg==",
-                            "endCursor": "Mg==",
-                        ],
-                    ],
-                ]
-            )
+                    ]
+                )
         )
     }
 
     /// Test that `last` argument works as intended
-    func testLast() async throws {
+    @Test func last() async throws {
         let result = try await schema.execute(
             request: """
             {
@@ -281,33 +281,33 @@ class ConnectionTests: XCTestCase {
             resolver: .init(),
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(
-                data: [
-                    "comments": [
-                        "edges": [
-                            [
-                                "node": [
-                                    "id": 3,
-                                    "message": "Goodbye",
+        #expect(
+            result ==
+                .init(
+                    data: [
+                        "comments": [
+                            "edges": [
+                                [
+                                    "node": [
+                                        "id": 3,
+                                        "message": "Goodbye",
+                                    ],
                                 ],
                             ],
+                            "pageInfo": [
+                                "hasPreviousPage": true,
+                                "hasNextPage": false,
+                                "startCursor": "Mw==",
+                                "endCursor": "Mw==",
+                            ],
                         ],
-                        "pageInfo": [
-                            "hasPreviousPage": true,
-                            "hasNextPage": false,
-                            "startCursor": "Mw==",
-                            "endCursor": "Mw==",
-                        ],
-                    ],
-                ]
-            )
+                    ]
+                )
         )
     }
 
     /// Test that `before` argument works as intended
-    func testBefore() async throws {
+    @Test func before() async throws {
         let result = try await schema.execute(
             request: """
             {
@@ -330,39 +330,39 @@ class ConnectionTests: XCTestCase {
             resolver: .init(),
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(
-                data: [
-                    "comments": [
-                        "edges": [
-                            [
-                                "node": [
-                                    "id": 1,
-                                    "message": "Hello",
+        #expect(
+            result ==
+                .init(
+                    data: [
+                        "comments": [
+                            "edges": [
+                                [
+                                    "node": [
+                                        "id": 1,
+                                        "message": "Hello",
+                                    ],
+                                ],
+                                [
+                                    "node": [
+                                        "id": 2,
+                                        "message": "What's up?",
+                                    ],
                                 ],
                             ],
-                            [
-                                "node": [
-                                    "id": 2,
-                                    "message": "What's up?",
-                                ],
+                            "pageInfo": [
+                                "hasPreviousPage": false,
+                                "hasNextPage": false,
+                                "startCursor": "MQ==",
+                                "endCursor": "Mg==",
                             ],
                         ],
-                        "pageInfo": [
-                            "hasPreviousPage": false,
-                            "hasNextPage": false,
-                            "startCursor": "MQ==",
-                            "endCursor": "Mg==",
-                        ],
-                    ],
-                ]
-            )
+                    ]
+                )
         )
     }
 
     /// Test that mixing `last` with `before` argument works as intended
-    func testLastBefore() async throws {
+    @Test func lastBefore() async throws {
         let result = try await schema.execute(
             request: """
             {
@@ -385,33 +385,33 @@ class ConnectionTests: XCTestCase {
             resolver: .init(),
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(
-                data: [
-                    "comments": [
-                        "edges": [
-                            [
-                                "node": [
-                                    "id": 2,
-                                    "message": "What's up?",
+        #expect(
+            result ==
+                .init(
+                    data: [
+                        "comments": [
+                            "edges": [
+                                [
+                                    "node": [
+                                        "id": 2,
+                                        "message": "What's up?",
+                                    ],
                                 ],
                             ],
+                            "pageInfo": [
+                                "hasPreviousPage": true,
+                                "hasNextPage": false,
+                                "startCursor": "Mg==",
+                                "endCursor": "Mg==",
+                            ],
                         ],
-                        "pageInfo": [
-                            "hasPreviousPage": true,
-                            "hasNextPage": false,
-                            "startCursor": "Mg==",
-                            "endCursor": "Mg==",
-                        ],
-                    ],
-                ]
-            )
+                    ]
+                )
         )
     }
 
     /// Test that mixing `after` with `before` argument works as intended
-    func testAfterBefore() async throws {
+    @Test func afterBefore() async throws {
         let result = try await schema.execute(
             request: """
             {
@@ -434,33 +434,33 @@ class ConnectionTests: XCTestCase {
             resolver: .init(),
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(
-                data: [
-                    "comments": [
-                        "edges": [
-                            [
-                                "node": [
-                                    "id": 2,
-                                    "message": "What's up?",
+        #expect(
+            result ==
+                .init(
+                    data: [
+                        "comments": [
+                            "edges": [
+                                [
+                                    "node": [
+                                        "id": 2,
+                                        "message": "What's up?",
+                                    ],
                                 ],
                             ],
+                            "pageInfo": [
+                                "hasPreviousPage": false,
+                                "hasNextPage": false,
+                                "startCursor": "Mg==",
+                                "endCursor": "Mg==",
+                            ],
                         ],
-                        "pageInfo": [
-                            "hasPreviousPage": false,
-                            "hasNextPage": false,
-                            "startCursor": "Mg==",
-                            "endCursor": "Mg==",
-                        ],
-                    ],
-                ]
-            )
+                    ]
+                )
         )
     }
 
     /// Test that adjusting names using `as` works
-    func testNaming() async throws {
+    @Test func naming() async throws {
         struct ChatObject: Codable {
             func messages(
                 context _: NoContext,
@@ -524,30 +524,30 @@ class ConnectionTests: XCTestCase {
             resolver: .init(),
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            .init(
-                data: [
-                    "chatObject": [
-                        "messages": [
-                            "edges": [
-                                [
-                                    "node": [
-                                        "id": 1,
-                                        "text": "a",
+        #expect(
+            result ==
+                .init(
+                    data: [
+                        "chatObject": [
+                            "messages": [
+                                "edges": [
+                                    [
+                                        "node": [
+                                            "id": 1,
+                                            "text": "a",
+                                        ],
                                     ],
-                                ],
-                                [
-                                    "node": [
-                                        "id": 2,
-                                        "text": "b",
+                                    [
+                                        "node": [
+                                            "id": 2,
+                                            "text": "b",
+                                        ],
                                     ],
                                 ],
                             ],
                         ],
-                    ],
-                ]
-            )
+                    ]
+                )
         )
     }
 }

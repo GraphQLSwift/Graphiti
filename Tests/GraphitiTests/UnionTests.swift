@@ -1,10 +1,10 @@
 import Foundation
 @testable import Graphiti
 import GraphQL
-import XCTest
+import Testing
 
-class UnionTests: XCTestCase {
-    func testUnionInit() throws {
+struct UnionTests {
+    @Test func unionInit() throws {
         _ = try Schema<StarWarsResolver, StarWarsContext> {
             Type(Planet.self) {
                 Field("id", at: \.id)

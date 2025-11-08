@@ -1,12 +1,12 @@
 import Foundation
 @testable import Graphiti
 import GraphQL
-import XCTest
+import Testing
 
-class ScalarTests: XCTestCase {
+struct ScalarTests {
     // MARK: Test UUID converts to String as expected
 
-    func testUUIDOutput() async throws {
+    @Test func uuidOutput() async throws {
         struct UUIDOutput {
             let value: UUID
         }
@@ -41,17 +41,17 @@ class ScalarTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "uuid": [
-                    "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
-                ],
-            ])
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "uuid": [
+                        "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+                    ],
+                ])
         )
     }
 
-    func testUUIDArg() async throws {
+    @Test func uuidArg() async throws {
         struct UUIDOutput {
             let value: UUID
         }
@@ -92,17 +92,17 @@ class ScalarTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "uuid": [
-                    "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
-                ],
-            ])
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "uuid": [
+                        "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+                    ],
+                ])
         )
     }
 
-    func testUUIDInput() async throws {
+    @Test func uuidInput() async throws {
         struct UUIDOutput {
             let value: UUID
         }
@@ -150,19 +150,19 @@ class ScalarTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "uuid": [
-                    "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
-                ],
-            ])
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "uuid": [
+                        "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+                    ],
+                ])
         )
     }
 
     // MARK: Test Date scalars convert to String using ISO8601 encoders
 
-    func testDateOutput() async throws {
+    @Test func dateOutput() async throws {
         struct DateOutput {
             let value: Date
         }
@@ -202,17 +202,17 @@ class ScalarTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "date": [
-                    "value": "2001-01-01T00:00:00Z",
-                ],
-            ])
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "date": [
+                        "value": "2001-01-01T00:00:00Z",
+                    ],
+                ])
         )
     }
 
-    func testDateArg() async throws {
+    @Test func dateArg() async throws {
         struct DateOutput {
             let value: Date
         }
@@ -258,17 +258,17 @@ class ScalarTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "date": [
-                    "value": "2001-01-01T00:00:00Z",
-                ],
-            ])
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "date": [
+                        "value": "2001-01-01T00:00:00Z",
+                    ],
+                ])
         )
     }
 
-    func testDateInput() async throws {
+    @Test func dateInput() async throws {
         struct DateOutput {
             let value: Date
         }
@@ -321,19 +321,19 @@ class ScalarTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "date": [
-                    "value": "2001-01-01T00:00:00Z",
-                ],
-            ])
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "date": [
+                        "value": "2001-01-01T00:00:00Z",
+                    ],
+                ])
         )
     }
 
     // MARK: Test a scalar that converts to a single-value Map (StringCodedCoordinate -> String)
 
-    func testStringCoordOutput() async throws {
+    @Test func stringCoordOutput() async throws {
         struct CoordinateOutput {
             let value: StringCodedCoordinate
         }
@@ -368,17 +368,17 @@ class ScalarTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "coord": [
-                    "value": "(0.0, 0.0)",
-                ],
-            ])
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "coord": [
+                        "value": "(0.0, 0.0)",
+                    ],
+                ])
         )
     }
 
-    func testStringCoordArg() async throws {
+    @Test func stringCoordArg() async throws {
         struct CoordinateOutput {
             let value: StringCodedCoordinate
         }
@@ -419,17 +419,17 @@ class ScalarTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "coord": [
-                    "value": "(0.0, 0.0)",
-                ],
-            ])
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "coord": [
+                        "value": "(0.0, 0.0)",
+                    ],
+                ])
         )
     }
 
-    func testStringCoordInput() async throws {
+    @Test func stringCoordInput() async throws {
         struct CoordinateOutput {
             let value: StringCodedCoordinate
         }
@@ -477,19 +477,19 @@ class ScalarTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "coord": [
-                    "value": "(0.0, 0.0)",
-                ],
-            ])
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "coord": [
+                        "value": "(0.0, 0.0)",
+                    ],
+                ])
         )
     }
 
     // MARK: Test a scalar that converts to a multi-value Map (Coordinate -> Dict)
 
-    func testDictCoordOutput() async throws {
+    @Test func dictCoordOutput() async throws {
         struct CoordinateOutput {
             let value: DictCodedCoordinate
         }
@@ -528,17 +528,17 @@ class ScalarTests: XCTestCase {
 
         let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
 
-        XCTAssertEqual(
-            value?["longitude"],
-            .number(0.0)
+        #expect(
+            value?["longitude"] ==
+                .number(0.0)
         )
-        XCTAssertEqual(
-            value?["latitude"],
-            .number(0.0)
+        #expect(
+            value?["latitude"] ==
+                .number(0.0)
         )
     }
 
-    func testDictCoordArg() async throws {
+    @Test func dictCoordArg() async throws {
         struct CoordinateOutput {
             let value: DictCodedCoordinate
         }
@@ -583,17 +583,17 @@ class ScalarTests: XCTestCase {
 
         let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
 
-        XCTAssertEqual(
-            value?["longitude"],
-            .number(0.0)
+        #expect(
+            value?["longitude"] ==
+                .number(0.0)
         )
-        XCTAssertEqual(
-            value?["latitude"],
-            .number(0.0)
+        #expect(
+            value?["latitude"] ==
+                .number(0.0)
         )
     }
 
-    func testDictCoordInput() async throws {
+    @Test func dictCoordInput() async throws {
         struct CoordinateOutput {
             let value: DictCodedCoordinate
         }
@@ -645,13 +645,13 @@ class ScalarTests: XCTestCase {
 
         let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
 
-        XCTAssertEqual(
-            value?["longitude"],
-            .number(0.0)
+        #expect(
+            value?["longitude"] ==
+                .number(0.0)
         )
-        XCTAssertEqual(
-            value?["latitude"],
-            .number(0.0)
+        #expect(
+            value?["latitude"] ==
+                .number(0.0)
         )
     }
 }

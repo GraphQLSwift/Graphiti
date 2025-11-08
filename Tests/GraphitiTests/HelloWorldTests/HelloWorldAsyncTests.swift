@@ -1,6 +1,6 @@
 @testable import Graphiti
 import GraphQL
-import XCTest
+import Testing
 
 @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
 let pubsub = SimplePubSub<User>()
@@ -121,38 +121,37 @@ struct HelloAsyncAPI: API {
     }
 }
 
-@available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
-class HelloWorldAsyncTests: XCTestCase {
+struct HelloWorldAsyncTests {
     private let api = HelloAsyncAPI()
 
     /// Tests that async version of API.execute works as expected
-    func testAsyncExecute() async throws {
+    @Test
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    func asyncExecute() async throws {
         let query = "{ hello }"
         let result = try await api.execute(
             request: query,
             context: api.context
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: ["hello": "world"])
-        )
+        #expect(result == GraphQLResult(data: ["hello": "world"]))
     }
 
     /// Tests that async fields (via ConcurrentResolve) are resolved successfully
-    func testAsyncHello() async throws {
+    @Test
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    func asyncHello() async throws {
         let query = "{ asyncHello }"
         let result = try await api.execute(
             request: query,
             context: api.context
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: ["asyncHello": "world"])
-        )
+        #expect(result == GraphQLResult(data: ["asyncHello": "world"]))
     }
 
     /// Tests subscription when the sourceEventStream type matches the resolved type (i.e. the normal resolution function should just short-circuit to the sourceEventStream object)
-    func testSubscriptionSelf() async throws {
+    @Test
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    func subscriptionSelf() async throws {
         let request = """
         subscription {
             subscribeUser {
@@ -171,8 +170,8 @@ class HelloWorldAsyncTests: XCTestCase {
         await pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
         let result = try await iterator.next()
-        XCTAssertEqual(
-            result,
+        #expect(
+            result ==
             GraphQLResult(data: [
                 "subscribeUser": [
                     "id": "124",
@@ -183,7 +182,9 @@ class HelloWorldAsyncTests: XCTestCase {
     }
 
     /// Tests subscription when the sourceEventStream type does not match the resolved type (i.e. there is a non-trivial resolution function that transforms the sourceEventStream object)
-    func testSubscriptionEvent() async throws {
+    @Test
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    func subscriptionEvent() async throws {
         let request = """
         subscription {
             subscribeUserEvent {
@@ -204,8 +205,8 @@ class HelloWorldAsyncTests: XCTestCase {
         await pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
         let result = try await iterator.next()
-        XCTAssertEqual(
-            result,
+        #expect(
+            result ==
             GraphQLResult(data: [
                 "subscribeUserEvent": [
                     "user": [
@@ -218,7 +219,9 @@ class HelloWorldAsyncTests: XCTestCase {
     }
 
     /// Tests that subscription resolvers that return futures work
-    func testFutureSubscription() async throws {
+    @Test
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    func futureSubscription() async throws {
         let request = """
         subscription {
             futureSubscribeUser {
@@ -237,8 +240,8 @@ class HelloWorldAsyncTests: XCTestCase {
         await pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
         let result = try await iterator.next()
-        XCTAssertEqual(
-            result,
+        #expect(
+            result ==
             GraphQLResult(data: [
                 "futureSubscribeUser": [
                     "id": "124",
@@ -249,7 +252,9 @@ class HelloWorldAsyncTests: XCTestCase {
     }
 
     /// Tests that subscription resolvers that are async work
-    func testAsyncSubscription() async throws {
+    @Test
+    @available(macOS 12, iOS 15, watchOS 8, tvOS 15, *)
+    func asyncSubscription() async throws {
         let request = """
         subscription {
             asyncSubscribeUser {
@@ -268,8 +273,8 @@ class HelloWorldAsyncTests: XCTestCase {
         await pubsub.publish(event: User(id: "124", name: "Jerry", friends: nil))
 
         let result = try await iterator.next()
-        XCTAssertEqual(
-            result,
+        #expect(
+            result ==
             GraphQLResult(data: [
                 "asyncSubscribeUser": [
                     "id": "124",
