@@ -1,8 +1,8 @@
 import Graphiti
 import GraphQL
-import XCTest
+import Testing
 
-class PartialSchemaTests: XCTestCase {
+struct PartialSchemaTests {
     class BaseSchema: PartialSchema<StarWarsResolver, StarWarsContext> {
         @TypeDefinitions
         override var types: Types {
@@ -95,7 +95,7 @@ class PartialSchemaTests: XCTestCase {
         }
     }
 
-    func testPartialSchemaWithBuilder() async throws {
+    @Test func partialSchemaWithBuilder() async throws {
         let builder = SchemaBuilder(StarWarsResolver.self, StarWarsContext.self)
 
         builder.use(partials: [BaseSchema(), SearchSchema()])
@@ -119,17 +119,17 @@ class PartialSchemaTests: XCTestCase {
             """,
             context: StarWarsContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "human": [
-                    "name": "Luke Skywalker",
-                ],
-            ])
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "human": [
+                        "name": "Luke Skywalker",
+                    ],
+                ])
         )
     }
 
-    func testPartialSchema() async throws {
+    @Test func partialSchema() async throws {
         /// Double check if static func works and the types are inferred properly
         let schema = try Schema.create(from: [BaseSchema(), SearchSchema()])
 
@@ -150,17 +150,17 @@ class PartialSchemaTests: XCTestCase {
             """,
             context: StarWarsContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "human": [
-                    "name": "Luke Skywalker",
-                ],
-            ])
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "human": [
+                        "name": "Luke Skywalker",
+                    ],
+                ])
         )
     }
 
-    func testPartialSchemaOutOfOrder() async throws {
+    @Test func partialSchemaOutOfOrder() async throws {
         /// Double check if ordering of partial schema doesn't matter
         let schema = try Schema.create(from: [SearchSchema(), BaseSchema()])
 
@@ -181,17 +181,17 @@ class PartialSchemaTests: XCTestCase {
             """,
             context: StarWarsContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "human": [
-                    "name": "Luke Skywalker",
-                ],
-            ])
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "human": [
+                        "name": "Luke Skywalker",
+                    ],
+                ])
         )
     }
 
-    func testInstancePartialSchema() async throws {
+    @Test func instancePartialSchema() async throws {
         let baseSchema = PartialSchema<StarWarsResolver, StarWarsContext>(
             types: {
                 Interface(Character.self) {
@@ -302,13 +302,13 @@ class PartialSchemaTests: XCTestCase {
             """,
             context: StarWarsContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "human": [
-                    "name": "Luke Skywalker",
-                ],
-            ])
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "human": [
+                        "name": "Luke Skywalker",
+                    ],
+                ])
         )
     }
 }

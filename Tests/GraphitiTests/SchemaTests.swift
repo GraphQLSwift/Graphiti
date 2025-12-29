@@ -1,11 +1,11 @@
 import Foundation
 @testable import Graphiti
 import GraphQL
-import XCTest
+import Testing
 
-class SchemaTests: XCTestCase {
+struct SchemaTests {
     // Tests that circularly dependent objects can be used in schema and resolved correctly
-    func testCircularDependencies() async throws {
+    @Test func circularDependencies() async throws {
         struct A: Codable {
             let name: String
             var b: B {
@@ -56,20 +56,20 @@ class SchemaTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "a": [
-                    "b": [
-                        "name": "Circular",
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "a": [
+                        "b": [
+                            "name": "Circular",
+                        ],
                     ],
-                ],
-            ])
+                ])
         )
     }
 
     // Tests that we can resolve type references for named types
-    func testTypeReferenceForNamedType() async throws {
+    @Test func typeReferenceForNamedType() async throws {
         struct LocationObject: Codable {
             let id: String
             let name: String
@@ -122,19 +122,19 @@ class SchemaTests: XCTestCase {
             """,
             context: NoContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "user": [
-                    "location": [
-                        "name": "Earth",
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "user": [
+                        "location": [
+                            "name": "Earth",
+                        ],
                     ],
-                ],
-            ])
+                ])
         )
     }
 
-    func testSchemaWithNoQuery() {
+    @Test func schemaWithNoQuery() {
         struct User: Codable {
             let id: String
         }
@@ -148,19 +148,19 @@ class SchemaTests: XCTestCase {
                 }
             }
         } catch {
-            XCTAssertEqual(
-                error as? SchemaError,
-                SchemaError(
-                    description: "Schema must contain at least 1 query or federated resolver"
-                )
+            #expect(
+                error as? SchemaError ==
+                    SchemaError(
+                        description: "Schema must contain at least 1 query or federated resolver"
+                    )
             )
         }
     }
 }
 
 private class TestAPI<Resolver: Sendable, ContextType: Sendable>: API {
-    public let resolver: Resolver
-    public let schema: Schema<Resolver, ContextType>
+    let resolver: Resolver
+    let schema: Schema<Resolver, ContextType>
 
     init(resolver: Resolver, schema: Schema<Resolver, ContextType>) {
         self.resolver = resolver

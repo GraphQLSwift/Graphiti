@@ -1,11 +1,11 @@
 import Foundation
 @testable import Graphiti
 import GraphQL
-import XCTest
+import Testing
 
-class ValidationRulesTests: XCTestCase {
+struct ValidationRulesTests {
     // Test registering custom validation rules
-    func testRegisteringCustomValidationRule() async throws {
+    @Test func registeringCustomValidationRule() async throws {
         struct TestResolver {
             var helloWorld: String { "Hellow World" }
         }
@@ -32,21 +32,21 @@ class ValidationRulesTests: XCTestCase {
             context: NoContext(),
             validationRules: [NoIntrospectionRule]
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(errors: [
-                .init(
-                    message: "GraphQL introspection is not allowed, but the query contained __schema or __type",
-                    locations: [.init(line: 2, column: 3)]
-                ),
-            ])
+        #expect(
+            result ==
+                GraphQLResult(errors: [
+                    .init(
+                        message: "GraphQL introspection is not allowed, but the query contained __schema or __type",
+                        locations: [.init(line: 2, column: 3)]
+                    ),
+                ])
         )
     }
 }
 
 private class TestAPI<Resolver: Sendable, ContextType: Sendable>: API {
-    public let resolver: Resolver
-    public let schema: Schema<Resolver, ContextType>
+    let resolver: Resolver
+    let schema: Schema<Resolver, ContextType>
 
     init(resolver: Resolver, schema: Schema<Resolver, ContextType>) {
         self.resolver = resolver

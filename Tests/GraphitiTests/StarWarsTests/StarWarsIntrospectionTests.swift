@@ -1,12 +1,12 @@
 import GraphQL
-import XCTest
+import Testing
 
 @testable import Graphiti
 
-class StarWarsIntrospectionTests: XCTestCase {
+struct StarWarsIntrospectionTests {
     private let api = StarWarsAPI()
 
-    func testIntrospectionTypeQuery() async throws {
+    @Test func introspectionTypeQuery() async throws {
         let result = try await api.execute(
             request: """
             query IntrospectionTypeQuery {
@@ -19,74 +19,74 @@ class StarWarsIntrospectionTests: XCTestCase {
             """,
             context: StarWarsContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(
-                data: [
-                    "__schema": [
-                        "types": [
-                            [
-                                "name": "Boolean",
-                            ],
-                            [
-                                "name": "Character",
-                            ],
-                            [
-                                "name": "Droid",
-                            ],
-                            [
-                                "name": "Episode",
-                            ],
-                            [
-                                "name": "Human",
-                            ],
-                            [
-                                "name": "Int",
-                            ],
-                            [
-                                "name": "Planet",
-                            ],
-                            [
-                                "name": "Query",
-                            ],
-                            [
-                                "name": "SearchResult",
-                            ],
-                            [
-                                "name": "String",
-                            ],
-                            [
-                                "name": "__Directive",
-                            ],
-                            [
-                                "name": "__DirectiveLocation",
-                            ],
-                            [
-                                "name": "__EnumValue",
-                            ],
-                            [
-                                "name": "__Field",
-                            ],
-                            [
-                                "name": "__InputValue",
-                            ],
-                            [
-                                "name": "__Schema",
-                            ],
-                            [
-                                "name": "__Type",
-                            ],
-                            [
-                                "name": "__TypeKind",
+        #expect(
+            result ==
+                GraphQLResult(
+                    data: [
+                        "__schema": [
+                            "types": [
+                                [
+                                    "name": "Boolean",
+                                ],
+                                [
+                                    "name": "Character",
+                                ],
+                                [
+                                    "name": "Droid",
+                                ],
+                                [
+                                    "name": "Episode",
+                                ],
+                                [
+                                    "name": "Human",
+                                ],
+                                [
+                                    "name": "Int",
+                                ],
+                                [
+                                    "name": "Planet",
+                                ],
+                                [
+                                    "name": "Query",
+                                ],
+                                [
+                                    "name": "SearchResult",
+                                ],
+                                [
+                                    "name": "String",
+                                ],
+                                [
+                                    "name": "__Directive",
+                                ],
+                                [
+                                    "name": "__DirectiveLocation",
+                                ],
+                                [
+                                    "name": "__EnumValue",
+                                ],
+                                [
+                                    "name": "__Field",
+                                ],
+                                [
+                                    "name": "__InputValue",
+                                ],
+                                [
+                                    "name": "__Schema",
+                                ],
+                                [
+                                    "name": "__Type",
+                                ],
+                                [
+                                    "name": "__TypeKind",
+                                ],
                             ],
                         ],
-                    ],
-                ]
-            )
+                    ]
+                )
         )
     }
 
-    func testIntrospectionQueryTypeQuery() async throws {
+    @Test func introspectionQueryTypeQuery() async throws {
         let result = try await api.execute(
             request: """
             query IntrospectionQueryTypeQuery {
@@ -99,21 +99,21 @@ class StarWarsIntrospectionTests: XCTestCase {
             """,
             context: StarWarsContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(
-                data: [
-                    "__schema": [
-                        "queryType": [
-                            "name": "Query",
+        #expect(
+            result ==
+                GraphQLResult(
+                    data: [
+                        "__schema": [
+                            "queryType": [
+                                "name": "Query",
+                            ],
                         ],
-                    ],
-                ]
-            )
+                    ]
+                )
         )
     }
 
-    func testIntrospectionDroidTypeQuery() async throws {
+    @Test func introspectionDroidTypeQuery() async throws {
         let result = try await api.execute(
             request: """
             query IntrospectionDroidTypeQuery {
@@ -124,19 +124,19 @@ class StarWarsIntrospectionTests: XCTestCase {
             """,
             context: StarWarsContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(
-                data: [
-                    "__type": [
-                        "name": "Droid",
-                    ],
-                ]
-            )
+        #expect(
+            result ==
+                GraphQLResult(
+                    data: [
+                        "__type": [
+                            "name": "Droid",
+                        ],
+                    ]
+                )
         )
     }
 
-    func testIntrospectionDroidKindQuery() async throws {
+    @Test func introspectionDroidKindQuery() async throws {
         let result = try await api.execute(
             request: """
             query IntrospectionDroidKindQuery {
@@ -148,20 +148,20 @@ class StarWarsIntrospectionTests: XCTestCase {
             """,
             context: StarWarsContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(
-                data: [
-                    "__type": [
-                        "name": "Droid",
-                        "kind": "OBJECT",
-                    ],
-                ]
-            )
+        #expect(
+            result ==
+                GraphQLResult(
+                    data: [
+                        "__type": [
+                            "name": "Droid",
+                            "kind": "OBJECT",
+                        ],
+                    ]
+                )
         )
     }
 
-    func testIntrospectionCharacterKindQuery() async throws {
+    @Test func introspectionCharacterKindQuery() async throws {
         let result = try await api.execute(
             request: """
             query IntrospectionCharacterKindQuery {
@@ -173,20 +173,20 @@ class StarWarsIntrospectionTests: XCTestCase {
             """,
             context: StarWarsContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(
-                data: [
-                    "__type": [
-                        "name": "Character",
-                        "kind": "INTERFACE",
-                    ],
-                ]
-            )
+        #expect(
+            result ==
+                GraphQLResult(
+                    data: [
+                        "__type": [
+                            "name": "Character",
+                            "kind": "INTERFACE",
+                        ],
+                    ]
+                )
         )
     }
 
-    func testIntrospectionDroidFieldsQuery() async throws {
+    @Test func introspectionDroidFieldsQuery() async throws {
         let result = try await api.execute(
             request: """
             query IntrospectionDroidFieldsQuery {
@@ -204,63 +204,63 @@ class StarWarsIntrospectionTests: XCTestCase {
             """,
             context: StarWarsContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(
-                data: [
-                    "__type": [
-                        "name": "Droid",
-                        "fields": [
-                            [
-                                "name": "appearsIn",
-                                "type": [
-                                    "name": nil,
-                                    "kind": "NON_NULL",
+        #expect(
+            result ==
+                GraphQLResult(
+                    data: [
+                        "__type": [
+                            "name": "Droid",
+                            "fields": [
+                                [
+                                    "name": "appearsIn",
+                                    "type": [
+                                        "name": nil,
+                                        "kind": "NON_NULL",
+                                    ],
                                 ],
-                            ],
-                            [
-                                "name": "friends",
-                                "type": [
-                                    "name": nil,
-                                    "kind": "NON_NULL",
+                                [
+                                    "name": "friends",
+                                    "type": [
+                                        "name": nil,
+                                        "kind": "NON_NULL",
+                                    ],
                                 ],
-                            ],
-                            [
-                                "name": "id",
-                                "type": [
-                                    "name": nil,
-                                    "kind": "NON_NULL",
+                                [
+                                    "name": "id",
+                                    "type": [
+                                        "name": nil,
+                                        "kind": "NON_NULL",
+                                    ],
                                 ],
-                            ],
-                            [
-                                "name": "name",
-                                "type": [
-                                    "name": nil,
-                                    "kind": "NON_NULL",
+                                [
+                                    "name": "name",
+                                    "type": [
+                                        "name": nil,
+                                        "kind": "NON_NULL",
+                                    ],
                                 ],
-                            ],
-                            [
-                                "name": "primaryFunction",
-                                "type": [
-                                    "name": nil,
-                                    "kind": "NON_NULL",
+                                [
+                                    "name": "primaryFunction",
+                                    "type": [
+                                        "name": nil,
+                                        "kind": "NON_NULL",
+                                    ],
                                 ],
-                            ],
-                            [
-                                "name": "secretBackstory",
-                                "type": [
-                                    "name": "String",
-                                    "kind": "SCALAR",
+                                [
+                                    "name": "secretBackstory",
+                                    "type": [
+                                        "name": "String",
+                                        "kind": "SCALAR",
+                                    ],
                                 ],
                             ],
                         ],
-                    ],
-                ]
-            )
+                    ]
+                )
         )
     }
 
-    func testIntrospectionDroidNestedFieldsQuery() async throws {
+    @Test func introspectionDroidNestedFieldsQuery() async throws {
         let result = try await api.execute(
             request: """
             query IntrospectionDroidNestedFieldsQuery {
@@ -282,84 +282,84 @@ class StarWarsIntrospectionTests: XCTestCase {
             """,
             context: StarWarsContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(
-                data: [
-                    "__type": [
-                        "name": "Droid",
-                        "fields": [
-                            [
-                                "name": "appearsIn",
-                                "type": [
-                                    "name": nil,
-                                    "kind": "NON_NULL",
-                                    "ofType": [
+        #expect(
+            result ==
+                GraphQLResult(
+                    data: [
+                        "__type": [
+                            "name": "Droid",
+                            "fields": [
+                                [
+                                    "name": "appearsIn",
+                                    "type": [
                                         "name": nil,
-                                        "kind": "LIST",
+                                        "kind": "NON_NULL",
+                                        "ofType": [
+                                            "name": nil,
+                                            "kind": "LIST",
+                                        ],
                                     ],
                                 ],
-                            ],
-                            [
-                                "name": "friends",
-                                "type": [
-                                    "name": nil,
-                                    "kind": "NON_NULL",
-                                    "ofType": [
+                                [
+                                    "name": "friends",
+                                    "type": [
                                         "name": nil,
-                                        "kind": "LIST",
+                                        "kind": "NON_NULL",
+                                        "ofType": [
+                                            "name": nil,
+                                            "kind": "LIST",
+                                        ],
                                     ],
                                 ],
-                            ],
-                            [
-                                "name": "id",
-                                "type": [
-                                    "name": nil,
-                                    "kind": "NON_NULL",
-                                    "ofType": [
+                                [
+                                    "name": "id",
+                                    "type": [
+                                        "name": nil,
+                                        "kind": "NON_NULL",
+                                        "ofType": [
+                                            "name": "String",
+                                            "kind": "SCALAR",
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    "name": "name",
+                                    "type": [
+                                        "name": nil,
+                                        "kind": "NON_NULL",
+                                        "ofType": [
+                                            "name": "String",
+                                            "kind": "SCALAR",
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    "name": "primaryFunction",
+                                    "type": [
+                                        "name": nil,
+                                        "kind": "NON_NULL",
+                                        "ofType": [
+                                            "name": "String",
+                                            "kind": "SCALAR",
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    "name": "secretBackstory",
+                                    "type": [
                                         "name": "String",
                                         "kind": "SCALAR",
+                                        "ofType": nil,
                                     ],
-                                ],
-                            ],
-                            [
-                                "name": "name",
-                                "type": [
-                                    "name": nil,
-                                    "kind": "NON_NULL",
-                                    "ofType": [
-                                        "name": "String",
-                                        "kind": "SCALAR",
-                                    ],
-                                ],
-                            ],
-                            [
-                                "name": "primaryFunction",
-                                "type": [
-                                    "name": nil,
-                                    "kind": "NON_NULL",
-                                    "ofType": [
-                                        "name": "String",
-                                        "kind": "SCALAR",
-                                    ],
-                                ],
-                            ],
-                            [
-                                "name": "secretBackstory",
-                                "type": [
-                                    "name": "String",
-                                    "kind": "SCALAR",
-                                    "ofType": nil,
                                 ],
                             ],
                         ],
-                    ],
-                ]
-            )
+                    ]
+                )
         )
     }
 
-    func testIntrospectionFieldArgsQuery() async throws {
+    @Test func introspectionFieldArgsQuery() async throws {
         let result = try await api.execute(
             request: """
             query IntrospectionFieldArgsQuery {
@@ -387,91 +387,91 @@ class StarWarsIntrospectionTests: XCTestCase {
             """,
             context: StarWarsContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(
-                data: [
-                    "__schema": [
-                        "queryType": [
-                            "fields": [
-                                [
-                                    "name": "droid",
-                                    "args": [
-                                        [
-                                            "name": "id",
-                                            "description": "Id of the droid.",
-                                            "type": [
-                                                "name": nil,
-                                                "kind": "NON_NULL",
-                                                "ofType": [
-                                                    "name": "String",
-                                                    "kind": "SCALAR",
+        #expect(
+            result ==
+                GraphQLResult(
+                    data: [
+                        "__schema": [
+                            "queryType": [
+                                "fields": [
+                                    [
+                                        "name": "droid",
+                                        "args": [
+                                            [
+                                                "name": "id",
+                                                "description": "Id of the droid.",
+                                                "type": [
+                                                    "name": nil,
+                                                    "kind": "NON_NULL",
+                                                    "ofType": [
+                                                        "name": "String",
+                                                        "kind": "SCALAR",
+                                                    ],
                                                 ],
+                                                "defaultValue": nil,
                                             ],
-                                            "defaultValue": nil,
                                         ],
                                     ],
-                                ],
-                                [
-                                    "name": "hero",
-                                    "args": [
-                                        [
-                                            "name": "episode",
-                                            "description": "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode.",
-                                            "type": [
-                                                "name": "Episode",
-                                                "kind": "ENUM",
-                                                "ofType": nil,
+                                    [
+                                        "name": "hero",
+                                        "args": [
+                                            [
+                                                "name": "episode",
+                                                "description": "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode.",
+                                                "type": [
+                                                    "name": "Episode",
+                                                    "kind": "ENUM",
+                                                    "ofType": nil,
+                                                ],
+                                                "defaultValue": nil,
                                             ],
-                                            "defaultValue": nil,
                                         ],
                                     ],
-                                ],
-                                [
-                                    "name": "human",
-                                    "args": [
-                                        [
-                                            "name": "id",
-                                            "description": "Id of the human.",
-                                            "type": [
-                                                "name": nil,
-                                                "kind": "NON_NULL",
-                                                "ofType": [
-                                                    "name": "String",
-                                                    "kind": "SCALAR",
+                                    [
+                                        "name": "human",
+                                        "args": [
+                                            [
+                                                "name": "id",
+                                                "description": "Id of the human.",
+                                                "type": [
+                                                    "name": nil,
+                                                    "kind": "NON_NULL",
+                                                    "ofType": [
+                                                        "name": "String",
+                                                        "kind": "SCALAR",
+                                                    ],
                                                 ],
+                                                "defaultValue": nil,
                                             ],
-                                            "defaultValue": nil,
                                         ],
                                     ],
-                                ],
-                                [
-                                    "name": "search",
-                                    "args": [
-                                        [
-                                            "name": "query",
-                                            "description": nil,
-                                            "type": [
-                                                "name": nil,
-                                                "kind": "NON_NULL",
-                                                "ofType": [
-                                                    "name": "String",
-                                                    "kind": "SCALAR",
+                                    [
+                                        "name": "search",
+                                        "args": [
+                                            [
+                                                "name": "query",
+                                                "description": nil,
+                                                "type": [
+                                                    "name": nil,
+                                                    "kind": "NON_NULL",
+                                                    "ofType": [
+                                                        "name": "String",
+                                                        "kind": "SCALAR",
+                                                    ],
                                                 ],
+                                                "defaultValue": "\"R2-D2\"",
                                             ],
-                                            "defaultValue": "\"R2-D2\"",
                                         ],
                                     ],
                                 ],
                             ],
                         ],
-                    ],
-                ]
-            )
+                    ]
+                )
         )
     }
 
-    func testIntrospectionDroidDescriptionQuery() async throws {
+    @Test func introspectionDroidDescriptionQuery() async throws {
         let result = try await api.execute(
             request: """
             query IntrospectionDroidDescriptionQuery {
@@ -483,16 +483,16 @@ class StarWarsIntrospectionTests: XCTestCase {
             """,
             context: StarWarsContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(
-                data: [
-                    "__type": [
-                        "name": "Droid",
-                        "description": "A mechanical creature in the Star Wars universe.",
-                    ],
-                ]
-            )
+        #expect(
+            result ==
+                GraphQLResult(
+                    data: [
+                        "__type": [
+                            "name": "Droid",
+                            "description": "A mechanical creature in the Star Wars universe.",
+                        ],
+                    ]
+                )
         )
     }
 }

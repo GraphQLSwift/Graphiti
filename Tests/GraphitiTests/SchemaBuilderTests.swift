@@ -1,9 +1,9 @@
 import Graphiti
 import GraphQL
-import XCTest
+import Testing
 
-class SchemaBuilderTests: XCTestCase {
-    func testSchemaBuilder() async throws {
+struct SchemaBuilderTests {
+    @Test func schemaBuilder() async throws {
         let builder = SchemaBuilder(StarWarsResolver.self, StarWarsContext.self)
 
         // Add assets slightly out of order
@@ -111,16 +111,16 @@ class SchemaBuilderTests: XCTestCase {
             """,
             context: StarWarsContext()
         )
-        XCTAssertEqual(
-            result,
-            GraphQLResult(data: [
-                "human": [
-                    "name": "Luke Skywalker",
-                ],
-            ])
+        #expect(
+            result ==
+                GraphQLResult(data: [
+                    "human": [
+                        "name": "Luke Skywalker",
+                    ],
+                ])
         )
 
-        XCTAssert(
+        #expect(
             api.schema.schema.typeMap.contains(where: { key, _ in
                 key == "PlanetConnection"
             })
