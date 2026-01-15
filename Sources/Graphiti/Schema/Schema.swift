@@ -4,7 +4,7 @@ public struct SchemaError: Error, Equatable {
     let description: String
 }
 
-public final class Schema<Resolver: Sendable, Context: Sendable> {
+public final class Schema<Resolver: Sendable, Context: Sendable>: Sendable {
     public let schema: GraphQLSchema
 
     init(
