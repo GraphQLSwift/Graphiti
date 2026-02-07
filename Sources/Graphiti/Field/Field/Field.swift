@@ -150,5 +150,5 @@ public extension Field where Arguments == NoArguments {
     }
 }
 
-// We must conform KeyPath to unchecked sendable to allow keypath-based resolvers.
+/// We must conform KeyPath to unchecked sendable to allow keypath-based resolvers.
 extension KeyPath: @retroactive @unchecked Sendable {}
