@@ -2,11 +2,10 @@
 
 Graphiti is a Swift library for building GraphQL schemas fast, safely and easily.
 
-[![Swift][swift-badge]][swift-url]
+[![Platforms][platforms-badge]][platforms-url]
+[![Versions][versions-badge]][versions-url]
 [![License][mit-badge]][mit-url]
 [![GitHub Actions][gh-actions-badge]][gh-actions-url]
-[![Maintainability][maintainability-badge]][maintainability-url]
-[![Coverage][coverage-badge]][coverage-url]
 
 Looking for help? Find resources [from the community](http://graphql.org/community/).
 
@@ -249,6 +248,12 @@ swiftformat .
 
 This project is released under the MIT license. See [LICENSE](LICENSE) for details.
 
+[platforms-badge]: https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FGraphQLSwift%2FGraphiti%2Fbadge%3Ftype%3Dplatforms
+[platforms-url]: https://swiftpackageindex.com/GraphQLSwift/Graphiti
+
+[versions-badge]: https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FGraphQLSwift%2FGraphiti%2Fbadge%3Ftype%3Dswift-versions
+[versions-url]: https://swiftpackageindex.com/GraphQLSwift/Graphiti
+
 [swift-badge]: https://img.shields.io/badge/Swift-5.4-orange.svg?style=flat
 [swift-url]: https://swift.org
 
@@ -257,9 +262,3 @@ This project is released under the MIT license. See [LICENSE](LICENSE) for detai
 
 [gh-actions-badge]: https://github.com/GraphQLSwift/Graphiti/workflows/Tests/badge.svg
 [gh-actions-url]: https://github.com/GraphQLSwift/Graphiti/actions?query=workflow%3ATests
-
-[maintainability-badge]: https://api.codeclimate.com/v1/badges/25559824033fc2caa94e/maintainability
-[maintainability-url]: https://codeclimate.com/github/GraphQLSwift/Graphiti/maintainability
-
-[coverage-badge]: https://api.codeclimate.com/v1/badges/25559824033fc2caa94e/test_coverage
-[coverage-url]: https://codeclimate.com/github/GraphQLSwift/Graphiti/test_coverage

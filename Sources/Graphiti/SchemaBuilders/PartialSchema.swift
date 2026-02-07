@@ -32,16 +32,24 @@ open class PartialSchema<Resolver: Sendable, Context: Sendable> {
     }
 
     /// Definitions of types
-    open var types: Types { typedef }
+    open var types: Types {
+        typedef
+    }
 
     /// Definitions of query operation fields
-    open var query: Fields { querydef }
+    open var query: Fields {
+        querydef
+    }
 
     /// Definitions of mutation operation fields
-    open var mutation: Fields { mutationdef }
+    open var mutation: Fields {
+        mutationdef
+    }
 
     /// Definitions of subscription operation fields
-    open var subscription: Fields { subscriptiondef }
+    open var subscription: Fields {
+        subscriptiondef
+    }
 }
 
 public extension Schema {

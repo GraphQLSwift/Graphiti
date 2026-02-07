@@ -4,7 +4,7 @@ import GraphQL
 import Testing
 
 struct SchemaTests {
-    // Tests that circularly dependent objects can be used in schema and resolved correctly
+    /// Tests that circularly dependent objects can be used in schema and resolved correctly
     @Test func circularDependencies() async throws {
         struct A: Codable {
             let name: String
@@ -68,7 +68,7 @@ struct SchemaTests {
         )
     }
 
-    // Tests that we can resolve type references for named types
+    /// Tests that we can resolve type references for named types
     @Test func typeReferenceForNamedType() async throws {
         struct LocationObject: Codable {
             let id: String

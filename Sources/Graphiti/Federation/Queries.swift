@@ -5,8 +5,7 @@ func serviceQuery(for sdl: String) -> GraphQLField {
         type: GraphQLNonNull(serviceType),
         description: "Return the SDL string for the subschema",
         resolve: { _, _, _, _ in
-            let result = Service(sdl: sdl)
-            return result
+            Service(sdl: sdl)
         }
     )
 }

@@ -130,7 +130,7 @@ struct PartialSchemaTests {
     }
 
     @Test func partialSchema() async throws {
-        /// Double check if static func works and the types are inferred properly
+        // Double check if static func works and the types are inferred properly
         let schema = try Schema.create(from: [BaseSchema(), SearchSchema()])
 
         struct PartialSchemaTestAPI: API {
@@ -161,7 +161,7 @@ struct PartialSchemaTests {
     }
 
     @Test func partialSchemaOutOfOrder() async throws {
-        /// Double check if ordering of partial schema doesn't matter
+        // Double check if ordering of partial schema doesn't matter
         let schema = try Schema.create(from: [SearchSchema(), BaseSchema()])
 
         struct PartialSchemaTestAPI: API {
@@ -282,7 +282,7 @@ struct PartialSchemaTests {
             }
         )
 
-        /// Double check if ordering of partial schema doesn't matter
+        // Double check if ordering of partial schema doesn't matter
         let schema = try Schema.create(from: [searchSchema, baseSchema])
 
         struct PartialSchemaTestAPI: API {

@@ -1,7 +1,6 @@
+@testable import Graphiti
 import GraphQL
 import Testing
-
-@testable import Graphiti
 
 struct StarWarsIntrospectionTests {
     private let api = StarWarsAPI()

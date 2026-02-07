@@ -4,10 +4,12 @@ import GraphQL
 import Testing
 
 struct ValidationRulesTests {
-    // Test registering custom validation rules
+    /// Test registering custom validation rules
     @Test func registeringCustomValidationRule() async throws {
         struct TestResolver {
-            var helloWorld: String { "Hellow World" }
+            var helloWorld: String {
+                "Hellow World"
+            }
         }
 
         let testSchema = try Schema<TestResolver, NoContext> {
