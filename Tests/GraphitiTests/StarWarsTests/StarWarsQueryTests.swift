@@ -498,47 +498,7 @@ struct StarWarsQueryTests {
     }
 
     @Test func nonNullableFieldsQuery() async throws {
-        struct A {
-            func nullableA(context _: NoContext, arguments _: NoArguments) -> A? {
-                return A()
-            }
-
-            func nonNullA(context _: NoContext, arguments _: NoArguments) -> A {
-                return A()
-            }
-
-            func `throws`(context _: NoContext, arguments _: NoArguments) throws -> String {
-                struct 🏃: Error, CustomStringConvertible {
-                    let description: String
-                }
-
-                throw 🏃(description: "catch me if you can.")
-            }
-        }
-
-        struct TestResolver {
-            func nullableA(context _: NoContext, arguments _: NoArguments) -> A? {
-                return A()
-            }
-        }
-
-        struct MyAPI: API {
-            var resolver: TestResolver = .init()
-
-            let schema = try! Schema<TestResolver, NoContext> {
-                Type(A.self) {
-                    Field("nullableA", at: A.nullableA)
-                    Field("nonNullA", at: A.nonNullA)
-                    Field("throws", at: A.throws)
-                }
-
-                Query {
-                    Field("nullableA", at: TestResolver.nullableA)
-                }
-            }
-        }
-        let api = MyAPI()
-
+        let api = NonNullableFieldsAPI()
         let result = try await api.execute(
             request: """
             query {
@@ -572,6 +532,46 @@ struct StarWarsQueryTests {
                     ]
                 )
         )
+    }
+
+    struct NonNullableFieldsAPI: API {
+        struct A {
+            func nullableA(context _: NoContext, arguments _: NoArguments) -> A? {
+                return A()
+            }
+
+            func nonNullA(context _: NoContext, arguments _: NoArguments) -> A {
+                return A()
+            }
+
+            func `throws`(context _: NoContext, arguments _: NoArguments) throws -> String {
+                struct 🏃: Error, CustomStringConvertible {
+                    let description: String
+                }
+
+                throw 🏃(description: "catch me if you can.")
+            }
+        }
+
+        struct TestResolver {
+            func nullableA(context _: NoContext, arguments _: NoArguments) -> A? {
+                return A()
+            }
+        }
+
+        var resolver: TestResolver = .init()
+
+        let schema = try! Schema<TestResolver, NoContext> {
+            Type(A.self) {
+                Field("nullableA", at: A.nullableA)
+                Field("nonNullA", at: A.nonNullA)
+                Field("throws", at: A.throws)
+            }
+
+            Query {
+                Field("nullableA", at: TestResolver.nullableA)
+            }
+        }
     }
 
     @Test func searchQuery() async throws {
