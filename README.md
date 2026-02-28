@@ -1,14 +1,14 @@
 # Graphiti
 
-Graphiti is a Swift library for building GraphQL schemas fast, safely and easily.
-
 [![Platforms][platforms-badge]][platforms-url]
 [![Versions][versions-badge]][versions-url]
 [![License][mit-badge]][mit-url]
 [![GitHub Actions][gh-actions-badge]][gh-actions-url]
 
-Looking for help? Find resources [from the community](http://graphql.org/community/).
 
+Graphiti is a Swift library for building GraphQL schemas fast, safely and easily in Swift code.
+
+To expose your schema through HTTP, check out [graphql-vapor](https://github.com/GraphQLSwift/graphql-vapor) or [graphql-hummingbird](https://github.com/GraphQLSwift/graphql-hummingbird), and to generate Swift code from GraphQL SDL files, use [graphql-generator](https://github.com/GraphQLSwift/graphql-generator) instead.
 
 ## Getting Started
 
