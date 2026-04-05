@@ -35,8 +35,8 @@ public final class Schema<Resolver: Sendable, Context: Sendable>: Sendable {
     }
 }
 
-public extension Schema {
-    convenience init(
+extension Schema {
+    public convenience init(
         coders: Coders = Coders(),
         federatedSDL: String? = nil,
         @ComponentBuilder<Resolver, Context> _ components: () -> Component<Resolver, Context>
@@ -48,7 +48,7 @@ public extension Schema {
         )
     }
 
-    convenience init(
+    public convenience init(
         coders: Coders = Coders(),
         federatedSDL: String? = nil,
         @ComponentBuilder<Resolver, Context> _ components: () -> [Component<Resolver, Context>]
@@ -60,7 +60,7 @@ public extension Schema {
         )
     }
 
-    func execute(
+    public func execute(
         request: String,
         resolver: Resolver,
         context: Context,
@@ -79,7 +79,7 @@ public extension Schema {
         )
     }
 
-    func subscribe(
+    public func subscribe(
         request: String,
         resolver: Resolver,
         context: Context,

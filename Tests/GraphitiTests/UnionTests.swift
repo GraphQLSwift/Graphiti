@@ -1,7 +1,8 @@
 import Foundation
-@testable import Graphiti
 import GraphQL
 import Testing
+
+@testable import Graphiti
 
 struct UnionTests {
     @Test func unionInit() throws {
@@ -40,11 +41,14 @@ struct UnionTests {
                 Field("id", at: \.id)
             }
 
-            Union(SearchResult.self, members: [
-                Planet.self,
-                Human.self,
-                Droid.self,
-            ])
+            Union(
+                SearchResult.self,
+                members: [
+                    Planet.self,
+                    Human.self,
+                    Droid.self,
+                ]
+            )
 
             Query {
                 Field("search", at: StarWarsResolver.search) {

@@ -15,8 +15,8 @@ public class ArgumentComponent<ArgumentsType: Decodable> {
     }
 }
 
-public extension ArgumentComponent {
-    func description(_ description: String) -> Self {
+extension ArgumentComponent {
+    public func description(_ description: String) -> Self {
         self.description = description
         return self
     }

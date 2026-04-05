@@ -66,15 +66,15 @@ public final class Query<Resolver: Sendable, Context: Sendable>: Component<Resol
     }
 }
 
-public extension Query {
-    convenience init(
+extension Query {
+    public convenience init(
         as name: String = "Query",
         @FieldComponentBuilder<Resolver, Context> _ fields: () -> FieldComponent<Resolver, Context>
     ) {
         self.init(name: name, fields: [fields()])
     }
 
-    convenience init(
+    public convenience init(
         as name: String = "Query",
         @FieldComponentBuilder<Resolver, Context> _ fields: ()
             -> [FieldComponent<Resolver, Context>]

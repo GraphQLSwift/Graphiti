@@ -1,6 +1,7 @@
-@testable import Graphiti
 import GraphQL
 import Testing
+
+@testable import Graphiti
 
 struct ID: Codable {
     let id: String
@@ -176,13 +177,13 @@ struct HelloWorldTests {
             context: api.context
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     errors: [
                         GraphQLError(
                             message: "Cannot query field \"boyhowdy\" on type \"Query\".",
                             locations: [SourceLocation(line: 1, column: 3)]
-                        ),
+                        )
                     ]
                 )
         )
@@ -191,10 +192,10 @@ struct HelloWorldTests {
     @Test func scalar() async throws {
         var result = try await api.execute(
             request: """
-            query Query($float: Float!) {
-                float(float: $float)
-            }
-            """,
+                query Query($float: Float!) {
+                    float(float: $float)
+                }
+                """,
             context: api.context,
             variables: ["float": 4]
         )
@@ -202,20 +203,20 @@ struct HelloWorldTests {
 
         result = try await api.execute(
             request: """
-            query Query {
-                float(float: 4)
-            }
-            """,
+                query Query {
+                    float(float: 4)
+                }
+                """,
             context: api.context
         )
         #expect(result == GraphQLResult(data: ["float": 4.0]))
 
         result = try await api.execute(
             request: """
-            query Query($id: ID!) {
-                id(id: $id)
-            }
-            """,
+                query Query($id: ID!) {
+                    id(id: $id)
+                }
+                """,
             context: api.context,
             variables: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"]
         )
@@ -223,10 +224,10 @@ struct HelloWorldTests {
 
         result = try await api.execute(
             request: """
-            query Query {
-                id(id: "85b8d502-8190-40ab-b18f-88edd297d8b6")
-            }
-            """,
+                query Query {
+                    id(id: "85b8d502-8190-40ab-b18f-88edd297d8b6")
+                }
+                """,
             context: api.context
         )
         #expect(result == GraphQLResult(data: ["id": "85b8d502-8190-40ab-b18f-88edd297d8b6"]))
@@ -235,19 +236,19 @@ struct HelloWorldTests {
     @Test func input() async throws {
         let result = try await api.execute(
             request: """
-            mutation addUser($user: UserInput!) {
-                addUser(user: $user) {
-                    id,
-                    name
+                mutation addUser($user: UserInput!) {
+                    addUser(user: $user) {
+                        id,
+                        name
+                    }
                 }
-            }
-            """,
+                """,
             context: api.context,
             variables: ["user": ["id": "123", "name": "bob"]]
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: ["addUser": ["id": "123", "name": "bob"]]
                 )
         )
@@ -257,20 +258,20 @@ struct HelloWorldTests {
         let result = try await api.execute(
             request: GraphQLRequest(
                 query: """
-                mutation addUser($user: UserInput!) {
-                    addUser(user: $user) {
-                        id,
-                        name
+                    mutation addUser($user: UserInput!) {
+                        addUser(user: $user) {
+                            id,
+                            name
+                        }
                     }
-                }
-                """,
+                    """,
                 variables: ["user": ["id": "123", "name": "bob"]]
             ),
             context: api.context
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: ["addUser": ["id": "123", "name": "bob"]]
                 )
         )
@@ -279,35 +280,35 @@ struct HelloWorldTests {
     @Test func inputRecursive() async throws {
         let result = try await api.execute(
             request: """
-            mutation addUser($user: UserInput!) {
-                addUser(user: $user) {
-                    id,
-                    name,
-                    friends {
+                mutation addUser($user: UserInput!) {
+                    addUser(user: $user) {
                         id,
-                        name
+                        name,
+                        friends {
+                            id,
+                            name
+                        }
                     }
                 }
-            }
-            """,
+                """,
             context: api.context,
             variables: [
                 "user": [
                     "id": "123",
                     "name": "bob",
                     "friends": [["id": "124", "name": "jeff"]],
-                ],
+                ]
             ]
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "addUser": [
                             "id": "123",
                             "name": "bob",
                             "friends": [["id": "124", "name": "jeff"]],
-                        ],
+                        ]
                     ]
                 )
         )

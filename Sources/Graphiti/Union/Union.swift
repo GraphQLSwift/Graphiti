@@ -4,10 +4,7 @@ public final class Union<
     Resolver: Sendable,
     Context: Sendable,
     UnionType
->: TypeComponent<
-    Resolver,
-    Context
-> {
+>: TypeComponent<Resolver, Context> {
     private let members: [Any.Type]
 
     override func update(typeProvider: SchemaTypeProvider, coders _: Coders) throws {
@@ -38,8 +35,8 @@ public final class Union<
     }
 }
 
-public extension Union {
-    convenience init(
+extension Union {
+    public convenience init(
         _ type: UnionType.Type,
         as name: String? = nil,
         members: Any.Type...
@@ -47,7 +44,7 @@ public extension Union {
         self.init(type: type, name: name, members: members)
     }
 
-    convenience init(
+    public convenience init(
         _ type: UnionType.Type,
         as name: String? = nil,
         members: [Any.Type]

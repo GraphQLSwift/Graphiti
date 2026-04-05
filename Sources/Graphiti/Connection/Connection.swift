@@ -6,33 +6,36 @@ public struct Connection<Node: Sendable>: Sendable {
     public let pageInfo: PageInfo
 }
 
-public extension Connection where Node: Identifiable, Node.ID: LosslessStringConvertible {
-    static func id(_ cursor: String) -> Node.ID? {
+extension Connection where Node: Identifiable, Node.ID: LosslessStringConvertible {
+    public static func id(_ cursor: String) -> Node.ID? {
         cursor.base64Decoded().flatMap { Node.ID($0) }
     }
 
-    static func cursor(_ node: Node) -> String {
+    public static func cursor(_ node: Node) -> String {
         node.id.description.base64Encoded()!
     }
 }
 
-public extension Sequence where Element: Sendable, Element: Identifiable,
-Element.ID: LosslessStringConvertible {
-    func connection(from arguments: Paginatable) throws -> Connection<Element> {
+extension Sequence
+where
+    Element: Sendable, Element: Identifiable,
+    Element.ID: LosslessStringConvertible
+{
+    public func connection(from arguments: Paginatable) throws -> Connection<Element> {
         try connection(from: arguments, makeCursor: Connection<Element>.cursor)
     }
 
-    func connection(from arguments: ForwardPaginatable) throws -> Connection<Element> {
+    public func connection(from arguments: ForwardPaginatable) throws -> Connection<Element> {
         try connection(from: arguments, makeCursor: Connection<Element>.cursor)
     }
 
-    func connection(from arguments: BackwardPaginatable) throws -> Connection<Element> {
+    public func connection(from arguments: BackwardPaginatable) throws -> Connection<Element> {
         try connection(from: arguments, makeCursor: Connection<Element>.cursor)
     }
 }
 
-public extension Sequence where Element: Sendable {
-    func connection(
+extension Sequence where Element: Sendable {
+    public func connection(
         from arguments: Paginatable,
         makeCursor: @escaping (Element) throws -> String
     ) throws -> Connection<Element> {
@@ -43,7 +46,7 @@ public extension Sequence where Element: Sendable {
         )
     }
 
-    func connection(
+    public func connection(
         from arguments: ForwardPaginatable,
         makeCursor: @escaping (Element) throws -> String
     ) throws -> Connection<Element> {
@@ -54,7 +57,7 @@ public extension Sequence where Element: Sendable {
         )
     }
 
-    func connection(
+    public func connection(
         from arguments: BackwardPaginatable,
         makeCursor: @escaping (Element) throws -> String
     ) throws -> Connection<Element> {
@@ -96,19 +99,16 @@ func slicingCursor<Node>(
 ) -> ArraySlice<Edge<Node>> {
     var edges = ArraySlice(edges)
 
-    if
-        let after = arguments.after,
-        let afterIndex = edges
-            .firstIndex(where: { $0.cursor == after })?
-            .advanced(by: 1)
+    if let after = arguments.after,
+        let afterIndex =
+            edges.firstIndex(where: { $0.cursor == after })?.advanced(by: 1)
     {
         edges = edges[afterIndex...]
     }
 
-    if
-        let before = arguments.before,
-        let beforeIndex = edges
-            .firstIndex(where: { $0.cursor == before })
+    if let before = arguments.before,
+        let beforeIndex =
+            edges.firstIndex(where: { $0.cursor == before })
     {
         edges = edges[..<beforeIndex]
     }

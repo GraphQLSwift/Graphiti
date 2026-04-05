@@ -52,11 +52,11 @@ open class PartialSchema<Resolver: Sendable, Context: Sendable> {
     }
 }
 
-public extension Schema {
+extension Schema {
     /// Create a schema from partial schemas
     /// - Parameter partials: Partial schemas that declare types, query, mutation, and/or subscription definiton
     /// - Returns: A compiled schema will all definitions given from the partial schemas
-    static func create(
+    public static func create(
         from partials: [PartialSchema<Resolver, Context>]
     ) throws -> Schema<Resolver, Context> {
         try SchemaBuilder(Resolver.self, Context.self)

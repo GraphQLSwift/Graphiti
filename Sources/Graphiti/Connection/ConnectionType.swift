@@ -4,10 +4,7 @@ public final class ConnectionType<
     Resolver: Sendable,
     Context: Sendable,
     ObjectType: Sendable
->: TypeComponent<
-    Resolver,
-    Context
-> {
+>: TypeComponent<Resolver, Context> {
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
         if !typeProvider.contains(type: PageInfo.self) {
             let pageInfo = Type<Resolver, Context, PageInfo>(PageInfo.self) {
@@ -52,8 +49,8 @@ public final class ConnectionType<
     }
 }
 
-public extension ConnectionType {
-    convenience init(
+extension ConnectionType {
+    public convenience init(
         _ type: ObjectType.Type,
         as name: String? = nil
     ) {

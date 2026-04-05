@@ -29,13 +29,15 @@ public class SubscriptionField<
             resolve: { source, arguments, context, _ in
                 guard let _source = source as? SourceEventType else {
                     throw GraphQLError(
-                        message: "Expected source type \(SourceEventType.self) but got \(type(of: source))"
+                        message:
+                            "Expected source type \(SourceEventType.self) but got \(type(of: source))"
                     )
                 }
 
                 guard let _context = context as? Context else {
                     throw GraphQLError(
-                        message: "Expected context type \(Context.self) but got \(type(of: context))"
+                        message:
+                            "Expected context type \(Context.self) but got \(type(of: context))"
                     )
                 }
 
@@ -45,13 +47,15 @@ public class SubscriptionField<
             subscribe: { source, arguments, context, _ in
                 guard let _source = source as? ObjectType else {
                     throw GraphQLError(
-                        message: "Expected source type \(ObjectType.self) but got \(type(of: source))"
+                        message:
+                            "Expected source type \(ObjectType.self) but got \(type(of: source))"
                     )
                 }
 
                 guard let _context = context as? Context else {
                     throw GraphQLError(
-                        message: "Expected context type \(Context.self) but got \(type(of: context))"
+                        message:
+                            "Expected context type \(Context.self) but got \(type(of: context))"
                     )
                 }
 
@@ -78,12 +82,7 @@ public class SubscriptionField<
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         resolve: @escaping AsyncResolve<SourceEventType, Context, Arguments, (any Sendable)?>,
-        subscribe: @escaping AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >
+        subscribe: @escaping AsyncResolve<ObjectType, Context, Arguments, SubSequence>
     ) {
         self.name = name
         self.arguments = arguments
@@ -95,12 +94,7 @@ public class SubscriptionField<
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         asyncResolve: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
-        asyncSubscribe: @escaping AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >
+        asyncSubscribe: @escaping AsyncResolve<ObjectType, Context, Arguments, SubSequence>
     ) {
         let resolve: AsyncResolve<SourceEventType, Context, Arguments, (any Sendable)?> = { type in
             { context, arguments in
@@ -114,23 +108,19 @@ public class SubscriptionField<
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         as _: FieldType.Type,
-        asyncSubscribe: @escaping AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >
+        asyncSubscribe: @escaping AsyncResolve<ObjectType, Context, Arguments, SubSequence>
     ) {
-        let resolve: AsyncResolve<
-            SourceEventType,
-            Context,
-            Arguments,
-            (any Sendable)?
-        > = { source in
-            { _, _ in
-                source
+        let resolve:
+            AsyncResolve<
+                SourceEventType,
+                Context,
+                Arguments,
+                (any Sendable)?
+            > = { source in
+                { _, _ in
+                    source
+                }
             }
-        }
         self.init(name: name, arguments: arguments, resolve: resolve, subscribe: asyncSubscribe)
     }
 
@@ -138,12 +128,7 @@ public class SubscriptionField<
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         syncResolve: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
-        syncSubscribe: @escaping SyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >
+        syncSubscribe: @escaping SyncResolve<ObjectType, Context, Arguments, SubSequence>
     ) {
         let asyncResolve: AsyncResolve<SourceEventType, Context, Arguments, ResolveType> = { type in
             { context, arguments in
@@ -151,12 +136,7 @@ public class SubscriptionField<
             }
         }
 
-        let asyncSubscribe: AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        > = { type in
+        let asyncSubscribe: AsyncResolve<ObjectType, Context, Arguments, SubSequence> = { type in
             { context, arguments in
                 try syncSubscribe(type)(context, arguments)
             }
@@ -173,39 +153,30 @@ public class SubscriptionField<
         name: String,
         arguments: [ArgumentComponent<Arguments>],
         as: FieldType.Type,
-        syncSubscribe: @escaping SyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >
+        syncSubscribe: @escaping SyncResolve<ObjectType, Context, Arguments, SubSequence>
     ) {
-        let asyncSubscribe: AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        > = { type in
-            { context, arguments in
-                try syncSubscribe(type)(context, arguments)
+        let asyncSubscribe:
+            AsyncResolve<
+                ObjectType,
+                Context,
+                Arguments,
+                SubSequence
+            > = { type in
+                { context, arguments in
+                    try syncSubscribe(type)(context, arguments)
+                }
             }
-        }
         self.init(name: name, arguments: arguments, as: `as`, asyncSubscribe: asyncSubscribe)
     }
 }
 
 // MARK: AsyncResolve Initializers
 
-public extension SubscriptionField {
-    convenience init(
+extension SubscriptionField {
+    public convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, FieldType>,
-        atSub subFunc: @escaping AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >,
+        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, SubSequence>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(
@@ -216,15 +187,10 @@ public extension SubscriptionField {
         )
     }
 
-    convenience init(
+    public convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, FieldType>,
-        atSub subFunc: @escaping AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >,
+        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, SubSequence>,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
     ) {
@@ -237,45 +203,30 @@ public extension SubscriptionField {
     }
 }
 
-public extension SubscriptionField {
-    convenience init(
+extension SubscriptionField {
+    public convenience init(
         _ name: String,
         as: FieldType.Type,
-        atSub subFunc: @escaping AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >,
+        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, SubSequence>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(name: name, arguments: [argument()], as: `as`, asyncSubscribe: subFunc)
     }
 
-    convenience init(
+    public convenience init(
         _ name: String,
         as: FieldType.Type,
-        atSub subFunc: @escaping AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >,
+        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, SubSequence>,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
     ) {
         self.init(name: name, arguments: arguments(), as: `as`, asyncSubscribe: subFunc)
     }
 
-    convenience init<ResolveType: Sendable>(
+    public convenience init<ResolveType: Sendable>(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
-        atSub subFunc: @escaping AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >,
+        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, SubSequence>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(
@@ -286,15 +237,10 @@ public extension SubscriptionField {
         )
     }
 
-    convenience init<ResolveType: Sendable>(
+    public convenience init<ResolveType: Sendable>(
         _ name: String,
         at function: @escaping AsyncResolve<SourceEventType, Context, Arguments, ResolveType>,
-        atSub subFunc: @escaping AsyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >,
+        atSub subFunc: @escaping AsyncResolve<ObjectType, Context, Arguments, SubSequence>,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
     ) {
@@ -307,16 +253,11 @@ public extension SubscriptionField {
     }
 }
 
-public extension SubscriptionField {
-    convenience init(
+extension SubscriptionField {
+    public convenience init(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
-        atSub subFunc: @escaping SyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >,
+        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, SubSequence>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(
@@ -327,15 +268,10 @@ public extension SubscriptionField {
         )
     }
 
-    convenience init(
+    public convenience init(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, FieldType>,
-        atSub subFunc: @escaping SyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >,
+        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, SubSequence>,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
     ) {
@@ -343,32 +279,22 @@ public extension SubscriptionField {
     }
 }
 
-public extension SubscriptionField {
+extension SubscriptionField {
     @_disfavoredOverload
-    convenience init(
+    public convenience init(
         _ name: String,
         as: FieldType.Type,
-        atSub subFunc: @escaping SyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >,
+        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, SubSequence>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(name: name, arguments: [argument()], as: `as`, syncSubscribe: subFunc)
     }
 
     @_disfavoredOverload
-    convenience init(
+    public convenience init(
         _ name: String,
         as: FieldType.Type,
-        atSub subFunc: @escaping SyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >,
+        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, SubSequence>,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
             -> [ArgumentComponent<Arguments>] = { [] }
     ) {
@@ -376,16 +302,11 @@ public extension SubscriptionField {
     }
 
     @_disfavoredOverload
-    convenience init<ResolveType: Sendable>(
+    public convenience init<ResolveType: Sendable>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as _: FieldType.Type,
-        atSub subFunc: @escaping SyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >,
+        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, SubSequence>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
     ) {
         self.init(
@@ -397,18 +318,14 @@ public extension SubscriptionField {
     }
 
     @_disfavoredOverload
-    convenience init<ResolveType: Sendable>(
+    public convenience init<ResolveType: Sendable>(
         _ name: String,
         at function: @escaping SyncResolve<SourceEventType, Context, Arguments, ResolveType>,
         as _: FieldType.Type,
-        atSub subFunc: @escaping SyncResolve<
-            ObjectType,
-            Context,
-            Arguments,
-            SubSequence
-        >,
-        @ArgumentComponentBuilder<Arguments> _ arguments: ()
-            -> [ArgumentComponent<Arguments>] = { [] }
+        atSub subFunc: @escaping SyncResolve<ObjectType, Context, Arguments, SubSequence>,
+        @ArgumentComponentBuilder<Arguments> _ arguments: () -> [ArgumentComponent<Arguments>] = {
+            []
+        }
     ) {
         self.init(name: name, arguments: arguments(), syncResolve: function, syncSubscribe: subFunc)
     }

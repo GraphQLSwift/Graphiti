@@ -1,6 +1,6 @@
 import Foundation
-import Graphiti
 import GraphQL
+import Graphiti
 import Testing
 
 struct FederationOnlySchemaTests {
@@ -83,8 +83,8 @@ struct FederationOnlySchemaTests {
     @Test func userFederationSimple() async throws {
         let representations: [String: Map] = [
             "representations": [
-                ["__typename": "User", "id": "1234"],
-            ],
+                ["__typename": "User", "id": "1234"]
+            ]
         ]
 
         let query =
@@ -100,13 +100,13 @@ struct FederationOnlySchemaTests {
 
         let result = try await execute(request: query, variables: representations)
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "_entities": [
                         [
-                            "id": "1234",
-                        ],
-                    ],
+                            "id": "1234"
+                        ]
+                    ]
                 ])
         )
     }
@@ -114,8 +114,8 @@ struct FederationOnlySchemaTests {
     @Test func userFederationNested() async throws {
         let representations: [String: Map] = [
             "representations": [
-                ["__typename": "User", "id": "1234"],
-            ],
+                ["__typename": "User", "id": "1234"]
+            ]
         ]
 
         let query =
@@ -132,8 +132,8 @@ struct FederationOnlySchemaTests {
 
         let result = try await execute(request: query, variables: representations)
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "_entities": [
                         [
                             "id": "1234",
@@ -141,8 +141,8 @@ struct FederationOnlySchemaTests {
                                 "name": "User 1234",
                                 "email": "1234@example.com",
                             ],
-                        ],
-                    ],
+                        ]
+                    ]
                 ])
         )
     }
@@ -150,8 +150,8 @@ struct FederationOnlySchemaTests {
     @Test func userFederationNestedOptional() async throws {
         let representations: [String: Map] = [
             "representations": [
-                ["__typename": "User", "id": "1"],
-            ],
+                ["__typename": "User", "id": "1"]
+            ]
         ]
 
         let query =
@@ -168,8 +168,8 @@ struct FederationOnlySchemaTests {
 
         let result = try await execute(request: query, variables: representations)
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "_entities": [
                         [
                             "id": "1",
@@ -177,8 +177,8 @@ struct FederationOnlySchemaTests {
                                 "name": "User 1",
                                 "email": .null,
                             ],
-                        ],
-                    ],
+                        ]
+                    ]
                 ])
         )
     }

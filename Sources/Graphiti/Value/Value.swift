@@ -10,19 +10,19 @@ public final class Value<EnumType: Encodable & RawRepresentable> where EnumType.
     }
 }
 
-public extension Value {
-    convenience init(_ value: EnumType) {
+extension Value {
+    public convenience init(_ value: EnumType) {
         self.init(value: value)
     }
 
     @discardableResult
-    func description(_ description: String) -> Self {
+    public func description(_ description: String) -> Self {
         self.description = description
         return self
     }
 
     @discardableResult
-    func deprecationReason(_ deprecationReason: String) -> Self {
+    public func deprecationReason(_ deprecationReason: String) -> Self {
         self.deprecationReason = deprecationReason
         return self
     }

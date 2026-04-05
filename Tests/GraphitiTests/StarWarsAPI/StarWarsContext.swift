@@ -1,10 +1,8 @@
-/**
- * This defines a basic set of data for our Star Wars Schema.
- *
- * This data is hard coded for the sake of the demo, but you could imagine
- * fetching this data from a backend service rather than from hardcoded
- * values in a more complex demo.
- */
+/// This defines a basic set of data for our Star Wars Schema.
+///
+/// This data is hard coded for the sake of the demo, but you could imagine
+/// fetching this data from a backend service rather than from hardcoded
+/// values in a more complex demo.
 public final class StarWarsContext: Sendable {
     private static let tatooine = Planet(
         id: "10001",

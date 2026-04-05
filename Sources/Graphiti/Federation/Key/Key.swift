@@ -5,11 +5,7 @@ public class Key<
     Resolver: Sendable,
     Context: Sendable,
     Arguments: Codable & Sendable
->: KeyComponent<
-    ObjectType,
-    Resolver,
-    Context
->, @unchecked Sendable {
+>: KeyComponent<ObjectType, Resolver, Context>, @unchecked Sendable {
     let arguments: [ArgumentComponent<Arguments>]
     let resolve: AsyncResolve<Resolver, Context, Arguments, ObjectType?>
 

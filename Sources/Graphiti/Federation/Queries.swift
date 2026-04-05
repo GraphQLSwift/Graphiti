@@ -21,7 +21,7 @@ func entitiesQuery(
         args: [
             "representations": GraphQLArgument(
                 type: GraphQLNonNull(GraphQLList(GraphQLNonNull(anyType)))
-            ),
+            )
         ],
         resolve: { source, args, context, info in
             let arguments = try coders.decoder.decode(EntityArguments.self, from: args)

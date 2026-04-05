@@ -7,8 +7,8 @@ public protocol API {
     var schema: Schema<Resolver, ContextType> { get }
 }
 
-public extension API {
-    func execute(
+extension API {
+    public func execute(
         request: String,
         context: ContextType,
         variables: [String: Map] = [:],
@@ -25,7 +25,7 @@ public extension API {
         )
     }
 
-    func execute(
+    public func execute(
         request: GraphQLRequest,
         context: ContextType,
         validationRules: [@Sendable (ValidationContext) -> Visitor] = []
@@ -39,7 +39,7 @@ public extension API {
         )
     }
 
-    func subscribe(
+    public func subscribe(
         request: String,
         context: ContextType,
         variables: [String: Map] = [:],
@@ -56,7 +56,7 @@ public extension API {
         )
     }
 
-    func subscribe(
+    public func subscribe(
         request: GraphQLRequest,
         context: ContextType,
         validationRules: [@Sendable (ValidationContext) -> Visitor] = []

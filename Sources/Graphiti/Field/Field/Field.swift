@@ -5,10 +5,7 @@ public class Field<
     Context: Sendable,
     FieldType: Sendable,
     Arguments: Decodable & Sendable
->: FieldComponent<
-    ObjectType,
-    Context
-> {
+>: FieldComponent<ObjectType, Context> {
     let name: String
     let arguments: [ArgumentComponent<Arguments>]
     let resolve: AsyncResolve<ObjectType, Context, Arguments, (any Sendable)?>
@@ -26,13 +23,15 @@ public class Field<
             resolve: { source, arguments, context, _ in
                 guard let s = source as? ObjectType else {
                     throw GraphQLError(
-                        message: "Expected source type \(ObjectType.self) but got \(type(of: source))"
+                        message:
+                            "Expected source type \(ObjectType.self) but got \(type(of: source))"
                     )
                 }
 
                 guard let c = context as? Context else {
                     throw GraphQLError(
-                        message: "Expected context type \(Context.self) but got \(type(of: context))"
+                        message:
+                            "Expected context type \(Context.self) but got \(type(of: context))"
                     )
                 }
 
@@ -95,8 +94,8 @@ public class Field<
 
 // MARK: AsyncResolve Initializers
 
-public extension Field {
-    convenience init(
+extension Field {
+    public convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<ObjectType, Context, Arguments, FieldType>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
@@ -104,7 +103,7 @@ public extension Field {
         self.init(name: name, arguments: [argument()], asyncResolve: function)
     }
 
-    convenience init(
+    public convenience init(
         _ name: String,
         at function: @escaping AsyncResolve<ObjectType, Context, Arguments, FieldType>,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
@@ -114,8 +113,8 @@ public extension Field {
     }
 }
 
-public extension Field {
-    convenience init(
+extension Field {
+    public convenience init(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, FieldType>,
         @ArgumentComponentBuilder<Arguments> _ argument: () -> ArgumentComponent<Arguments>
@@ -123,7 +122,7 @@ public extension Field {
         self.init(name: name, arguments: [argument()], syncResolve: function)
     }
 
-    convenience init(
+    public convenience init(
         _ name: String,
         at function: @escaping SyncResolve<ObjectType, Context, Arguments, FieldType>,
         @ArgumentComponentBuilder<Arguments> _ arguments: ()
@@ -135,8 +134,8 @@ public extension Field {
 
 // MARK: Keypath Initializers
 
-public extension Field where Arguments == NoArguments {
-    convenience init(
+extension Field where Arguments == NoArguments {
+    public convenience init(
         _ name: String,
         at keyPath: KeyPath<ObjectType, FieldType>
     ) {

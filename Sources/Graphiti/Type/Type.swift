@@ -4,10 +4,7 @@ public final class Type<
     Resolver: Sendable,
     Context: Sendable,
     ObjectType: Sendable
->: TypeComponent<
-    Resolver,
-    Context
-> {
+>: TypeComponent<Resolver, Context> {
     let interfaces: [Any.Type]
     var keys: [KeyComponent<ObjectType, Resolver, Context>]
     let fields: [FieldComponent<ObjectType, Context>]
@@ -44,13 +41,15 @@ public final class Type<
             let resolve: GraphQLFieldResolve = { source, args, context, _ in
                 guard let s = source as? Resolver else {
                     throw GraphQLError(
-                        message: "Expected source type \(ObjectType.self) but got \(type(of: source))"
+                        message:
+                            "Expected source type \(ObjectType.self) but got \(type(of: source))"
                     )
                 }
 
                 guard let c = context as? Context else {
                     throw GraphQLError(
-                        message: "Expected context type \(Context.self) but got \(type(of: context))"
+                        message:
+                            "Expected context type \(Context.self) but got \(type(of: context))"
                     )
                 }
 
@@ -104,8 +103,8 @@ public final class Type<
     }
 }
 
-public extension Type {
-    convenience init(
+extension Type {
+    public convenience init(
         _ type: ObjectType.Type,
         as name: String? = nil,
         interfaces: [Any.Type] = [],
@@ -121,7 +120,7 @@ public extension Type {
         )
     }
 
-    convenience init(
+    public convenience init(
         _ type: ObjectType.Type,
         as name: String? = nil,
         interfaces: [Any.Type] = [],
@@ -137,7 +136,7 @@ public extension Type {
         )
     }
 
-    convenience init(
+    public convenience init(
         resolver _: Resolver.Type,
         context _: Context.Type,
         _ type: ObjectType.Type,

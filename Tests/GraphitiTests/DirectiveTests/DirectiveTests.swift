@@ -1,22 +1,23 @@
-@testable import Graphiti
 import GraphQL
 import Testing
+
+@testable import Graphiti
 
 struct DirectiveTests {
     private let api = StarWarsAPI()
 
     @Test func skip() async throws {
         let query = """
-        query FetchHeroNameWithSkip($skipName: Boolean!) {
-            hero {
-                id
-                name @skip(if: $skipName)
+            query FetchHeroNameWithSkip($skipName: Boolean!) {
+                hero {
+                    id
+                    name @skip(if: $skipName)
+                }
             }
-        }
-        """
+            """
 
         let input: [String: Map] = [
-            "skipName": true,
+            "skipName": true
         ]
 
         let response = try await api.execute(
@@ -28,8 +29,8 @@ struct DirectiveTests {
         let expected = GraphQLResult(
             data: [
                 "hero": [
-                    "id": "2001",
-                ],
+                    "id": "2001"
+                ]
             ]
         )
 
@@ -38,16 +39,16 @@ struct DirectiveTests {
 
     @Test func include() async throws {
         let query = """
-        query FetchHeroNameWithSkip($includeName: Boolean!) {
-            hero {
-                id
-                name @include(if: $includeName)
+            query FetchHeroNameWithSkip($includeName: Boolean!) {
+                hero {
+                    id
+                    name @include(if: $includeName)
+                }
             }
-        }
-        """
+            """
 
         let input: [String: Map] = [
-            "includeName": false,
+            "includeName": false
         ]
 
         let response = try await api.execute(
@@ -59,8 +60,8 @@ struct DirectiveTests {
         let expected = GraphQLResult(
             data: [
                 "hero": [
-                    "id": "2001",
-                ],
+                    "id": "2001"
+                ]
             ]
         )
 
@@ -70,23 +71,23 @@ struct DirectiveTests {
     @Test func oneOfAcceptsGoodValue() async throws {
         let result = try await OneOfAPI().execute(
             request: """
-            query {
-                test(input: {a: "abc"}) {
-                    a
-                    b
+                query {
+                    test(input: {a: "abc"}) {
+                        a
+                        b
+                    }
                 }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "test": [
                             "a": "abc",
                             "b": .null,
-                        ],
+                        ]
                     ]
                 )
         )
@@ -95,18 +96,18 @@ struct DirectiveTests {
     @Test func oneOfRejectsBadValue() async throws {
         let result = try await OneOfAPI().execute(
             request: """
-            query {
-                test(input: {a: "abc", b: 123}) {
-                    a
-                    b
+                query {
+                    test(input: {a: "abc", b: 123}) {
+                        a
+                        b
+                    }
                 }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result.errors[0].message ==
-                #"OneOf Input Object "TestInputObject" must specify exactly one key."#
+            result.errors[0].message
+                == #"OneOf Input Object "TestInputObject" must specify exactly one key."#
         )
     }
 

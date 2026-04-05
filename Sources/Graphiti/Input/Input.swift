@@ -4,10 +4,7 @@ public final class Input<
     Resolver: Sendable,
     Context: Sendable,
     InputObjectType
->: TypeComponent<
-    Resolver,
-    Context
-> {
+>: TypeComponent<Resolver, Context> {
     let isOneOf: Bool
     let fields: [InputFieldComponent<InputObjectType, Context>]
 
@@ -50,8 +47,8 @@ public final class Input<
     }
 }
 
-public extension Input {
-    convenience init(
+extension Input {
+    public convenience init(
         _ type: InputObjectType.Type,
         as name: String? = nil,
         isOneOf: Bool = false,
@@ -61,7 +58,7 @@ public extension Input {
         self.init(type: type, name: name, isOneOf: isOneOf, fields: [fields()])
     }
 
-    convenience init(
+    public convenience init(
         _ type: InputObjectType.Type,
         as name: String? = nil,
         isOneOf: Bool = false,
