@@ -1,95 +1,89 @@
-import Graphiti
 import GraphQL
+import Graphiti
 import Testing
 
 struct DefaultValueTests {
     @Test func boolDefault() async throws {
         let result = try await DefaultValueAPI().execute(
             request: """
-            {
-                bool
-            }
-            """,
+                {
+                    bool
+                }
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(data: ["bool": true])
+            result == .init(data: ["bool": true])
         )
     }
 
     @Test func intDefault() async throws {
         let result = try await DefaultValueAPI().execute(
             request: """
-            {
-                int
-            }
-            """,
+                {
+                    int
+                }
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(data: ["int": 1])
+            result == .init(data: ["int": 1])
         )
     }
 
     @Test func floatDefault() async throws {
         let result = try await DefaultValueAPI().execute(
             request: """
-            {
-                float
-            }
-            """,
+                {
+                    float
+                }
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(data: ["float": 1.1])
+            result == .init(data: ["float": 1.1])
         )
     }
 
     @Test func stringDefault() async throws {
         let result = try await DefaultValueAPI().execute(
             request: """
-            {
-                string
-            }
-            """,
+                {
+                    string
+                }
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(data: ["string": "hello"])
+            result == .init(data: ["string": "hello"])
         )
     }
 
     @Test func enumDefault() async throws {
         let result = try await DefaultValueAPI().execute(
             request: """
-            {
-                enum
-            }
-            """,
+                {
+                    enum
+                }
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(data: ["enum": "valueA"])
+            result == .init(data: ["enum": "valueA"])
         )
     }
 
     @Test func arrayDefault() async throws {
         let result = try await DefaultValueAPI().execute(
             request: """
-            {
-                array
-            }
-            """,
+                {
+                    array
+                }
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(data: ["array": ["a", "b", "c"]])
+            result == .init(data: ["array": ["a", "b", "c"]])
         )
     }
 
@@ -97,22 +91,22 @@ struct DefaultValueTests {
         // Test input object argument default
         var result = try await DefaultValueAPI().execute(
             request: """
-            {
-                input {
-                bool
-                int
-                float
-                string
-                enum
-                array
+                {
+                    input {
+                    bool
+                    int
+                    float
+                    string
+                    enum
+                    array
+                    }
                 }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(data: [
+            result
+                == .init(data: [
                     "input": [
                         "bool": true,
                         "int": 1,
@@ -120,29 +114,29 @@ struct DefaultValueTests {
                         "string": "hello",
                         "enum": "valueA",
                         "array": ["a", "b", "c"],
-                    ],
+                    ]
                 ])
         )
 
         // Test input object field defaults
         result = try await DefaultValueAPI().execute(
             request: """
-            {
-                input(input: {bool: true}) {
-                bool
-                int
-                float
-                string
-                enum
-                array
+                {
+                    input(input: {bool: true}) {
+                    bool
+                    int
+                    float
+                    string
+                    enum
+                    array
+                    }
                 }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(data: [
+            result
+                == .init(data: [
                     "input": [
                         "bool": true,
                         "int": 1,
@@ -150,7 +144,7 @@ struct DefaultValueTests {
                         "string": "hello",
                         "enum": "valueA",
                         "array": ["a", "b", "c"],
-                    ],
+                    ]
                 ])
         )
     }
@@ -269,14 +263,16 @@ struct DefaultValueAPI: API {
                 Argument("array", at: \.array).defaultValue(["a", "b", "c"])
             }
             Field("input", at: Resolver.input) {
-                Argument("input", at: \.input).defaultValue(.init(
-                    bool: true,
-                    int: 1,
-                    float: 1.1,
-                    string: "hello",
-                    enum: .valueA,
-                    array: ["a", "b", "c"]
-                ))
+                Argument("input", at: \.input).defaultValue(
+                    .init(
+                        bool: true,
+                        int: 1,
+                        float: 1.1,
+                        string: "hello",
+                        enum: .valueA,
+                        array: ["a", "b", "c"]
+                    )
+                )
             }
         }
     }

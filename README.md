@@ -237,11 +237,11 @@ This package supports Swift versions in [alignment with Swift NIO](https://githu
 
 ## Contributing
 
-This repo uses [SwiftFormat](https://github.com/nicklockwood/SwiftFormat), and includes lint checks to enforce these formatting standards.
-To format your code, install `swiftformat` and run:
+This repo uses the standard [swift format](https://github.com/swiftlang/swift-format), and includes lint checks to enforce these formatting standards.
+To format your code, run:
 
 ```bash
-swiftformat .
+swift format --parallel --in-place --recursive ./
 ```
 
 ## License

@@ -8,8 +8,8 @@ public class InputFieldComponent<InputObjectType, Context> {
     }
 }
 
-public extension InputFieldComponent {
-    func description(_ description: String) -> Self {
+extension InputFieldComponent {
+    public func description(_ description: String) -> Self {
         self.description = description
         return self
     }

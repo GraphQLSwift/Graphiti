@@ -9,13 +9,13 @@ public class FieldComponent<ObjectType, Context> {
     }
 }
 
-public extension FieldComponent {
-    func description(_ description: String) -> Self {
+extension FieldComponent {
+    public func description(_ description: String) -> Self {
         self.description = description
         return self
     }
 
-    func deprecationReason(_ deprecationReason: String) -> Self {
+    public func deprecationReason(_ deprecationReason: String) -> Self {
         self.deprecationReason = deprecationReason
         return self
     }

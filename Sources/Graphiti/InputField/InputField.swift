@@ -4,10 +4,7 @@ public class InputField<
     InputObjectType,
     Context: Sendable,
     FieldType
->: InputFieldComponent<
-    InputObjectType,
-    Context
-> {
+>: InputFieldComponent<InputObjectType, Context> {
     let name: String
     var defaultValue: AnyEncodable?
 
@@ -30,8 +27,8 @@ public class InputField<
     }
 }
 
-public extension InputField {
-    convenience init(
+extension InputField {
+    public convenience init(
         _ name: String,
         at _: KeyPath<InputObjectType, FieldType>
     ) {
@@ -39,8 +36,8 @@ public extension InputField {
     }
 }
 
-public extension InputField where FieldType: Encodable {
-    func defaultValue(_ defaultValue: FieldType) -> Self {
+extension InputField where FieldType: Encodable {
+    public func defaultValue(_ defaultValue: FieldType) -> Self {
         self.defaultValue = AnyEncodable(defaultValue)
         return self
     }

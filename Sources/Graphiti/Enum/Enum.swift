@@ -4,10 +4,7 @@ public final class Enum<
     Resolver: Sendable,
     Context: Sendable,
     EnumType: Encodable & RawRepresentable
->: TypeComponent<
-    Resolver,
-    Context
-> where EnumType.RawValue == String {
+>: TypeComponent<Resolver, Context> where EnumType.RawValue == String {
     private let values: [Value<EnumType>]
 
     override func update(typeProvider: SchemaTypeProvider, coders _: Coders) throws {
@@ -39,8 +36,8 @@ public final class Enum<
     }
 }
 
-public extension Enum {
-    convenience init(
+extension Enum {
+    public convenience init(
         _ type: EnumType.Type,
         as name: String? = nil,
         @ValueBuilder<EnumType> _ values: () -> Value<EnumType>
@@ -48,7 +45,7 @@ public extension Enum {
         self.init(type: type, name: name, values: [values()])
     }
 
-    convenience init(
+    public convenience init(
         _ type: EnumType.Type,
         as name: String? = nil,
         @ValueBuilder<EnumType> _ values: () -> [Value<EnumType>]

@@ -26,8 +26,8 @@ public class Argument<ArgumentsType: Decodable, ArgumentType>: ArgumentComponent
     }
 }
 
-public extension Argument {
-    convenience init(
+extension Argument {
+    public convenience init(
         _ name: String,
         at _: KeyPath<ArgumentsType, ArgumentType>
     ) {
@@ -35,8 +35,8 @@ public extension Argument {
     }
 }
 
-public extension Argument where ArgumentType: Encodable {
-    func defaultValue(_ defaultValue: ArgumentType) -> Self {
+extension Argument where ArgumentType: Encodable {
+    public func defaultValue(_ defaultValue: ArgumentType) -> Self {
         self.defaultValue = AnyEncodable(defaultValue)
         return self
     }

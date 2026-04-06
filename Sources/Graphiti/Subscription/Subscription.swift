@@ -3,10 +3,7 @@ import GraphQL
 public final class Subscription<
     Resolver: Sendable,
     Context: Sendable
->: Component<
-    Resolver,
-    Context
-> {
+>: Component<Resolver, Context> {
     let fields: [FieldComponent<Resolver, Context>]
 
     let isTypeOf: GraphQLIsTypeOf = { source, _ in
@@ -47,15 +44,15 @@ public final class Subscription<
     }
 }
 
-public extension Subscription {
-    convenience init(
+extension Subscription {
+    public convenience init(
         as name: String = "Subscription",
         @FieldComponentBuilder<Resolver, Context> _ fields: () -> FieldComponent<Resolver, Context>
     ) {
         self.init(name: name, fields: [fields()])
     }
 
-    convenience init(
+    public convenience init(
         as name: String = "Subscription",
         @FieldComponentBuilder<Resolver, Context> _ fields: ()
             -> [FieldComponent<Resolver, Context>]

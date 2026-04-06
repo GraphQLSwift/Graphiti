@@ -41,15 +41,15 @@ public final class Mutation<Resolver: Sendable, Context: Sendable>: Component<Re
     }
 }
 
-public extension Mutation {
-    convenience init(
+extension Mutation {
+    public convenience init(
         as name: String = "Mutation",
         @FieldComponentBuilder<Resolver, Context> _ fields: () -> FieldComponent<Resolver, Context>
     ) {
         self.init(name: name, fields: [fields()])
     }
 
-    convenience init(
+    public convenience init(
         as name: String = "Mutation",
         @FieldComponentBuilder<Resolver, Context> _ fields: ()
             -> [FieldComponent<Resolver, Context>]

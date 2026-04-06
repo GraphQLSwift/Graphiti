@@ -1,6 +1,7 @@
-@testable import Graphiti
 import GraphQL
 import Testing
+
+@testable import Graphiti
 
 struct StarWarsIntrospectionTests {
     private let api = StarWarsAPI()
@@ -8,78 +9,78 @@ struct StarWarsIntrospectionTests {
     @Test func introspectionTypeQuery() async throws {
         let result = try await api.execute(
             request: """
-            query IntrospectionTypeQuery {
-                __schema {
-                    types {
-                        name
+                query IntrospectionTypeQuery {
+                    __schema {
+                        types {
+                            name
+                        }
                     }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "__schema": [
                             "types": [
                                 [
-                                    "name": "Boolean",
+                                    "name": "Boolean"
                                 ],
                                 [
-                                    "name": "Character",
+                                    "name": "Character"
                                 ],
                                 [
-                                    "name": "Droid",
+                                    "name": "Droid"
                                 ],
                                 [
-                                    "name": "Episode",
+                                    "name": "Episode"
                                 ],
                                 [
-                                    "name": "Human",
+                                    "name": "Human"
                                 ],
                                 [
-                                    "name": "Int",
+                                    "name": "Int"
                                 ],
                                 [
-                                    "name": "Planet",
+                                    "name": "Planet"
                                 ],
                                 [
-                                    "name": "Query",
+                                    "name": "Query"
                                 ],
                                 [
-                                    "name": "SearchResult",
+                                    "name": "SearchResult"
                                 ],
                                 [
-                                    "name": "String",
+                                    "name": "String"
                                 ],
                                 [
-                                    "name": "__Directive",
+                                    "name": "__Directive"
                                 ],
                                 [
-                                    "name": "__DirectiveLocation",
+                                    "name": "__DirectiveLocation"
                                 ],
                                 [
-                                    "name": "__EnumValue",
+                                    "name": "__EnumValue"
                                 ],
                                 [
-                                    "name": "__Field",
+                                    "name": "__Field"
                                 ],
                                 [
-                                    "name": "__InputValue",
+                                    "name": "__InputValue"
                                 ],
                                 [
-                                    "name": "__Schema",
+                                    "name": "__Schema"
                                 ],
                                 [
-                                    "name": "__Type",
+                                    "name": "__Type"
                                 ],
                                 [
-                                    "name": "__TypeKind",
+                                    "name": "__TypeKind"
                                 ],
-                            ],
-                        ],
+                            ]
+                        ]
                     ]
                 )
         )
@@ -88,25 +89,25 @@ struct StarWarsIntrospectionTests {
     @Test func introspectionQueryTypeQuery() async throws {
         let result = try await api.execute(
             request: """
-            query IntrospectionQueryTypeQuery {
-                __schema {
-                    queryType {
-                        name
+                query IntrospectionQueryTypeQuery {
+                    __schema {
+                        queryType {
+                            name
+                        }
                     }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "__schema": [
                             "queryType": [
-                                "name": "Query",
-                            ],
-                        ],
+                                "name": "Query"
+                            ]
+                        ]
                     ]
                 )
         )
@@ -115,21 +116,21 @@ struct StarWarsIntrospectionTests {
     @Test func introspectionDroidTypeQuery() async throws {
         let result = try await api.execute(
             request: """
-            query IntrospectionDroidTypeQuery {
-                __type(name: \"Droid\") {
-                    name
+                query IntrospectionDroidTypeQuery {
+                    __type(name: \"Droid\") {
+                        name
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "__type": [
-                            "name": "Droid",
-                        ],
+                            "name": "Droid"
+                        ]
                     ]
                 )
         )
@@ -138,23 +139,23 @@ struct StarWarsIntrospectionTests {
     @Test func introspectionDroidKindQuery() async throws {
         let result = try await api.execute(
             request: """
-            query IntrospectionDroidKindQuery {
-                __type(name: \"Droid\") {
-                    name
-                    kind
+                query IntrospectionDroidKindQuery {
+                    __type(name: \"Droid\") {
+                        name
+                        kind
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "__type": [
                             "name": "Droid",
                             "kind": "OBJECT",
-                        ],
+                        ]
                     ]
                 )
         )
@@ -163,23 +164,23 @@ struct StarWarsIntrospectionTests {
     @Test func introspectionCharacterKindQuery() async throws {
         let result = try await api.execute(
             request: """
-            query IntrospectionCharacterKindQuery {
-                __type(name: \"Character\") {
-                    name
-                    kind
+                query IntrospectionCharacterKindQuery {
+                    __type(name: \"Character\") {
+                        name
+                        kind
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "__type": [
                             "name": "Character",
                             "kind": "INTERFACE",
-                        ],
+                        ]
                     ]
                 )
         )
@@ -188,24 +189,24 @@ struct StarWarsIntrospectionTests {
     @Test func introspectionDroidFieldsQuery() async throws {
         let result = try await api.execute(
             request: """
-            query IntrospectionDroidFieldsQuery {
-                __type(name: \"Droid\") {
-                    name
-                    fields {
+                query IntrospectionDroidFieldsQuery {
+                    __type(name: \"Droid\") {
                         name
-                        type {
+                        fields {
                             name
-                            kind
+                            type {
+                                name
+                                kind
+                            }
                         }
                     }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "__type": [
                             "name": "Droid",
@@ -253,7 +254,7 @@ struct StarWarsIntrospectionTests {
                                     ],
                                 ],
                             ],
-                        ],
+                        ]
                     ]
                 )
         )
@@ -262,28 +263,28 @@ struct StarWarsIntrospectionTests {
     @Test func introspectionDroidNestedFieldsQuery() async throws {
         let result = try await api.execute(
             request: """
-            query IntrospectionDroidNestedFieldsQuery {
-                __type(name: \"Droid\") {
-                    name
-                    fields {
+                query IntrospectionDroidNestedFieldsQuery {
+                    __type(name: \"Droid\") {
                         name
-                        type {
+                        fields {
                             name
-                            kind
-                            ofType {
+                            type {
                                 name
                                 kind
+                                ofType {
+                                    name
+                                    kind
+                                }
                             }
                         }
                     }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "__type": [
                             "name": "Droid",
@@ -352,7 +353,7 @@ struct StarWarsIntrospectionTests {
                                     ],
                                 ],
                             ],
-                        ],
+                        ]
                     ]
                 )
         )
@@ -361,34 +362,34 @@ struct StarWarsIntrospectionTests {
     @Test func introspectionFieldArgsQuery() async throws {
         let result = try await api.execute(
             request: """
-            query IntrospectionFieldArgsQuery {
-                __schema {
-                    queryType {
-                        fields {
-                            name
-                            args {
+                query IntrospectionFieldArgsQuery {
+                    __schema {
+                        queryType {
+                            fields {
                                 name
-                                description
-                                type {
+                                args {
                                     name
-                                    kind
-                                    ofType {
+                                    description
+                                    type {
                                         name
                                         kind
+                                        ofType {
+                                            name
+                                            kind
+                                        }
                                     }
-                                }
-                                defaultValue
-                                }
+                                    defaultValue
+                                    }
+                            }
                         }
                     }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "__schema": [
                             "queryType": [
@@ -408,7 +409,7 @@ struct StarWarsIntrospectionTests {
                                                     ],
                                                 ],
                                                 "defaultValue": nil,
-                                            ],
+                                            ]
                                         ],
                                     ],
                                     [
@@ -416,14 +417,15 @@ struct StarWarsIntrospectionTests {
                                         "args": [
                                             [
                                                 "name": "episode",
-                                                "description": "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode.",
+                                                "description":
+                                                    "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode.",
                                                 "type": [
                                                     "name": "Episode",
                                                     "kind": "ENUM",
                                                     "ofType": nil,
                                                 ],
                                                 "defaultValue": nil,
-                                            ],
+                                            ]
                                         ],
                                     ],
                                     [
@@ -441,7 +443,7 @@ struct StarWarsIntrospectionTests {
                                                     ],
                                                 ],
                                                 "defaultValue": nil,
-                                            ],
+                                            ]
                                         ],
                                     ],
                                     [
@@ -459,12 +461,12 @@ struct StarWarsIntrospectionTests {
                                                     ],
                                                 ],
                                                 "defaultValue": "\"R2-D2\"",
-                                            ],
+                                            ]
                                         ],
                                     ],
-                                ],
-                            ],
-                        ],
+                                ]
+                            ]
+                        ]
                     ]
                 )
         )
@@ -473,23 +475,23 @@ struct StarWarsIntrospectionTests {
     @Test func introspectionDroidDescriptionQuery() async throws {
         let result = try await api.execute(
             request: """
-            query IntrospectionDroidDescriptionQuery {
-                __type(name: \"Droid\") {
-                    name
-                    description
+                query IntrospectionDroidDescriptionQuery {
+                    __type(name: \"Droid\") {
+                        name
+                        description
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "__type": [
                             "name": "Droid",
                             "description": "A mechanical creature in the Star Wars universe.",
-                        ],
+                        ]
                     ]
                 )
         )

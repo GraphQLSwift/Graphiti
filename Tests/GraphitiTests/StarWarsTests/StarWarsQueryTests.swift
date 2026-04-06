@@ -1,6 +1,7 @@
-@testable import Graphiti
 import GraphQL
 import Testing
+
+@testable import Graphiti
 
 struct StarWarsQueryTests {
     private let api = StarWarsAPI()
@@ -8,38 +9,37 @@ struct StarWarsQueryTests {
     @Test func heroNameQuery() async throws {
         let result = try await api.execute(
             request: """
-            query HeroNameQuery {
-                hero {
-                    name
+                query HeroNameQuery {
+                    hero {
+                        name
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: ["hero": ["name": "R2-D2"]])
+            result == GraphQLResult(data: ["hero": ["name": "R2-D2"]])
         )
     }
 
     @Test func heroNameAndFriendsQuery() async throws {
         let result = try await api.execute(
             request: """
-            query HeroNameAndFriendsQuery {
-                hero {
-                    id
-                    name
-                    friends {
+                query HeroNameAndFriendsQuery {
+                    hero {
+                        id
                         name
+                        friends {
+                            name
+                        }
                     }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "hero": [
                             "id": "2001",
@@ -49,7 +49,7 @@ struct StarWarsQueryTests {
                                 ["name": "Han Solo"],
                                 ["name": "Leia Organa"],
                             ],
-                        ],
+                        ]
                     ]
                 )
         )
@@ -58,24 +58,24 @@ struct StarWarsQueryTests {
     @Test func nestedQuery() async throws {
         let result = try await api.execute(
             request: """
-            query NestedQuery {
-                hero {
-                    name
-                    friends {
+                query NestedQuery {
+                    hero {
                         name
-                        appearsIn
                         friends {
                             name
+                            appearsIn
+                            friends {
+                                name
+                            }
                         }
                     }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "hero": [
                             "name": "R2-D2",
@@ -110,7 +110,7 @@ struct StarWarsQueryTests {
                                     ],
                                 ],
                             ],
-                        ],
+                        ]
                     ]
                 )
         )
@@ -119,21 +119,21 @@ struct StarWarsQueryTests {
     @Test func fetchLukeQuery() async throws {
         let result = try await api.execute(
             request: """
-            query FetchLukeQuery {
-                human(id: "1000") {
-                    name
+                query FetchLukeQuery {
+                    human(id: "1000") {
+                        name
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "human": [
-                            "name": "Luke Skywalker",
-                        ],
+                            "name": "Luke Skywalker"
+                        ]
                     ]
                 )
         )
@@ -142,64 +142,64 @@ struct StarWarsQueryTests {
     @Test func fetchSomeIDQuery() async throws {
         var result = try await api.execute(
             request: """
-            query FetchSomeIDQuery($someId: String!) {
-                human(id: $someId) {
-                    name
+                query FetchSomeIDQuery($someId: String!) {
+                    human(id: $someId) {
+                        name
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext(),
             variables: ["someId": "1000"]
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "human": [
-                            "name": "Luke Skywalker",
-                        ],
+                            "name": "Luke Skywalker"
+                        ]
                     ]
                 )
         )
 
         result = try await api.execute(
             request: """
-            query FetchSomeIDQuery($someId: String!) {
-                human(id: $someId) {
-                    name
+                query FetchSomeIDQuery($someId: String!) {
+                    human(id: $someId) {
+                        name
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext(),
             variables: ["someId": "1002"]
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "human": [
-                            "name": "Han Solo",
-                        ],
+                            "name": "Han Solo"
+                        ]
                     ]
                 )
         )
 
         result = try await api.execute(
             request: """
-            query FetchSomeIDQuery($someId: String!) {
-                human(id: $someId) {
-                    name
+                query FetchSomeIDQuery($someId: String!) {
+                    human(id: $someId) {
+                        name
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext(),
             variables: ["someId": "not a valid id"]
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
-                        "human": nil,
+                        "human": nil
                     ]
                 )
         )
@@ -208,21 +208,21 @@ struct StarWarsQueryTests {
     @Test func fetchLukeAliasedQuery() async throws {
         let result = try await api.execute(
             request: """
-            query FetchLukeAliasedQuery {
-                luke: human(id: "1000") {
-                    name
+                query FetchLukeAliasedQuery {
+                    luke: human(id: "1000") {
+                        name
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "luke": [
-                            "name": "Luke Skywalker",
-                        ],
+                            "name": "Luke Skywalker"
+                        ]
                     ]
                 )
         )
@@ -231,26 +231,26 @@ struct StarWarsQueryTests {
     @Test func fetchLukeAndLeiaAliasedQuery() async throws {
         let result = try await api.execute(
             request: """
-            query FetchLukeAndLeiaAliasedQuery {
-                luke: human(id: "1000") {
-                    name
+                query FetchLukeAndLeiaAliasedQuery {
+                    luke: human(id: "1000") {
+                        name
+                    }
+                    leia: human(id: "1003") {
+                        name
+                    }
                 }
-                leia: human(id: "1003") {
-                    name
-                }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "luke": [
-                            "name": "Luke Skywalker",
+                            "name": "Luke Skywalker"
                         ],
                         "leia": [
-                            "name": "Leia Organa",
+                            "name": "Leia Organa"
                         ],
                     ]
                 )
@@ -260,22 +260,22 @@ struct StarWarsQueryTests {
     @Test func duplicateFieldsQuery() async throws {
         let result = try await api.execute(
             request: """
-            query DuplicateFieldsQuery {
-                luke: human(id: "1000") {
-                    name
-                    homePlanet { name }
+                query DuplicateFieldsQuery {
+                    luke: human(id: "1000") {
+                        name
+                        homePlanet { name }
+                    }
+                    leia: human(id: "1003") {
+                        name
+                        homePlanet  { name }
+                    }
                 }
-                leia: human(id: "1003") {
-                    name
-                    homePlanet  { name }
-                }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "luke": [
                             "name": "Luke Skywalker",
@@ -293,24 +293,24 @@ struct StarWarsQueryTests {
     @Test func useFragmentQuery() async throws {
         let result = try await api.execute(
             request: """
-            query UseFragmentQuery {
-                luke: human(id: "1000") {
-                    ...HumanFragment
+                query UseFragmentQuery {
+                    luke: human(id: "1000") {
+                        ...HumanFragment
+                    }
+                    leia: human(id: "1003") {
+                        ...HumanFragment
+                    }
                 }
-                leia: human(id: "1003") {
-                    ...HumanFragment
+                fragment HumanFragment on Human {
+                    name
+                    homePlanet { name }
                 }
-            }
-            fragment HumanFragment on Human {
-                name
-                homePlanet { name }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "luke": [
                             "name": "Luke Skywalker",
@@ -328,23 +328,23 @@ struct StarWarsQueryTests {
     @Test func checkTypeOfR2Query() async throws {
         let result = try await api.execute(
             request: """
-            query CheckTypeOfR2Query {
-                hero {
-                    __typename
-                    name
+                query CheckTypeOfR2Query {
+                    hero {
+                        __typename
+                        name
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "hero": [
                             "__typename": "Droid",
                             "name": "R2-D2",
-                        ],
+                        ]
                     ]
                 )
         )
@@ -353,23 +353,23 @@ struct StarWarsQueryTests {
     @Test func checkTypeOfLukeQuery() async throws {
         let result = try await api.execute(
             request: """
-            query CheckTypeOfLukeQuery {
-                hero(episode: EMPIRE) {
-                    __typename
-                    name
+                query CheckTypeOfLukeQuery {
+                    hero(episode: EMPIRE) {
+                        __typename
+                        name
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "hero": [
                             "__typename": "Human",
                             "name": "Luke Skywalker",
-                        ],
+                        ]
                     ]
                 )
         )
@@ -378,30 +378,30 @@ struct StarWarsQueryTests {
     @Test func secretBackstoryQuery() async throws {
         let result = try await api.execute(
             request: """
-            query SecretBackstoryQuery {
-                hero {
-                    name
-                    secretBackstory
+                query SecretBackstoryQuery {
+                    hero {
+                        name
+                        secretBackstory
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "hero": [
                             "name": "R2-D2",
                             "secretBackstory": nil,
-                        ],
+                        ]
                     ],
                     errors: [
                         GraphQLError(
                             message: "secretBackstory is secret.",
                             locations: [SourceLocation(line: 4, column: 9)],
                             path: ["hero", "secretBackstory"]
-                        ),
+                        )
                     ]
                 )
         )
@@ -410,21 +410,21 @@ struct StarWarsQueryTests {
     @Test func secretBackstoryListQuery() async throws {
         let result = try await api.execute(
             request: """
-            query SecretBackstoryListQuery {
-                hero {
-                    name
-                    friends {
+                query SecretBackstoryListQuery {
+                    hero {
                         name
-                        secretBackstory
+                        friends {
+                            name
+                            secretBackstory
+                        }
                     }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "hero": [
                             "name": "R2-D2",
@@ -442,7 +442,7 @@ struct StarWarsQueryTests {
                                     "secretBackstory": nil,
                                 ],
                             ],
-                        ],
+                        ]
                     ],
                     errors: [
                         GraphQLError(
@@ -468,30 +468,30 @@ struct StarWarsQueryTests {
     @Test func secretBackstoryAliasQuery() async throws {
         let result = try await api.execute(
             request: """
-            query SecretBackstoryAliasQuery {
-                mainHero: hero {
-                    name
-                    story: secretBackstory
+                query SecretBackstoryAliasQuery {
+                    mainHero: hero {
+                        name
+                        story: secretBackstory
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "mainHero": [
                             "name": "R2-D2",
                             "story": nil,
-                        ],
+                        ]
                     ],
                     errors: [
                         GraphQLError(
                             message: "secretBackstory is secret.",
                             locations: [SourceLocation(line: 4, column: 9)],
                             path: ["mainHero", "story"]
-                        ),
+                        )
                     ]
                 )
         )
@@ -501,34 +501,34 @@ struct StarWarsQueryTests {
         let api = NonNullableFieldsAPI()
         let result = try await api.execute(
             request: """
-            query {
-                nullableA {
+                query {
                     nullableA {
-                        nonNullA {
+                        nullableA {
                             nonNullA {
-                                throws
+                                nonNullA {
+                                    throws
+                                }
                             }
                         }
                     }
                 }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "nullableA": [
-                            "nullableA": nil,
-                        ],
+                            "nullableA": nil
+                        ]
                     ],
                     errors: [
                         GraphQLError(
                             message: "catch me if you can.",
                             locations: [SourceLocation(line: 6, column: 21)],
                             path: ["nullableA", "nullableA", "nonNullA", "nonNullA", "throws"]
-                        ),
+                        )
                     ]
                 )
         )
@@ -577,34 +577,34 @@ struct StarWarsQueryTests {
     @Test func searchQuery() async throws {
         let result = try await api.execute(
             request: """
-            query {
-                search(query: "o") {
-                    ... on Planet {
-                        name
-                        diameter
-                    }
-                    ... on Human {
-                        name
-                    }
-                    ... on Droid {
-                        name
-                        primaryFunction
+                query {
+                    search(query: "o") {
+                        ... on Planet {
+                            name
+                            diameter
+                        }
+                        ... on Human {
+                            name
+                        }
+                        ... on Droid {
+                            name
+                            primaryFunction
+                        }
                     }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "search": [
                             ["name": "Tatooine", "diameter": 10465],
                             ["name": "Han Solo"],
                             ["name": "Leia Organa"],
                             ["name": "C-3PO", "primaryFunction": "Protocol"],
-                        ],
+                        ]
                     ]
                 )
         )
@@ -613,46 +613,46 @@ struct StarWarsQueryTests {
     @Test func directive() async throws {
         var result = try await api.execute(
             request: """
-            query Hero {
-                hero {
-                    name
-
-                    friends @include(if: false) {
+                query Hero {
+                    hero {
                         name
+
+                        friends @include(if: false) {
+                            name
+                        }
                     }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "hero": [
-                            "name": "R2-D2",
-                        ],
+                            "name": "R2-D2"
+                        ]
                     ]
                 )
         )
 
         result = try await api.execute(
             request: """
-            query Hero {
-                hero {
-                    name
-
-                    friends @include(if: true) {
+                query Hero {
+                    hero {
                         name
+
+                        friends @include(if: true) {
+                            name
+                        }
                     }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(
+            result
+                == GraphQLResult(
                     data: [
                         "hero": [
                             "name": "R2-D2",
@@ -661,7 +661,7 @@ struct StarWarsQueryTests {
                                 ["name": "Han Solo"],
                                 ["name": "Leia Organa"],
                             ],
-                        ],
+                        ]
                     ]
                 )
         )

@@ -7,7 +7,7 @@ struct ProductContext {
             size: "small",
             weight: 1,
             unit: "kg"
-        ),
+        )
     ]
 
     static let users = [
@@ -16,7 +16,7 @@ struct ProductContext {
             name: "Jane Smith",
             totalProductsCreated: 1337,
             yearsOfEmployment: 10
-        ),
+        )
     ]
 
     static let deprecatedProducts = [
@@ -25,7 +25,7 @@ struct ProductContext {
             package: "@apollo/federation-v1",
             reason: "Migrate to Federation V2",
             createdBy: users[0]
-        ),
+        )
     ]
 
     static let productsResearch = [

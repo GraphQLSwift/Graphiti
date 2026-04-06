@@ -94,8 +94,8 @@ open class Scalar<
     }
 }
 
-public extension Scalar {
-    convenience init(
+extension Scalar {
+    public convenience init(
         _ type: ScalarType.Type,
         as name: String? = nil,
         specifiedBy: String? = nil,
@@ -116,48 +116,36 @@ public extension Scalar {
 
 extension GraphQL.Value {
     var map: Map {
-        if
-            let value = self as? BooleanValue
-        {
+        if let value = self as? BooleanValue {
             return .bool(value.value)
         }
 
-        if
-            let value = self as? IntValue,
+        if let value = self as? IntValue,
             let int = Int(value.value)
         {
             return .int(int)
         }
 
-        if
-            let value = self as? FloatValue,
+        if let value = self as? FloatValue,
             let double = Double(value.value)
         {
             return .double(double)
         }
 
-        if
-            let value = self as? StringValue
-        {
+        if let value = self as? StringValue {
             return .string(value.value)
         }
 
-        if
-            let value = self as? EnumValue
-        {
+        if let value = self as? EnumValue {
             return .string(value.value)
         }
 
-        if
-            let value = self as? ListValue
-        {
+        if let value = self as? ListValue {
             let array = value.values.map { $0.map }
             return .array(array)
         }
 
-        if
-            let value = self as? ObjectValue
-        {
+        if let value = self as? ObjectValue {
             let dictionary: OrderedDictionary<String, Map> = value.fields
                 .reduce(into: [:]) { result, field in
                     result[field.name.value] = field.value.map

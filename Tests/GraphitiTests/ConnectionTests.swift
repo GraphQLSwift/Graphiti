@@ -43,30 +43,30 @@ struct ConnectionTests {
     @Test func connection() async throws {
         let result = try await schema.execute(
             request: """
-            {
-                comments {
-                    edges {
-                        cursor
-                        node {
-                            id
-                            message
+                {
+                    comments {
+                        edges {
+                            cursor
+                            node {
+                                id
+                                message
+                            }
+                        }
+                        pageInfo {
+                            hasPreviousPage
+                            hasNextPage
+                            startCursor
+                            endCursor
                         }
                     }
-                    pageInfo {
-                        hasPreviousPage
-                        hasNextPage
-                        startCursor
-                        endCursor
-                    }
                 }
-            }
-            """,
+                """,
             resolver: .init(),
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(
+            result
+                == .init(
                     data: [
                         "comments": [
                             "edges": [
@@ -98,7 +98,7 @@ struct ConnectionTests {
                                 "startCursor": "MQ==",
                                 "endCursor": "Mw==",
                             ],
-                        ],
+                        ]
                     ]
                 )
         )
@@ -108,29 +108,29 @@ struct ConnectionTests {
     @Test func first() async throws {
         let result = try await schema.execute(
             request: """
-            {
-                comments(first: 1) {
-                    edges {
-                        node {
-                            id
-                            message
+                {
+                    comments(first: 1) {
+                        edges {
+                            node {
+                                id
+                                message
+                            }
+                        }
+                        pageInfo {
+                            hasPreviousPage
+                            hasNextPage
+                            startCursor
+                            endCursor
                         }
                     }
-                    pageInfo {
-                        hasPreviousPage
-                        hasNextPage
-                        startCursor
-                        endCursor
-                    }
                 }
-            }
-            """,
+                """,
             resolver: .init(),
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(
+            result
+                == .init(
                     data: [
                         "comments": [
                             "edges": [
@@ -138,8 +138,8 @@ struct ConnectionTests {
                                     "node": [
                                         "id": 1,
                                         "message": "Hello",
-                                    ],
-                                ],
+                                    ]
+                                ]
                             ],
                             "pageInfo": [
                                 "hasPreviousPage": false,
@@ -147,7 +147,7 @@ struct ConnectionTests {
                                 "startCursor": "MQ==",
                                 "endCursor": "MQ==",
                             ],
-                        ],
+                        ]
                     ]
                 )
         )
@@ -157,29 +157,29 @@ struct ConnectionTests {
     @Test func after() async throws {
         let result = try await schema.execute(
             request: """
-            {
-                comments(after: "MQ==") {
-                    edges {
-                        node {
-                            id
-                            message
+                {
+                    comments(after: "MQ==") {
+                        edges {
+                            node {
+                                id
+                                message
+                            }
+                        }
+                        pageInfo {
+                            hasPreviousPage
+                            hasNextPage
+                            startCursor
+                            endCursor
                         }
                     }
-                    pageInfo {
-                        hasPreviousPage
-                        hasNextPage
-                        startCursor
-                        endCursor
-                    }
                 }
-            }
-            """,
+                """,
             resolver: .init(),
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(
+            result
+                == .init(
                     data: [
                         "comments": [
                             "edges": [
@@ -187,13 +187,13 @@ struct ConnectionTests {
                                     "node": [
                                         "id": 2,
                                         "message": "What's up?",
-                                    ],
+                                    ]
                                 ],
                                 [
                                     "node": [
                                         "id": 3,
                                         "message": "Goodbye",
-                                    ],
+                                    ]
                                 ],
                             ],
                             "pageInfo": [
@@ -202,7 +202,7 @@ struct ConnectionTests {
                                 "startCursor": "Mg==",
                                 "endCursor": "Mw==",
                             ],
-                        ],
+                        ]
                     ]
                 )
         )
@@ -212,29 +212,29 @@ struct ConnectionTests {
     @Test func firstAfter() async throws {
         let result = try await schema.execute(
             request: """
-            {
-                comments(first: 1, after: "MQ==") {
-                    edges {
-                        node {
-                            id
-                            message
+                {
+                    comments(first: 1, after: "MQ==") {
+                        edges {
+                            node {
+                                id
+                                message
+                            }
+                        }
+                        pageInfo {
+                            hasPreviousPage
+                            hasNextPage
+                            startCursor
+                            endCursor
                         }
                     }
-                    pageInfo {
-                        hasPreviousPage
-                        hasNextPage
-                        startCursor
-                        endCursor
-                    }
                 }
-            }
-            """,
+                """,
             resolver: .init(),
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(
+            result
+                == .init(
                     data: [
                         "comments": [
                             "edges": [
@@ -242,8 +242,8 @@ struct ConnectionTests {
                                     "node": [
                                         "id": 2,
                                         "message": "What's up?",
-                                    ],
-                                ],
+                                    ]
+                                ]
                             ],
                             "pageInfo": [
                                 "hasPreviousPage": false,
@@ -251,7 +251,7 @@ struct ConnectionTests {
                                 "startCursor": "Mg==",
                                 "endCursor": "Mg==",
                             ],
-                        ],
+                        ]
                     ]
                 )
         )
@@ -261,29 +261,29 @@ struct ConnectionTests {
     @Test func last() async throws {
         let result = try await schema.execute(
             request: """
-            {
-                comments(last: 1) {
-                    edges {
-                        node {
-                            id
-                            message
+                {
+                    comments(last: 1) {
+                        edges {
+                            node {
+                                id
+                                message
+                            }
+                        }
+                        pageInfo {
+                            hasPreviousPage
+                            hasNextPage
+                            startCursor
+                            endCursor
                         }
                     }
-                    pageInfo {
-                        hasPreviousPage
-                        hasNextPage
-                        startCursor
-                        endCursor
-                    }
                 }
-            }
-            """,
+                """,
             resolver: .init(),
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(
+            result
+                == .init(
                     data: [
                         "comments": [
                             "edges": [
@@ -291,8 +291,8 @@ struct ConnectionTests {
                                     "node": [
                                         "id": 3,
                                         "message": "Goodbye",
-                                    ],
-                                ],
+                                    ]
+                                ]
                             ],
                             "pageInfo": [
                                 "hasPreviousPage": true,
@@ -300,7 +300,7 @@ struct ConnectionTests {
                                 "startCursor": "Mw==",
                                 "endCursor": "Mw==",
                             ],
-                        ],
+                        ]
                     ]
                 )
         )
@@ -310,29 +310,29 @@ struct ConnectionTests {
     @Test func before() async throws {
         let result = try await schema.execute(
             request: """
-            {
-                comments(before: "Mw==") {
-                    edges {
-                        node {
-                            id
-                            message
+                {
+                    comments(before: "Mw==") {
+                        edges {
+                            node {
+                                id
+                                message
+                            }
+                        }
+                        pageInfo {
+                            hasPreviousPage
+                            hasNextPage
+                            startCursor
+                            endCursor
                         }
                     }
-                    pageInfo {
-                        hasPreviousPage
-                        hasNextPage
-                        startCursor
-                        endCursor
-                    }
                 }
-            }
-            """,
+                """,
             resolver: .init(),
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(
+            result
+                == .init(
                     data: [
                         "comments": [
                             "edges": [
@@ -340,13 +340,13 @@ struct ConnectionTests {
                                     "node": [
                                         "id": 1,
                                         "message": "Hello",
-                                    ],
+                                    ]
                                 ],
                                 [
                                     "node": [
                                         "id": 2,
                                         "message": "What's up?",
-                                    ],
+                                    ]
                                 ],
                             ],
                             "pageInfo": [
@@ -355,7 +355,7 @@ struct ConnectionTests {
                                 "startCursor": "MQ==",
                                 "endCursor": "Mg==",
                             ],
-                        ],
+                        ]
                     ]
                 )
         )
@@ -365,29 +365,29 @@ struct ConnectionTests {
     @Test func lastBefore() async throws {
         let result = try await schema.execute(
             request: """
-            {
-                comments(last: 1, before: "Mw==") {
-                    edges {
-                        node {
-                            id
-                            message
+                {
+                    comments(last: 1, before: "Mw==") {
+                        edges {
+                            node {
+                                id
+                                message
+                            }
+                        }
+                        pageInfo {
+                            hasPreviousPage
+                            hasNextPage
+                            startCursor
+                            endCursor
                         }
                     }
-                    pageInfo {
-                        hasPreviousPage
-                        hasNextPage
-                        startCursor
-                        endCursor
-                    }
                 }
-            }
-            """,
+                """,
             resolver: .init(),
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(
+            result
+                == .init(
                     data: [
                         "comments": [
                             "edges": [
@@ -395,8 +395,8 @@ struct ConnectionTests {
                                     "node": [
                                         "id": 2,
                                         "message": "What's up?",
-                                    ],
-                                ],
+                                    ]
+                                ]
                             ],
                             "pageInfo": [
                                 "hasPreviousPage": true,
@@ -404,7 +404,7 @@ struct ConnectionTests {
                                 "startCursor": "Mg==",
                                 "endCursor": "Mg==",
                             ],
-                        ],
+                        ]
                     ]
                 )
         )
@@ -414,29 +414,29 @@ struct ConnectionTests {
     @Test func afterBefore() async throws {
         let result = try await schema.execute(
             request: """
-            {
-                comments(after: "MQ==", before: "Mw==") {
-                    edges {
-                        node {
-                            id
-                            message
+                {
+                    comments(after: "MQ==", before: "Mw==") {
+                        edges {
+                            node {
+                                id
+                                message
+                            }
+                        }
+                        pageInfo {
+                            hasPreviousPage
+                            hasNextPage
+                            startCursor
+                            endCursor
                         }
                     }
-                    pageInfo {
-                        hasPreviousPage
-                        hasNextPage
-                        startCursor
-                        endCursor
-                    }
                 }
-            }
-            """,
+                """,
             resolver: .init(),
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(
+            result
+                == .init(
                     data: [
                         "comments": [
                             "edges": [
@@ -444,8 +444,8 @@ struct ConnectionTests {
                                     "node": [
                                         "id": 2,
                                         "message": "What's up?",
-                                    ],
-                                ],
+                                    ]
+                                ]
                             ],
                             "pageInfo": [
                                 "hasPreviousPage": false,
@@ -453,7 +453,7 @@ struct ConnectionTests {
                                 "startCursor": "Mg==",
                                 "endCursor": "Mg==",
                             ],
-                        ],
+                        ]
                     ]
                 )
         )
@@ -508,25 +508,25 @@ struct ConnectionTests {
 
         let result = try await schema.execute(
             request: """
-            {
-                chatObject {
-                    messages {
-                        edges {
-                            node {
-                                id
-                                text
+                {
+                    chatObject {
+                        messages {
+                            edges {
+                                node {
+                                    id
+                                    text
+                                }
                             }
                         }
                     }
                 }
-            }
-            """,
+                """,
             resolver: .init(),
             context: NoContext()
         )
         #expect(
-            result ==
-                .init(
+            result
+                == .init(
                     data: [
                         "chatObject": [
                             "messages": [
@@ -535,17 +535,17 @@ struct ConnectionTests {
                                         "node": [
                                             "id": 1,
                                             "text": "a",
-                                        ],
+                                        ]
                                     ],
                                     [
                                         "node": [
                                             "id": 2,
                                             "text": "b",
-                                        ],
+                                        ]
                                     ],
-                                ],
-                            ],
-                        ],
+                                ]
+                            ]
+                        ]
                     ]
                 )
         )

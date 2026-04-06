@@ -13,8 +13,8 @@ open class Component<Resolver: Sendable, Context: Sendable> {
     func update(typeProvider _: SchemaTypeProvider, coders _: Coders) throws {}
 }
 
-public extension Component {
-    func description(_ description: String) -> Self {
+extension Component {
+    public func description(_ description: String) -> Self {
         self.description = description
         return self
     }

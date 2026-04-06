@@ -1,7 +1,8 @@
 import Foundation
-@testable import Graphiti
 import GraphQL
 import Testing
+
+@testable import Graphiti
 
 struct ScalarTests {
     // MARK: Test UUID converts to String as expected
@@ -33,20 +34,20 @@ struct ScalarTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                uuid {
-                value
+                query {
+                    uuid {
+                    value
+                    }
                 }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "uuid": [
-                        "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
-                    ],
+                        "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"
+                    ]
                 ])
         )
     }
@@ -84,20 +85,20 @@ struct ScalarTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                uuid (value: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F") {
-                value
+                query {
+                    uuid (value: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F") {
+                    value
+                    }
                 }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "uuid": [
-                        "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
-                    ],
+                        "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"
+                    ]
                 ])
         )
     }
@@ -142,20 +143,20 @@ struct ScalarTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                uuid (input: {value: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"}) {
-                value
+                query {
+                    uuid (input: {value: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"}) {
+                    value
+                    }
                 }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "uuid": [
-                        "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
-                    ],
+                        "value": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"
+                    ]
                 ])
         )
     }
@@ -194,20 +195,20 @@ struct ScalarTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                date {
-                value
+                query {
+                    date {
+                    value
+                    }
                 }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "date": [
-                        "value": "2001-01-01T00:00:00Z",
-                    ],
+                        "value": "2001-01-01T00:00:00Z"
+                    ]
                 ])
         )
     }
@@ -250,20 +251,20 @@ struct ScalarTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                date (value: "2001-01-01T00:00:00Z") {
-                value
+                query {
+                    date (value: "2001-01-01T00:00:00Z") {
+                    value
+                    }
                 }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "date": [
-                        "value": "2001-01-01T00:00:00Z",
-                    ],
+                        "value": "2001-01-01T00:00:00Z"
+                    ]
                 ])
         )
     }
@@ -313,20 +314,20 @@ struct ScalarTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                date (input: {value: "2001-01-01T00:00:00Z"}) {
-                value
+                query {
+                    date (input: {value: "2001-01-01T00:00:00Z"}) {
+                    value
+                    }
                 }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "date": [
-                        "value": "2001-01-01T00:00:00Z",
-                    ],
+                        "value": "2001-01-01T00:00:00Z"
+                    ]
                 ])
         )
     }
@@ -360,20 +361,20 @@ struct ScalarTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                coord {
-                value
+                query {
+                    coord {
+                    value
+                    }
                 }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "coord": [
-                        "value": "(0.0, 0.0)",
-                    ],
+                        "value": "(0.0, 0.0)"
+                    ]
                 ])
         )
     }
@@ -411,20 +412,20 @@ struct ScalarTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                coord (value: "(0.0, 0.0)") {
-                value
+                query {
+                    coord (value: "(0.0, 0.0)") {
+                    value
+                    }
                 }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "coord": [
-                        "value": "(0.0, 0.0)",
-                    ],
+                        "value": "(0.0, 0.0)"
+                    ]
                 ])
         )
     }
@@ -469,20 +470,20 @@ struct ScalarTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                coord (input: {value: "(0.0, 0.0)"}) {
-                value
+                query {
+                    coord (input: {value: "(0.0, 0.0)"}) {
+                    value
+                    }
                 }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "coord": [
-                        "value": "(0.0, 0.0)",
-                    ],
+                        "value": "(0.0, 0.0)"
+                    ]
                 ])
         )
     }
@@ -517,24 +518,22 @@ struct ScalarTests {
         // Test individual fields because we can't be confident we'll match the ordering of Map's OrderedDictionary
         let result = try await api.execute(
             request: """
-            query {
-              coord {
-                value
-              }
-            }
-            """,
+                query {
+                  coord {
+                    value
+                  }
+                }
+                """,
             context: NoContext()
         )
 
         let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
 
         #expect(
-            value?["longitude"] ==
-                .number(0.0)
+            value?["longitude"] == .number(0.0)
         )
         #expect(
-            value?["latitude"] ==
-                .number(0.0)
+            value?["latitude"] == .number(0.0)
         )
     }
 
@@ -572,24 +571,22 @@ struct ScalarTests {
         // Test individual fields because we can't be confident we'll match the ordering of Map's OrderedDictionary
         let result = try await api.execute(
             request: """
-            query {
-              coord (value: {latitude: 0.0, longitude: 0.0}) {
-                value
-              }
-            }
-            """,
+                query {
+                  coord (value: {latitude: 0.0, longitude: 0.0}) {
+                    value
+                  }
+                }
+                """,
             context: NoContext()
         )
 
         let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
 
         #expect(
-            value?["longitude"] ==
-                .number(0.0)
+            value?["longitude"] == .number(0.0)
         )
         #expect(
-            value?["latitude"] ==
-                .number(0.0)
+            value?["latitude"] == .number(0.0)
         )
     }
 
@@ -634,24 +631,22 @@ struct ScalarTests {
         // Test individual fields because we can't be confident we'll match the ordering of Map's OrderedDictionary
         let result = try await api.execute(
             request: """
-            query {
-              coord (input: {value: {latitude: 0.0, longitude: 0.0}}) {
-                value
-              }
-            }
-            """,
+                query {
+                  coord (input: {value: {latitude: 0.0, longitude: 0.0}}) {
+                    value
+                  }
+                }
+                """,
             context: NoContext()
         )
 
         let value = result.data?.dictionary?["coord"]?.dictionary?["value"]?.dictionary
 
         #expect(
-            value?["longitude"] ==
-                .number(0.0)
+            value?["longitude"] == .number(0.0)
         )
         #expect(
-            value?["latitude"] ==
-                .number(0.0)
+            value?["latitude"] == .number(0.0)
         )
     }
 }

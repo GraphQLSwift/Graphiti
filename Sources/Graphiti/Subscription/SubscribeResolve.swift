@@ -1,4 +1,3 @@
-
 public typealias SubscribeResolve<ObjectType, Context, Arguments, ResolveType> = (
     _ object: ObjectType
 ) -> (

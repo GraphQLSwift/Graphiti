@@ -19,7 +19,8 @@ extension TypeProvider {
 
         guard graphQLNameMap[key] == nil else {
             throw GraphQLError(
-                message: "Duplicate type registration for GraphQL type name \"\(name)\" while trying to register type \(Reflection.name(for: type))"
+                message:
+                    "Duplicate type registration for GraphQL type name \"\(name)\" while trying to register type \(Reflection.name(for: type))"
             )
         }
 
@@ -35,7 +36,8 @@ extension TypeProvider {
 
         guard graphQLTypeMap[key] == nil else {
             throw GraphQLError(
-                message: "Duplicate type registration for GraphQLType \"\(graphQLType.debugDescription)\" while trying to register type \(Reflection.name(for: type))"
+                message:
+                    "Duplicate type registration for GraphQLType \"\(graphQLType.debugDescription)\" while trying to register type \(Reflection.name(for: type))"
             )
         }
 
@@ -50,7 +52,7 @@ extension TypeProvider {
         } else {
             throw GraphQLError(
                 message:
-                "GraphQLType \"\(type)\" is not nullable."
+                    "GraphQLType \"\(type)\" is not nullable."
             )
         }
     }
@@ -83,9 +85,9 @@ extension TypeProvider {
         } catch {
             throw GraphQLError(
                 message:
-                // TODO: Add field type and use "type.field" format.
-                "Cannot use type \"\(type)\" for field \"\(field)\". " +
-                    "Type does not map to a GraphQL type.",
+                    // TODO: Add field type and use "type.field" format.
+                    "Cannot use type \"\(type)\" for field \"\(field)\". "
+                    + "Type does not map to a GraphQL type.",
                 originalError: error
             )
         }
@@ -93,9 +95,9 @@ extension TypeProvider {
         guard let outputType = graphQLType as? GraphQLOutputType else {
             throw GraphQLError(
                 message:
-                // TODO: Add field type and use "type.field" format.
-                "Cannot use type \"\(type)\" for field \"\(field)\". " +
-                    "Mapped GraphQL type is not an output type."
+                    // TODO: Add field type and use "type.field" format.
+                    "Cannot use type \"\(type)\" for field \"\(field)\". "
+                    + "Mapped GraphQL type is not an output type."
             )
         }
 
@@ -110,9 +112,9 @@ extension TypeProvider {
         } catch {
             throw GraphQLError(
                 message:
-                // TODO: Add field type and use "type.field" format.
-                "Cannot use type \"\(type)\" for field \"\(field)\". " +
-                    "Type does not map to a GraphQL type.",
+                    // TODO: Add field type and use "type.field" format.
+                    "Cannot use type \"\(type)\" for field \"\(field)\". "
+                    + "Type does not map to a GraphQL type.",
                 originalError: error
             )
         }
@@ -120,9 +122,9 @@ extension TypeProvider {
         guard let inputType = graphQLType as? GraphQLInputType else {
             throw GraphQLError(
                 message:
-                // TODO: Add field type and use "type.field" format.
-                "Cannot use type \"\(type)\" for field \"\(field)\". " +
-                    "Mapped GraphQL type is not an input type."
+                    // TODO: Add field type and use "type.field" format.
+                    "Cannot use type \"\(type)\" for field \"\(field)\". "
+                    + "Mapped GraphQL type is not an input type."
             )
         }
 
@@ -137,8 +139,8 @@ extension TypeProvider {
         } catch {
             throw GraphQLError(
                 message:
-                "Cannot use type \"\(type)\" as named type. " +
-                    "Type does not map to a GraphQL type.",
+                    "Cannot use type \"\(type)\" as named type. "
+                    + "Type does not map to a GraphQL type.",
                 originalError: error
             )
         }
@@ -146,8 +148,8 @@ extension TypeProvider {
         guard let namedType = GraphQL.getNamedType(type: graphQLType) else {
             throw GraphQLError(
                 message:
-                "Cannot use type \"\(type)\" as named type. " +
-                    "Mapped GraphQL type is not a named type."
+                    "Cannot use type \"\(type)\" as named type. "
+                    + "Mapped GraphQL type is not a named type."
             )
         }
 
@@ -159,9 +161,8 @@ extension TypeProvider {
         guard Reflection.isProtocol(type: type) else {
             throw GraphQLError(
                 message:
-                // TODO: Add more information of where the error happened.
-                "Cannot use type \"\(type)\" as interface. " +
-                    "Type is not a protocol."
+                    // TODO: Add more information of where the error happened.
+                    "Cannot use type \"\(type)\" as interface. " + "Type is not a protocol."
             )
         }
 
@@ -172,9 +173,9 @@ extension TypeProvider {
         } catch {
             throw GraphQLError(
                 message:
-                // TODO: Add more information of where the error happened.
-                "Cannot use type \"\(type)\" as interface. " +
-                    "Type does not map to a GraphQL type.",
+                    // TODO: Add more information of where the error happened.
+                    "Cannot use type \"\(type)\" as interface. "
+                    + "Type does not map to a GraphQL type.",
                 originalError: error
             )
         }
@@ -182,18 +183,18 @@ extension TypeProvider {
         guard let nonNull = graphQLType as? GraphQLNonNull else {
             throw GraphQLError(
                 message:
-                // TODO: Add more information of where the error happened.
-                "Cannot use type \"\(type)\" as interface. " +
-                    "Mapped GraphQL type is nullable."
+                    // TODO: Add more information of where the error happened.
+                    "Cannot use type \"\(type)\" as interface. "
+                    + "Mapped GraphQL type is nullable."
             )
         }
 
         guard let interfaceType = nonNull.ofType as? GraphQLInterfaceType else {
             throw GraphQLError(
                 message:
-                // TODO: Add more information of where the error happened.
-                "Cannot use type \"\(type)\" as interface. " +
-                    "Mapped GraphQL type is not an interface type."
+                    // TODO: Add more information of where the error happened.
+                    "Cannot use type \"\(type)\" as interface. "
+                    + "Mapped GraphQL type is not an interface type."
             )
         }
 
@@ -208,9 +209,9 @@ extension TypeProvider {
         } catch {
             throw GraphQLError(
                 message:
-                // TODO: Add more information of where the error happened.
-                "Cannot use type \"\(type)\" as object. " +
-                    "Type does not map to a GraphQL type.",
+                    // TODO: Add more information of where the error happened.
+                    "Cannot use type \"\(type)\" as object. "
+                    + "Type does not map to a GraphQL type.",
                 originalError: error
             )
         }
@@ -218,18 +219,17 @@ extension TypeProvider {
         guard let nonNull = graphQLType as? GraphQLNonNull else {
             throw GraphQLError(
                 message:
-                // TODO: Add more information of where the error happened.
-                "Cannot use type \"\(type)\" as object. " +
-                    "Mapped GraphQL type is nullable."
+                    // TODO: Add more information of where the error happened.
+                    "Cannot use type \"\(type)\" as object. " + "Mapped GraphQL type is nullable."
             )
         }
 
         guard let objectType = nonNull.ofType as? GraphQLObjectType else {
             throw GraphQLError(
                 message:
-                // TODO: Add more information of where the error happened.
-                "Cannot use type \"\(type)\" as object. " +
-                    "Mapped GraphQL type is not an object type."
+                    // TODO: Add more information of where the error happened.
+                    "Cannot use type \"\(type)\" as object. "
+                    + "Mapped GraphQL type is not an object type."
             )
         }
 

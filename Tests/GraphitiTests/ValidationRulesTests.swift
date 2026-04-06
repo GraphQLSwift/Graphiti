@@ -1,7 +1,8 @@
 import Foundation
-@testable import Graphiti
 import GraphQL
 import Testing
+
+@testable import Graphiti
 
 struct ValidationRulesTests {
     /// Test registering custom validation rules
@@ -24,23 +25,24 @@ struct ValidationRulesTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                __type(name: "Query") {
-                    name
-                    description
+                query {
+                    __type(name: "Query") {
+                        name
+                        description
+                    }
                 }
-            }
-            """,
+                """,
             context: NoContext(),
             validationRules: [NoIntrospectionRule]
         )
         #expect(
-            result ==
-                GraphQLResult(errors: [
+            result
+                == GraphQLResult(errors: [
                     .init(
-                        message: "GraphQL introspection is not allowed, but the query contained __schema or __type",
+                        message:
+                            "GraphQL introspection is not allowed, but the query contained __schema or __type",
                         locations: [.init(line: 2, column: 3)]
-                    ),
+                    )
                 ])
         )
     }

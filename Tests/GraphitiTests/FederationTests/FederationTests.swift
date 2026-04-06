@@ -1,6 +1,6 @@
 import Foundation
-import Graphiti
 import GraphQL
+import Graphiti
 import Testing
 
 struct FederationTests {
@@ -21,11 +21,11 @@ struct FederationTests {
         let result = try await execute(request: Self.query("service"))
         let sdl = try Self.loadSDL()
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "_service": [
-                        "sdl": Map(stringLiteral: sdl),
-                    ],
+                        "sdl": Map(stringLiteral: sdl)
+                    ]
                 ])
         )
     }
@@ -33,14 +33,14 @@ struct FederationTests {
     @Test func entityKey() async throws {
         let representations: [String: Map] = [
             "representations": [
-                ["__typename": "User", "email": "support@apollographql.com"],
-            ],
+                ["__typename": "User", "email": "support@apollographql.com"]
+            ]
         ]
 
         let result = try await execute(request: Self.query("entities"), variables: representations)
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "_entities": [
                         [
                             "email": "support@apollographql.com",
@@ -48,8 +48,8 @@ struct FederationTests {
                             "totalProductsCreated": 1337,
                             "yearsOfEmployment": 10,
                             "averageProductsCreatedPerYear": 133,
-                        ],
-                    ],
+                        ]
+                    ]
                 ])
         )
     }
@@ -61,14 +61,14 @@ struct FederationTests {
                     "__typename": "DeprecatedProduct",
                     "sku": "apollo-federation-v1",
                     "package": "@apollo/federation-v1",
-                ],
-            ],
+                ]
+            ]
         ]
 
         let result = try await execute(request: Self.query("entities"), variables: representations)
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "_entities": [
                         [
                             "sku": "apollo-federation-v1",
@@ -81,8 +81,8 @@ struct FederationTests {
                                 "yearsOfEmployment": 10,
                                 "averageProductsCreatedPerYear": 133,
                             ],
-                        ],
-                    ],
+                        ]
+                    ]
                 ])
         )
     }
@@ -90,14 +90,14 @@ struct FederationTests {
     @Test func entityCompositeKey() async throws {
         let representations: [String: Map] = [
             "representations": [
-                ["__typename": "ProductResearch", "study": ["caseNumber": "1234"]],
-            ],
+                ["__typename": "ProductResearch", "study": ["caseNumber": "1234"]]
+            ]
         ]
 
         let result = try await execute(request: Self.query("entities"), variables: representations)
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "_entities": [
                         [
                             "study": [
@@ -105,8 +105,8 @@ struct FederationTests {
                                 "description": "Federation Study",
                             ],
                             "outcome": nil,
-                        ],
-                    ],
+                        ]
+                    ]
                 ])
         )
     }
@@ -117,20 +117,20 @@ struct FederationTests {
                 ["__typename": "Product", "id": "apollo-federation"],
                 ["__typename": "Product", "sku": "federation", "package": "@apollo/federation"],
                 ["__typename": "Product", "sku": "studio", "variation": ["id": "platform"]],
-            ],
+            ]
         ]
 
         let result = try await execute(request: Self.query("entities"), variables: representations)
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "_entities": [
                         [
                             "id": "apollo-federation",
                             "sku": "federation",
                             "package": "@apollo/federation",
                             "variation": [
-                                "id": "OSS",
+                                "id": "OSS"
                             ],
                             "dimensions": [
                                 "size": "small",
@@ -152,7 +152,7 @@ struct FederationTests {
                                         "caseNumber": "1234",
                                         "description": "Federation Study",
                                     ],
-                                ],
+                                ]
                             ],
                         ],
                         [
@@ -160,7 +160,7 @@ struct FederationTests {
                             "sku": "federation",
                             "package": "@apollo/federation",
                             "variation": [
-                                "id": "OSS",
+                                "id": "OSS"
                             ],
                             "dimensions": [
                                 "size": "small",
@@ -182,7 +182,7 @@ struct FederationTests {
                                         "caseNumber": "1234",
                                         "description": "Federation Study",
                                     ],
-                                ],
+                                ]
                             ],
                         ],
                         [
@@ -190,7 +190,7 @@ struct FederationTests {
                             "sku": "studio",
                             "package": "",
                             "variation": [
-                                "id": "platform",
+                                "id": "platform"
                             ],
                             "dimensions": [
                                 "size": "small",
@@ -212,10 +212,10 @@ struct FederationTests {
                                         "caseNumber": "1235",
                                         "description": "Studio Study",
                                     ],
-                                ],
+                                ]
                             ],
                         ],
-                    ],
+                    ]
                 ])
         )
     }

@@ -4,10 +4,7 @@ public final class Interface<
     Resolver: Sendable,
     Context: Sendable,
     InterfaceType
->: TypeComponent<
-    Resolver,
-    Context
-> {
+>: TypeComponent<Resolver, Context> {
     let fields: [FieldComponent<InterfaceType, Context>]
 
     override func update(typeProvider: SchemaTypeProvider, coders: Coders) throws {
@@ -47,8 +44,8 @@ public final class Interface<
     }
 }
 
-public extension Interface {
-    convenience init(
+extension Interface {
+    public convenience init(
         _ type: InterfaceType.Type,
         as name: String? = nil,
         @FieldComponentBuilder<InterfaceType, Context> _ fields: ()
@@ -61,7 +58,7 @@ public extension Interface {
         )
     }
 
-    convenience init(
+    public convenience init(
         _ type: InterfaceType.Type,
         as name: String? = nil,
         @FieldComponentBuilder<InterfaceType, Context> _ fields: ()

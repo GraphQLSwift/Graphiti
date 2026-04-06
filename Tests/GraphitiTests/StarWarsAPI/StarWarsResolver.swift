@@ -1,31 +1,35 @@
 import Graphiti
 
-public extension Character {
-    var secretBackstory: String? {
+extension Character {
+    public var secretBackstory: String? {
         nil
     }
 
-    func getFriends(context _: StarWarsContext, arguments _: NoArguments) -> [Character] {
+    public func getFriends(context _: StarWarsContext, arguments _: NoArguments) -> [Character] {
         []
     }
 }
 
-public extension Human {
-    func getFriends(context: StarWarsContext, arguments _: NoArguments) -> [Character] {
+extension Human {
+    public func getFriends(context: StarWarsContext, arguments _: NoArguments) -> [Character] {
         context.getFriends(of: self)
     }
 
-    func getSecretBackstory(context: StarWarsContext, arguments _: NoArguments) throws -> String? {
+    public func getSecretBackstory(context: StarWarsContext, arguments _: NoArguments) throws
+        -> String?
+    {
         try context.getSecretBackStory()
     }
 }
 
-public extension Droid {
-    func getFriends(context: StarWarsContext, arguments _: NoArguments) -> [Character] {
+extension Droid {
+    public func getFriends(context: StarWarsContext, arguments _: NoArguments) -> [Character] {
         context.getFriends(of: self)
     }
 
-    func getSecretBackstory(context: StarWarsContext, arguments _: NoArguments) throws -> String? {
+    public func getSecretBackstory(context: StarWarsContext, arguments _: NoArguments) throws
+        -> String?
+    {
         try context.getSecretBackStory()
     }
 }

@@ -1,5 +1,5 @@
-import Graphiti
 import GraphQL
+import Graphiti
 import Testing
 
 struct PartialSchemaTests {
@@ -111,20 +111,20 @@ struct PartialSchemaTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                human(id: "1000") {
-                    name
+                query {
+                    human(id: "1000") {
+                        name
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "human": [
-                        "name": "Luke Skywalker",
-                    ],
+                        "name": "Luke Skywalker"
+                    ]
                 ])
         )
     }
@@ -142,20 +142,20 @@ struct PartialSchemaTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                human(id: "1000") {
-                    name
+                query {
+                    human(id: "1000") {
+                        name
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "human": [
-                        "name": "Luke Skywalker",
-                    ],
+                        "name": "Luke Skywalker"
+                    ]
                 ])
         )
     }
@@ -173,20 +173,20 @@ struct PartialSchemaTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                human(id: "1000") {
-                    name
+                query {
+                    human(id: "1000") {
+                        name
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "human": [
-                        "name": "Luke Skywalker",
-                    ],
+                        "name": "Luke Skywalker"
+                    ]
                 ])
         )
     }
@@ -294,20 +294,20 @@ struct PartialSchemaTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                human(id: "1000") {
-                    name
+                query {
+                    human(id: "1000") {
+                        name
+                    }
                 }
-            }
-            """,
+                """,
             context: StarWarsContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "human": [
-                        "name": "Luke Skywalker",
-                    ],
+                        "name": "Luke Skywalker"
+                    ]
                 ])
         )
     }

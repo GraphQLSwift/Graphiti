@@ -1,7 +1,8 @@
 import Foundation
-@testable import Graphiti
 import GraphQL
 import Testing
+
+@testable import Graphiti
 
 struct SchemaTests {
     /// Tests that circularly dependent objects can be used in schema and resolved correctly
@@ -46,24 +47,24 @@ struct SchemaTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                a {
-                b {
-                    name
+                query {
+                    a {
+                    b {
+                        name
+                    }
+                    }
                 }
-                }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "a": [
                         "b": [
-                            "name": "Circular",
-                        ],
-                    ],
+                            "name": "Circular"
+                        ]
+                    ]
                 ])
         )
     }
@@ -112,24 +113,24 @@ struct SchemaTests {
 
         let result = try await api.execute(
             request: """
-            query {
-                user {
-                location {
-                    name
+                query {
+                    user {
+                    location {
+                        name
+                    }
+                    }
                 }
-                }
-            }
-            """,
+                """,
             context: NoContext()
         )
         #expect(
-            result ==
-                GraphQLResult(data: [
+            result
+                == GraphQLResult(data: [
                     "user": [
                         "location": [
-                            "name": "Earth",
-                        ],
-                    ],
+                            "name": "Earth"
+                        ]
+                    ]
                 ])
         )
     }
@@ -149,8 +150,8 @@ struct SchemaTests {
             }
         } catch {
             #expect(
-                error as? SchemaError ==
-                    SchemaError(
+                error as? SchemaError
+                    == SchemaError(
                         description: "Schema must contain at least 1 query or federated resolver"
                     )
             )
