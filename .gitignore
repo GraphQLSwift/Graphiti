@@ -3,6 +3,7 @@
 ### SwiftPM ###
 /.build
 /.swiftpm
+Package.resolved
 
 ### CI Artifacts ###
 /.test-coverage
